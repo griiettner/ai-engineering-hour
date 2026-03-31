@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour — AI-Augmented Developer Series</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #fafaf9; color: #292524; }
+
+        .session-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+        .session-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -8px rgba(0,0,0,0.12);
+        }
+        .session-card.upcoming {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .card-accent-bar {
+            height: 4px;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .hero-grid {
+            background-image:
+                linear-gradient(rgba(231,229,228,0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(231,229,228,0.4) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fade-up 0.5s ease both; }
+        .fade-up-1 { animation-delay: 0.05s; }
+        .fade-up-2 { animation-delay: 0.10s; }
+        .fade-up-3 { animation-delay: 0.15s; }
+        .fade-up-4 { animation-delay: 0.20s; }
+        .fade-up-5 { animation-delay: 0.25s; }
+        .fade-up-6 { animation-delay: 0.30s; }
+        .fade-up-7 { animation-delay: 0.35s; }
+    </style>
+</head>
+<body class="antialiased min-h-screen font-sans">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🎓</span>
+                <div>
+                    <h1 class="text-base font-bold text-stone-800 leading-tight tracking-tight">Engineering Hour</h1>
+                    <p class="text-xs text-stone-400 leading-tight">AI-Augmented Developer Series</p>
+                </div>
+            </div>
+            <span class="text-xs font-medium text-stone-400 hidden sm:block">Ubivis Engineering</span>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero-grid border-b border-stone-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
+            <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-4">Ubivis · Série Interna</p>
+            <h2 class="text-4xl md:text-5xl font-extrabold text-stone-800 leading-tight mb-5">
+                Use IA como<br class="hidden md:block"> um engenheiro sênior
+            </h2>
+            <p class="text-lg text-stone-500 max-w-xl mx-auto leading-relaxed">
+                14 sessões práticas sobre como integrar ferramentas de IA no workflow de desenvolvimento — do setup básico até agentes e automações avançadas.
+            </p>
+            <div class="flex items-center justify-center gap-6 mt-8 text-sm text-stone-400">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> 7 sessões disponíveis</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-stone-300 inline-block"></span> 7 em breve</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sessions grid -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+            <!-- P1 -->
+            <a href="part1.html" class="session-card fade-up fade-up-1 bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar" style="background:#0284c7"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#e0f2fe; color:#0284c7">Módulo 1</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Setup &amp; Regras de Ouro</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed">IDE vs CLI, gerenciamento de contexto, guardrails e os principais anti-patterns a evitar.</p>
+                    <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#0284c7">
+                        Abrir sessão <span>→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- P2 -->
+            <a href="part2.html" class="session-card fade-up fade-up-2 bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar" style="background:#64748b"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">Módulo 2</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Planejamento Avançado</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed">Estruturação de prompts, gerenciamento de contexto eficiente e como guiar o raciocínio do modelo.</p>
+                    <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold text-stone-500">
+                        Abrir sessão <span>→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- P3 -->
+            <a href="part3.html" class="session-card fade-up fade-up-3 bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar" style="background:#6d28d9"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#f3e8ff; color:#6d28d9">Módulo 3</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Claude Hooks &amp; Confiança Automatizada</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed">PostToolUse, PreToolUse e como criar ciclos de validação automática sem abrir mão do julgamento humano.</p>
+                    <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#6d28d9">
+                        Abrir sessão <span>→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- P4 -->
+            <a href="part4.html" class="session-card fade-up fade-up-4 bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar" style="background:#0d9488"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#f0fdfa; color:#0d9488">Módulo 4</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Decisões Embasadas com MCP</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed">Model Context Protocol — como conectar o Claude a ferramentas externas e tomar decisões com dados reais.</p>
+                    <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#0d9488">
+                        Abrir sessão <span>→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- P5 -->
+            <a href="part5.html" class="session-card fade-up fade-up-5 bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar" style="background:#ea580c"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#fff7ed; color:#ea580c">Módulo 5</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Workspace Seguro &amp; Guardrails</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed">CLAUDE.md, CONSTITUTION.md e como criar guardrails que protegem o projeto sem travar a produtividade.</p>
+                    <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#ea580c">
+                        Abrir sessão <span>→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- P6 -->
+            <a href="part6.html" class="session-card fade-up fade-up-6 bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar" style="background:#4f46e5"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#eef2ff; color:#4f46e5">Módulo 6</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Skills &amp; Comandos Slash</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed">Como criar skills reutilizáveis, frontmatter YAML, invocação automática pelo Claude e o padrão de índice com sub-skills.</p>
+                    <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#4f46e5">
+                        Abrir sessão <span>→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- P7 -->
+            <a href="part7.html" class="session-card fade-up fade-up-7 bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar" style="background:#c026d3"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#fdf4ff; color:#c026d3">Módulo 7</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Agentes, Sub-Agentes &amp; Agent Teams</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed">Single agent vs multi-agente, subagentes isolados, Agent Teams com peer-to-peer e como justificar o custo de tokens.</p>
+                    <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#c026d3">
+                        Abrir sessão <span>→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- P8–P14: upcoming -->
+            <div class="session-card upcoming bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar bg-stone-200"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-400">Módulo 8</span>
+                        <span class="text-xs text-stone-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-stone-300 inline-block"></span>Em breve</span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-400 mb-2 leading-snug">Em breve</h3>
+                    <p class="text-sm text-stone-300 leading-relaxed">Próxima sessão da série. Conteúdo a ser definido.</p>
+                </div>
+            </div>
+
+            <div class="session-card upcoming bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar bg-stone-200"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-400">Módulo 9</span>
+                        <span class="text-xs text-stone-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-stone-300 inline-block"></span>Em breve</span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-400 mb-2 leading-snug">Em breve</h3>
+                    <p class="text-sm text-stone-300 leading-relaxed">Próxima sessão da série. Conteúdo a ser definido.</p>
+                </div>
+            </div>
+
+            <div class="session-card upcoming bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar bg-stone-200"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-400">Módulos 10–14</span>
+                        <span class="text-xs text-stone-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-stone-300 inline-block"></span>Em breve</span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-400 mb-2 leading-snug">Em breve</h3>
+                    <p class="text-sm text-stone-300 leading-relaxed">5 sessões finais da série. Conteúdo a ser definido.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-stone-200 mt-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-sm text-stone-400">
+                <span class="text-base">🎓</span>
+                <span>Engineering Hour · Ubivis</span>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-stone-400">
+                <span>HTML · Tailwind CSS · Chart.js</span>
+                <span>·</span>
+                <span>Sem build. Abra e use.</span>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
