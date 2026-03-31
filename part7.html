@@ -96,8 +96,8 @@
             font-weight: 700;
             flex-shrink: 0;
         }
-        .compare-tab { transition: all 0.15s; }
-        .compare-tab.active { background: #c026d3; color: white; font-weight: 600; }
+        .compare-tab, .agent-tab { transition: all 0.15s; }
+        .compare-tab.active, .agent-tab.active { background: #c026d3; color: white; font-weight: 600; }
         .flow-arrow {
             display: flex; align-items: center; justify-content: center;
             color: #a8a29e; font-size: 1.25rem;
@@ -317,82 +317,284 @@
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2">🔀 Subagentes</h2>
                     <p class="text-stone-600 leading-relaxed">
-                        O agente principal spawna filhos para tarefas específicas. Cada filho tem <strong>contexto isolado</strong>, trabalha de forma independente e reporta de volta ao pai ao terminar. É o padrão estável e recomendado para a maioria dos casos de uso.
+                        Cada subagente tem <strong>contexto isolado</strong> e reporta de volta ao orquestrador. Mas o que a maioria das descrições simplifica: subagentes <strong>não precisam rodar em paralelo</strong>. Você pode — e muitas vezes deve — orquestrar um <strong>pipeline sequencial com dependências</strong>, onde o output de um agente vira o input do próximo. Toda a arquitetura é definida por você nas instruções do agente orquestrador.
                     </p>
                 </div>
 
-                <!-- Communication flow -->
-                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
-                    <h3 class="font-bold text-stone-800 text-sm mb-5">Fluxo de comunicação: um caminho só de volta</h3>
+                <!-- Two modes tabs -->
+                <div class="flex gap-2 mb-5">
+                    <button onclick="showSubTab('parallel')" id="subtab-parallel" class="compare-tab active text-sm px-4 py-2 rounded-lg border border-stone-200">Paralelo (independente)</button>
+                    <button onclick="showSubTab('pipeline')" id="subtab-pipeline" class="compare-tab text-sm px-4 py-2 rounded-lg border border-stone-200">Pipeline (sequencial)</button>
+                </div>
+
+                <!-- Parallel mode -->
+                <div id="submode-parallel" class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <p class="text-xs text-stone-500 mb-4 leading-relaxed">O orquestrador spawna vários subagentes ao mesmo tempo para tarefas independentes. Cada um trabalha isolado e reporta ao pai. Bom para exploração, research e revisões que não dependem umas das outras.</p>
                     <div class="flex flex-col items-center gap-3">
-                        <!-- Main agent -->
                         <div class="agent-node">
-                            <div class="agent-bubble w-16 h-16 text-white text-2xl" style="background:#c026d3">👑</div>
-                            <span class="text-xs font-bold text-stone-700">Agente Principal</span>
-                            <span class="text-xs text-stone-400">contexto principal</span>
+                            <div class="agent-bubble w-14 h-14 text-white text-xl" style="background:#c026d3">👑</div>
+                            <span class="text-xs font-bold text-stone-700">Orquestrador</span>
                         </div>
-                        <!-- Arrows down -->
-                        <div class="flex gap-8 text-stone-400 text-sm">
-                            <span>↙ delega</span>
-                            <span>↓ delega</span>
-                            <span>↘ delega</span>
+                        <div class="flex gap-8 text-stone-400 text-xs">
+                            <span>↙ delega</span><span>↓ delega</span><span>↘ delega</span>
                         </div>
-                        <!-- Sub agents -->
                         <div class="flex gap-6 flex-wrap justify-center">
                             <div class="agent-node">
-                                <div class="agent-bubble w-12 h-12 bg-white border-2 text-xl" style="border-color:#c026d3">🔍</div>
-                                <span class="text-xs font-bold text-stone-600">Explore</span>
-                                <span class="text-xs text-stone-400">contexto próprio</span>
+                                <div class="agent-bubble w-11 h-11 bg-white border-2 text-lg" style="border-color:#c026d3">🔍</div>
+                                <span class="text-xs text-stone-600 font-bold">Researcher A</span>
+                                <span class="text-xs text-stone-400">módulo auth</span>
                             </div>
                             <div class="agent-node">
-                                <div class="agent-bubble w-12 h-12 bg-white border-2 text-xl" style="border-color:#c026d3">🛡️</div>
-                                <span class="text-xs font-bold text-stone-600">Security</span>
-                                <span class="text-xs text-stone-400">contexto próprio</span>
+                                <div class="agent-bubble w-11 h-11 bg-white border-2 text-lg" style="border-color:#c026d3">🔍</div>
+                                <span class="text-xs text-stone-600 font-bold">Researcher B</span>
+                                <span class="text-xs text-stone-400">módulo payments</span>
                             </div>
                             <div class="agent-node">
-                                <div class="agent-bubble w-12 h-12 bg-white border-2 text-xl" style="border-color:#c026d3">🧪</div>
-                                <span class="text-xs font-bold text-stone-600">Tester</span>
-                                <span class="text-xs text-stone-400">contexto próprio</span>
+                                <div class="agent-bubble w-11 h-11 bg-white border-2 text-lg" style="border-color:#c026d3">🔍</div>
+                                <span class="text-xs text-stone-600 font-bold">Researcher C</span>
+                                <span class="text-xs text-stone-400">módulo notifications</span>
                             </div>
                         </div>
-                        <!-- Arrows up -->
-                        <div class="flex gap-8 text-stone-400 text-sm">
-                            <span>↗ retorna resumo</span>
-                            <span>↑ retorna resumo</span>
-                            <span>↖ retorna resumo</span>
+                        <div class="flex gap-4 text-stone-400 text-xs">
+                            <span>↗ retorna relatório</span><span>↑ retorna relatório</span><span>↖ retorna relatório</span>
                         </div>
-                        <p class="text-xs text-stone-500 text-center mt-1">Subagentes não se comunicam entre si, apenas com o pai</p>
+                    </div>
+                </div>
+
+                <!-- Pipeline mode -->
+                <div id="submode-pipeline" class="hidden bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <p class="text-xs text-stone-500 mb-4 leading-relaxed">O orquestrador define uma cadeia: cada agente recebe o output do anterior e passa para o próximo. Permite loops de feedback (ex: Programador ↔ Revisor até passar). <strong>O humano escreve toda esta lógica no arquivo de instruções do orquestrador.</strong></p>
+
+                    <!-- Pipeline steps -->
+                    <div class="flex flex-col gap-2">
+                        <!-- Human -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-stone-800 text-white text-base flex-shrink-0">🧑</div>
+                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs">
+                                <strong class="text-stone-700">Humano</strong> — entrega a tarefa e aprova o plano antes da execução
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ tarefa</div>
+
+                        <!-- Project Owner -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 text-white text-base flex-shrink-0" style="background:#c026d3">👑</div>
+                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs">
+                                <strong style="color:#c026d3">Project Owner</strong> — sintetiza a tarefa e passa para o PM
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ briefing</div>
+
+                        <!-- Project Manager -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 text-white text-base flex-shrink-0" style="background:#7c3aed">🗂️</div>
+                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs">
+                                <strong class="text-violet-700">Project Manager</strong> — orquestra toda a sequência, distribui tarefas e recebe reports
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ tarefa de pesquisa (pode dividir em N researchers)</div>
+
+                        <!-- Researcher -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-blue-100 text-base flex-shrink-0 border-2 border-blue-300">🔍</div>
+                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs">
+                                <strong class="text-blue-700">Researcher</strong> <span class="text-stone-400">(Read Only)</span> — explora código, docs e dependências. PM pode spawnar múltiplos em paralelo se necessário
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ discovery report → PM → Secretary</div>
+
+                        <!-- Secretary -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-amber-100 text-base flex-shrink-0 border-2 border-amber-300">📝</div>
+                            <div class="flex-1 p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-xs">
+                                <strong class="text-amber-700">Secretary</strong> — debate o plano com PM, Researcher e PO. Se houver dúvidas sem resposta, o PO pergunta ao humano. Quando consenso atingido, escreve <code class="font-mono bg-amber-100 px-0.5 rounded">plan.md</code> para aprovação humana
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ humano aprova plan.md → PM delega ao Programador</div>
+
+                        <!-- Programmer -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-emerald-100 text-base flex-shrink-0 border-2 border-emerald-300">💻</div>
+                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs">
+                                <strong class="text-emerald-700">Programador</strong> — implementa exatamente o que está no plano aprovado, reporta ao PM
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ código → PM → Revisor</div>
+
+                        <!-- Revisor loop -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-orange-100 text-base flex-shrink-0 border-2 border-orange-300">🔄</div>
+                            <div class="flex-1 p-2.5 bg-orange-50 rounded-lg border border-orange-200 text-xs">
+                                <strong class="text-orange-700">Revisor</strong> — revisa o código e reporta ao PM. Se houver bugs, PM devolve ao Programador. <span class="font-semibold">Loop até "pass".</span>
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ pass → PM → Security Review</div>
+
+                        <!-- Security Review loop -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-red-100 text-base flex-shrink-0 border-2 border-red-300">🛡️</div>
+                            <div class="flex-1 p-2.5 bg-red-50 rounded-lg border border-red-200 text-xs">
+                                <strong class="text-red-700">Security Review</strong> — auditoria de segurança. Mesmo loop: falhas voltam ao Programador via PM até aprovação.
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ aprovado → PM → Secretary</div>
+
+                        <!-- Secretary docs -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-amber-100 text-base flex-shrink-0 border-2 border-amber-300">📚</div>
+                            <div class="flex-1 p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-xs">
+                                <strong class="text-amber-700">Secretary</strong> — atualiza <code class="font-mono bg-amber-100 px-0.5 rounded">CHANGELOG.md</code>, <code class="font-mono bg-amber-100 px-0.5 rounded">MEMORY.md</code> e documentação final
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 rounded-lg border text-xs leading-relaxed" style="background:#fdf4ff; border-color:#e879f9; color:#86198f">
+                        <strong>O humano define toda esta arquitetura</strong> nas instruções do agente orquestrador (CLAUDE.md ou o arquivo do PM). O Claude não inventa a hierarquia — ele executa o workflow que você especificou.
                     </div>
                 </div>
 
                 <!-- Custom agents -->
                 <div class="mb-6">
-                    <h3 class="font-bold text-stone-800 text-sm mb-3">Definindo Agentes Customizados em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/agents/</code></h3>
-                    <p class="text-sm text-stone-600 mb-3 leading-relaxed">Crie arquivos <code class="font-mono bg-stone-100 px-1 rounded text-xs">.md</code> em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/agents/</code> para definir subagentes especializados com papel, ferramentas e permissões específicas.</p>
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-xs font-bold text-stone-400 uppercase">.claude/agents/security-reviewer.md</p>
-                        <button class="copy-btn" onclick="copyCode('agent-def')">copiar</button>
+                    <h3 class="font-bold text-stone-800 text-sm mb-3">Definindo cada agente em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/agents/</code></h3>
+                    <p class="text-sm text-stone-600 mb-3 leading-relaxed">Cada papel do pipeline vira um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">.md</code> com frontmatter, ferramentas permitidas e instruções de tarefa.</p>
+
+                    <!-- Agent file selector -->
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <button onclick="showAgent('pm')" id="agentbtn-pm" class="agent-tab active text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">project-manager</button>
+                        <button onclick="showAgent('researcher')" id="agentbtn-researcher" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">researcher</button>
+                        <button onclick="showAgent('programmer')" id="agentbtn-programmer" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">programmer</button>
+                        <button onclick="showAgent('code-reviewer')" id="agentbtn-code-reviewer" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">code-reviewer</button>
+                        <button onclick="showAgent('security-reviewer')" id="agentbtn-security-reviewer" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">security-reviewer</button>
+                        <button onclick="showAgent('secretary')" id="agentbtn-secretary" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">secretary</button>
                     </div>
-                    <pre id="agent-def" class="text-xs leading-relaxed">---
-<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">security-reviewer</span>
-<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisor de segurança especializado em OWASP Top 10.</span>
-<span style="color:#6ee7b7">  Use para auditar código antes de PRs sensíveis.</span>
-<span style="color:#a5b4fc">model</span>: <span style="color:#6ee7b7">claude-sonnet-4-6</span>
+
+                    <div id="agent-filename" class="flex items-center justify-between mb-2">
+                        <p id="agent-filepath" class="text-xs font-bold text-stone-400 uppercase">.claude/agents/project-manager.md</p>
+                        <button class="copy-btn" onclick="copyCurrentAgent()">copiar</button>
+                    </div>
+
+                    <!-- PM -->
+                    <pre id="agentcode-pm" class="agent-code text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">project-manager</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Orquestra o pipeline completo de uma feature: research,</span>
+<span style="color:#6ee7b7">  planejamento, implementação, revisão de código, segurança e docs.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Task, Read, Write</span>
+---
+
+Você é o Project Manager. Ao receber uma tarefa do Project Owner:
+
+1. **Research**: use Task para delegar ao `researcher`. Consolide o relatório.
+2. **Plano**: use Task para delegar ao `secretary` (escreve plan.md).
+   Aguarde aprovação humana antes de prosseguir.
+3. **Implementação**: use Task para delegar ao `programmer` com plan.md aprovado.
+4. **Revisão**: use Task para delegar ao `code-reviewer`.
+   Se issues → retorne ao `programmer` com feedback. Repita até pass.
+5. **Segurança**: use Task para delegar ao `security-reviewer`.
+   Se findings → retorne ao `programmer`. Repita até aprovado.
+6. **Docs**: use Task para delegar ao `secretary` (CHANGELOG.md e docs finais).
+
+Reporte o resultado final ao Project Owner.</pre>
+
+                    <!-- Researcher -->
+                    <pre id="agentcode-researcher" class="agent-code hidden text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">researcher</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Explora o código-base, lê docs e dependências para gerar um</span>
+<span style="color:#6ee7b7">  discovery report antes de qualquer implementação.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Grep, Glob, WebFetch</span>
+---
+
+Você é um researcher read-only. Não edite arquivos.
+
+Dada a tarefa recebida do Project Manager:
+- Mapeie os arquivos e módulos relevantes
+- Leia dependências externas e docs de API envolvidas
+- Identifique riscos, acoplamentos e pontos de atenção
+
+Entregue um **Discovery Report** estruturado:
+- Arquivos-chave (paths + propósito)
+- Dependências envolvidas
+- Riscos identificados
+- Perguntas em aberto para o PM resolver antes do plano</pre>
+
+                    <!-- Programmer -->
+                    <pre id="agentcode-programmer" class="agent-code hidden text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">programmer</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Implementa exatamente o que está no plan.md aprovado pelo humano.</span>
+<span style="color:#6ee7b7">  Não toma decisões de design por conta própria.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Write, Edit, Bash, Glob, Grep</span>
+---
+
+Você é um programador de implementação. Seu único input é o plan.md aprovado
+(ou o feedback do code-reviewer / security-reviewer).
+
+Regras:
+- Implemente exatamente o que está no plano — sem features extras
+- Se receber feedback de revisão, corrija apenas os pontos apontados
+- Não refatore código fora do escopo da tarefa
+- Reporte ao PM quando concluído, listando arquivos alterados</pre>
+
+                    <!-- Code Reviewer -->
+                    <pre id="agentcode-code-reviewer" class="agent-code hidden text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">code-reviewer</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisa qualidade de código: lógica, cobertura de edge cases,</span>
+<span style="color:#6ee7b7">  padrões do projeto e clareza. Não toca em segurança.</span>
 <span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Grep, Glob</span>
 ---
 
-Você é um auditor de segurança sênior especializado em OWASP Top 10.
+Você é um revisor de código sênior. Analise o código implementado:
 
-Analise o código em busca de:
-- SQL/Command Injection (A03)
-- Broken Authentication (A07)
-- Sensitive Data Exposure (A02)
-- Inputs sem sanitização
+- Lógica e corretude (edge cases, condições de erro)
+- Aderência aos padrões do projeto (naming, estrutura)
+- Clareza e manutenibilidade
+- Cobertura de testes (se aplicável)
 
 Responda com:
+**Resultado**: ✅ Pass | ❌ Fail
+**Issues** (se Fail): lista numerada com arquivo, linha e descrição
+**Não toque em**: análise de segurança (responsabilidade do security-reviewer)</pre>
+
+                    <!-- Security Reviewer -->
+                    <pre id="agentcode-security-reviewer" class="agent-code hidden text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">security-reviewer</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Auditoria de segurança OWASP Top 10. Chamado pelo PM após o</span>
+<span style="color:#6ee7b7">  code-reviewer aprovar. Não revisa qualidade de código.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Grep, Glob</span>
+---
+
+Você é um auditor de segurança. Analise o código em busca de:
+
+- Injection (SQL, Command, LDAP) — A03
+- Autenticação e sessão quebradas — A07
+- Exposição de dados sensíveis — A02
+- Inputs sem sanitização ou validação
+- Dependências com vulnerabilidades conhecidas
+
+Responda com:
+**Resultado**: ✅ Aprovado | ❌ Reprovado
 **Severidade geral**: Alta / Média / Baixa
-**Issues**: lista por severidade com linha de arquivo
-**Aprovado para PR**: Sim / Não</pre>
+**Findings** (se Reprovado): arquivo, linha, OWASP ref e correção sugerida</pre>
+
+                    <!-- Secretary -->
+                    <pre id="agentcode-secretary" class="agent-code hidden text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">secretary</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Consolida debates em documentos (plan.md, CHANGELOG.md, MEMORY.md).</span>
+<span style="color:#6ee7b7">  Chamado duas vezes: antes da implementação e após aprovação final.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Write, Edit</span>
+---
+
+Você é o secretary do pipeline. Você tem duas responsabilidades:
+
+**Fase 1 — Planejamento**:
+Dada a conversa entre PM, Researcher e PO, consolide o consenso em plan.md.
+Se houver dúvidas sem resposta, sinalize ao PO para consultar o humano.
+O plan.md só é finalizado quando o humano aprovar.
+
+**Fase 2 — Documentação final**:
+Após aprovação do security-reviewer, atualize:
+- CHANGELOG.md (o que mudou, por quê)
+- MEMORY.md (decisões de arquitetura, contexto para o futuro)
+- Qualquer doc técnico relevante ao que foi implementado</pre>
+
                 </div>
 
                 <!-- Built-in agent types -->
@@ -817,6 +1019,39 @@ Agente 2 (executor, contexto zerado): "Implemente o
     </div>
 
     <script>
+        // ── Agent file selector ────────────────────────────────────────────
+        const agentPaths = {
+            'pm': 'project-manager',
+            'researcher': 'researcher',
+            'programmer': 'programmer',
+            'code-reviewer': 'code-reviewer',
+            'security-reviewer': 'security-reviewer',
+            'secretary': 'secretary'
+        };
+        let currentAgentKey = 'pm';
+        function showAgent(key) {
+            document.querySelectorAll('.agent-code').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.agent-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(`agentcode-${key}`).classList.remove('hidden');
+            document.getElementById(`agentbtn-${key}`).classList.add('active');
+            document.getElementById('agent-filepath').textContent = `.claude/agents/${agentPaths[key]}.md`;
+            currentAgentKey = key;
+        }
+        function copyCurrentAgent() {
+            const pre = document.getElementById(`agentcode-${currentAgentKey}`);
+            navigator.clipboard.writeText(pre.innerText);
+        }
+
+        // ── Subagentes tabs ────────────────────────────────────────────────
+        function showSubTab(tab) {
+            ['parallel', 'pipeline'].forEach(t => {
+                document.getElementById(`submode-${t}`).classList.add('hidden');
+                document.getElementById(`subtab-${t}`).classList.remove('active');
+            });
+            document.getElementById(`submode-${tab}`).classList.remove('hidden');
+            document.getElementById(`subtab-${tab}`).classList.add('active');
+        }
+
         // ── Navigation ─────────────────────────────────────────────────────
         function navigate(sectionId) {
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
