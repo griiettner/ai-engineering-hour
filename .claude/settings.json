@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls part*.html)",
+      "Bash(mkdir -p /Users/griiettner/Projects/ubivis/ai-engineering-hour/demo/.claude/rules)",
+      "Bash(mkdir -p /Users/griiettner/Projects/ubivis/ai-engineering-hour/demo/.claude/commands)",
+      "Bash(mkdir -p /Users/griiettner/Projects/ubivis/ai-engineering-hour/demo/.claude/memory)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:addyosmani.com)",
+      "WebFetch(domain:matthewrocklin.com)"
+    ],
+    "additionalDirectories": [
+      "/Users/griiettner/Projects/ubivis/ai-engineering-hour/demo/.claude"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR && file=$(echo $CLAUDE_FILE_PATHS | head -1) && [[ \"$file\" == *.html ]] && echo \"✅ $file salvo — abra no browser para verificar visualmente.\" || true"
+          }
+        ]
+      }
+    ]
+  }
+}

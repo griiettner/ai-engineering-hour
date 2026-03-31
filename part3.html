@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engineering Hour P3: Confiança Automatizada</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              stone: {
+                50: '#fafaf9',
+                100: '#f5f5f4',
+                200: '#e7e5e4',
+                300: '#d6d3d1',
+                700: '#44403c',
+                800: '#292524',
+                900: '#1c1917',
+              },
+              auto: {
+                violet: '#6d28d9',
+                indigo: '#4338ca',
+                slate: '#334155',
+              },
+            },
+            fontFamily: {
+              sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              mono: ['Fira Code', 'ui-monospace', 'monospace'],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      body {
+        background-color: #fafaf9;
+        color: #292524;
+      }
+      .nav-item.active {
+        background-color: #e7e5e4;
+        border-left: 4px solid #6d28d9;
+        font-weight: 600;
+      }
+      .nav-group-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #a8a29e;
+        padding: 0.5rem 0.25rem 0.25rem;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin: auto;
+        height: 300px;
+        max-height: 400px;
+      }
+      .loop-node {
+        transition: all 0.3s ease;
+      }
+      .loop-active {
+        border-color: #6d28d9;
+        box-shadow: 0 0 20px rgba(109, 40, 217, 0.25);
+      }
+      .flow-arrow {
+        display: flex;
+        align-items: center;
+        color: #a78bfa;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+      .hook-type-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .hook-type-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      }
+      pre {
+        background-color: #1c1917;
+        color: #d6d3d1;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.825rem;
+        overflow-x: auto;
+      }
+      .step-number {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 9999px;
+        background: #6d28d9;
+        color: white;
+        font-weight: 700;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .danger-card {
+        border-left: 4px solid #dc2626;
+      }
+      .warning-card {
+        border-left: 4px solid #d97706;
+      }
+    </style>
+  </head>
+  <body class="antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">⚡</span>
+          <h1 class="text-xl font-bold text-stone-800 tracking-tight">
+            Engineering Hour <span class="text-auto-violet">P3</span>
+          </h1>
+        </div>
+        <div class="text-sm font-medium text-stone-500 hidden sm:block">
+          Módulo 3: Claude Hooks & Confiança Automatizada
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
+
+      <!-- Sidebar Navigation -->
+      <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+
+        <div class="nav-group-label">O Sistema</div>
+        <button onclick="navigate('loop')" id="nav-loop"
+          class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+          <span>🔄</span> Ciclo Autônomo
+        </button>
+        <button onclick="navigate('hooks')" id="nav-hooks"
+          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+          <span>🔌</span> Tipos de Hooks
+        </button>
+
+        <div class="nav-group-label mt-2">Implementação</div>
+        <button onclick="navigate('config')" id="nav-config"
+          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+          <span>🛠️</span> Configuração
+        </button>
+        <button onclick="navigate('limits')" id="nav-limits"
+          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+          <span>⚠️</span> Limites & Cuidados
+        </button>
+
+        <div class="nav-group-label mt-2">Impacto</div>
+        <button onclick="navigate('metrics')" id="nav-metrics"
+          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+          <span>📊</span> Métricas de Confiança
+        </button>
+        <button onclick="navigate('review')" id="nav-review"
+          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+          <span>🔍</span> O Novo Code Review
+        </button>
+
+        <div class="nav-group-label mt-2">Ação</div>
+        <button onclick="navigate('nextsteps')" id="nav-nextsteps"
+          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+          <span>🚀</span> Próximos Passos
+        </button>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+
+        <!-- SECTION 1: Ciclo Autônomo -->
+        <section id="sec-loop" class="block">
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold text-stone-800 mb-2">🔄 O Ciclo Autônomo de Correção</h2>
+            <p class="text-stone-600">
+              O objetivo dos <strong>Claude Hooks</strong> é criar um sistema que se auto-valida. A IA não apenas
+              escreve o código, mas ela é forçada a testá-lo e corrigi-lo antes de te entregar o resultado final.
+              Clique nos estágios para entender o fluxo.
+            </p>
+          </div>
+
+          <div class="flex flex-col items-center py-10 bg-stone-50 rounded-2xl border border-stone-200 relative overflow-hidden">
+
+            <!-- Nodes + Arrows Row -->
+            <div class="flex flex-wrap justify-center items-center gap-2 relative z-10 px-4">
+
+              <!-- Node 1 -->
+              <div id="node-1"
+                class="loop-node w-36 h-36 rounded-full border-4 border-stone-300 bg-white flex flex-col items-center justify-center text-center p-3 cursor-pointer loop-active"
+                onclick="activateNode(1)">
+                <span class="text-2xl mb-1">✍️</span>
+                <h4 class="font-bold text-xs uppercase text-stone-800">Escrita</h4>
+                <p class="text-[9px] text-stone-500 mt-1">IA gera o código inicial baseado no prompt.</p>
+              </div>
+
+              <!-- Arrow 1→2 -->
+              <div class="flow-arrow">→</div>
+
+              <!-- Node 2 -->
+              <div id="node-2"
+                class="loop-node w-36 h-36 rounded-full border-4 border-stone-300 bg-white flex flex-col items-center justify-center text-center p-3 cursor-pointer"
+                onclick="activateNode(2)">
+                <span class="text-2xl mb-1">🧼</span>
+                <h4 class="font-bold text-xs uppercase text-stone-800">Lint & Estilo</h4>
+                <p class="text-[9px] text-stone-500 mt-1">Hook automático roda o Linter do projeto.</p>
+              </div>
+
+              <!-- Arrow 2→3 -->
+              <div class="flow-arrow">→</div>
+
+              <!-- Node 3 -->
+              <div id="node-3"
+                class="loop-node w-36 h-36 rounded-full border-4 border-stone-300 bg-white flex flex-col items-center justify-center text-center p-3 cursor-pointer"
+                onclick="activateNode(3)">
+                <span class="text-2xl mb-1">🧪</span>
+                <h4 class="font-bold text-xs uppercase text-stone-800">Testes</h4>
+                <p class="text-[9px] text-stone-500 mt-1">Hook executa suíte de testes unitários.</p>
+              </div>
+
+              <!-- Arrow 3→4 -->
+              <div class="flow-arrow">→</div>
+
+              <!-- Node 4 -->
+              <div id="node-4"
+                class="loop-node w-36 h-36 rounded-full border-4 border-stone-300 bg-white flex flex-col items-center justify-center text-center p-3 cursor-pointer"
+                onclick="activateNode(4)">
+                <span class="text-2xl mb-1">🔧</span>
+                <h4 class="font-bold text-xs uppercase text-stone-800">Correção</h4>
+                <p class="text-[9px] text-stone-500 mt-1">Se falhar, a IA lê o erro e corrige sozinha.</p>
+              </div>
+            </div>
+
+            <!-- Loop-back indicator -->
+            <div class="mt-4 flex items-center gap-2 text-violet-500 text-xs font-medium">
+              <span class="text-base">↩️</span>
+              <span>Se a correção falhar, o ciclo recomeça do Lint, até todos os hooks retornarem <code class="bg-violet-100 text-violet-700 px-1 rounded font-mono">exit 0</code></span>
+            </div>
+
+            <!-- Detail card -->
+            <div class="mt-8 w-full max-w-2xl px-6">
+              <div id="node-info" class="bg-white rounded-2xl shadow-md border border-stone-200 overflow-hidden transition-all duration-300">
+                <div id="node-info-placeholder" class="px-6 py-5 flex items-center gap-3 text-stone-400">
+                  <span class="text-xl">👆</span>
+                  <span class="text-sm italic">Clique em um estágio para ver detalhes da automação.</span>
+                </div>
+                <div id="node-info-content" class="hidden">
+                  <div id="node-info-header" class="flex items-center gap-3 px-6 py-4 border-b border-stone-100 bg-stone-50">
+                    <span id="node-info-icon" class="text-2xl"></span>
+                    <div>
+                      <p class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Estágio Ativo</p>
+                      <h4 id="node-info-title" class="font-bold text-stone-800 text-base"></h4>
+                    </div>
+                    <span id="node-info-badge" class="ml-auto text-[10px] font-mono font-bold px-2 py-1 rounded-full bg-violet-100 text-violet-700"></span>
+                  </div>
+                  <div id="node-info-body" class="px-6 py-4 text-sm text-stone-600 leading-relaxed"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 2: Tipos de Hooks -->
+        <section id="sec-hooks" class="hidden">
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold text-stone-800 mb-2">🔌 Tipos de Hooks Disponíveis</h2>
+            <p class="text-stone-600">
+              Hooks não são apenas para escrita de arquivos. O Claude Code expõe <strong>4 eventos</strong> do ciclo de vida do agente
+              que você pode interceptar. Cada um tem um propósito diferente.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+
+            <!-- PreToolUse -->
+            <div class="hook-type-card p-5 rounded-2xl border-2 border-violet-200 bg-violet-50">
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-widest text-violet-400">Evento</span>
+                  <h3 class="font-bold text-violet-900 text-lg font-mono">PreToolUse</h3>
+                </div>
+                <span class="text-2xl">🛡️</span>
+              </div>
+              <p class="text-sm text-violet-800 leading-relaxed mb-3">
+                Roda <strong>antes</strong> de qualquer ferramenta ser executada pelo agente.
+                Pode <strong>bloquear ou modificar</strong> a ação antes que aconteça.
+              </p>
+              <div class="bg-white rounded-lg p-3 border border-violet-100">
+                <p class="text-[11px] font-bold text-violet-600 mb-1">Casos de uso:</p>
+                <ul class="text-[11px] text-stone-600 space-y-1">
+                  <li>• Validar se o arquivo está na lista de permissões</li>
+                  <li>• Bloquear escrita em diretórios protegidos</li>
+                  <li>• Logar auditoria de toda ação do agente</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- PostToolUse -->
+            <div class="hook-type-card p-5 rounded-2xl border-2 border-blue-200 bg-blue-50">
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-widest text-blue-400">Evento</span>
+                  <h3 class="font-bold text-blue-900 text-lg font-mono">PostToolUse</h3>
+                </div>
+                <span class="text-2xl">⚙️</span>
+              </div>
+              <p class="text-sm text-blue-800 leading-relaxed mb-3">
+                Roda <strong>depois</strong> que uma ferramenta completa. Recebe o output completo
+                da operação. É o hook mais usado para lint e testes.
+              </p>
+              <div class="bg-white rounded-lg p-3 border border-blue-100">
+                <p class="text-[11px] font-bold text-blue-600 mb-1">Casos de uso:</p>
+                <ul class="text-[11px] text-stone-600 space-y-1">
+                  <li>• Rodar ESLint/Prettier após escrita de arquivo</li>
+                  <li>• Executar testes dos arquivos modificados</li>
+                  <li>• Atualizar índices ou geração de tipos</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Stop -->
+            <div class="hook-type-card p-5 rounded-2xl border-2 border-emerald-200 bg-emerald-50">
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Evento</span>
+                  <h3 class="font-bold text-emerald-900 text-lg font-mono">Stop</h3>
+                </div>
+                <span class="text-2xl">🏁</span>
+              </div>
+              <p class="text-sm text-emerald-800 leading-relaxed mb-3">
+                Roda quando o Claude <strong>finaliza a resposta</strong> completa ao usuário.
+                Ideal para ações de encerramento e notificações.
+              </p>
+              <div class="bg-white rounded-lg p-3 border border-emerald-100">
+                <p class="text-[11px] font-bold text-emerald-600 mb-1">Casos de uso:</p>
+                <ul class="text-[11px] text-stone-600 space-y-1">
+                  <li>• Notificar via Slack quando uma task termina</li>
+                  <li>• Gerar relatório de alterações feitas</li>
+                  <li>• Rodar um build final de validação</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Notification -->
+            <div class="hook-type-card p-5 rounded-2xl border-2 border-orange-200 bg-orange-50">
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-widest text-orange-400">Evento</span>
+                  <h3 class="font-bold text-orange-900 text-lg font-mono">Notification</h3>
+                </div>
+                <span class="text-2xl">🔔</span>
+              </div>
+              <p class="text-sm text-orange-800 leading-relaxed mb-3">
+                Roda quando o Claude emite um <strong>alerta ou notificação</strong> interna,
+                como avisos de permissão ou status de longa operação.
+              </p>
+              <div class="bg-white rounded-lg p-3 border border-orange-100">
+                <p class="text-[11px] font-bold text-orange-600 mb-1">Casos de uso:</p>
+                <ul class="text-[11px] text-stone-600 space-y-1">
+                  <li>• Customizar alertas de permissão para o time</li>
+                  <li>• Integrar com ferramentas de observabilidade</li>
+                  <li>• Notificações de desktop em tarefas longas</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Matcher explanation -->
+          <div class="bg-stone-900 rounded-2xl p-6 text-stone-100">
+            <h4 class="font-bold mb-3 flex items-center gap-2"><span>🎯</span> Como o Matcher funciona</h4>
+            <p class="text-sm text-stone-300 mb-4 leading-relaxed">
+              Cada hook usa um <code class="bg-stone-700 text-violet-300 px-1 rounded font-mono text-xs">matcher</code> para filtrar
+              em qual ferramenta ele deve disparar. Sem matcher, dispara em todas.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="bg-stone-800 rounded-lg p-3">
+                <p class="text-[10px] text-stone-400 font-mono mb-1">matcher: "Write"</p>
+                <p class="text-xs text-stone-300">Só dispara quando o agente cria um arquivo novo.</p>
+              </div>
+              <div class="bg-stone-800 rounded-lg p-3">
+                <p class="text-[10px] text-stone-400 font-mono mb-1">matcher: "Write|Edit"</p>
+                <p class="text-xs text-stone-300">Dispara em criação <em>e</em> edição de arquivos.</p>
+              </div>
+              <div class="bg-stone-800 rounded-lg p-3">
+                <p class="text-[10px] text-stone-400 font-mono mb-1">matcher: "Bash"</p>
+                <p class="text-xs text-stone-300">Dispara antes de qualquer comando de terminal.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 3: Configuração de Hooks -->
+        <section id="sec-config" class="hidden">
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold text-stone-800 mb-2">🛠️ Implementação Técnica</h2>
+            <p class="text-stone-600">
+              A configuração vive em <code class="bg-stone-100 text-stone-700 px-1 rounded font-mono text-sm">~/.claude/settings.json</code> (global)
+              ou <code class="bg-stone-100 text-stone-700 px-1 rounded font-mono text-sm">.claude/settings.json</code> (por projeto).
+              Este arquivo conecta o agente ao seu ambiente de desenvolvimento.
+            </p>
+          </div>
+
+          <div class="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden mb-6">
+            <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex items-center gap-3">
+              <span class="font-mono text-xs font-bold text-stone-700">📄 .claude/settings.json</span>
+              <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">estrutura real</span>
+            </div>
+            <pre class="m-0 rounded-none border-0 font-mono text-sm leading-relaxed">{
+  <span class="text-violet-400">"hooks"</span>: {
+    <span class="text-violet-400">"PostToolUse"</span>: [
+      {
+        <span class="text-blue-400">"matcher"</span>: <span class="text-emerald-400">"Write|Edit|MultiEdit"</span>,
+        <span class="text-blue-400">"hooks"</span>: [
+          {
+            <span class="text-blue-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
+            <span class="text-blue-400">"command"</span>: <span class="text-emerald-400">"cd $CLAUDE_PROJECT_DIR &amp;&amp; npm run lint --fix"</span>
+          },
+          {
+            <span class="text-blue-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
+            <span class="text-blue-400">"command"</span>: <span class="text-emerald-400">"cd $CLAUDE_PROJECT_DIR &amp;&amp; npx vitest run --reporter=verbose"</span>
+          }
+        ]
+      }
+    ],
+    <span class="text-violet-400">"Stop"</span>: [
+      {
+        <span class="text-blue-400">"hooks"</span>: [
+          {
+            <span class="text-blue-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
+            <span class="text-blue-400">"command"</span>: <span class="text-emerald-400">"notify-send 'Claude Code' 'Task finalizada!'"</span>
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+          </div>
+
+          <!-- Variable reference -->
+          <div class="mb-6 p-4 bg-stone-800 rounded-xl">
+            <h4 class="font-bold text-stone-200 text-sm mb-3">📦 Variáveis de ambiente disponíveis nos hooks</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div class="flex items-start gap-2">
+                <code class="text-[11px] bg-stone-700 text-violet-300 px-2 py-1 rounded font-mono flex-shrink-0">$CLAUDE_PROJECT_DIR</code>
+                <span class="text-[11px] text-stone-400">Raiz do projeto atual</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <code class="text-[11px] bg-stone-700 text-violet-300 px-2 py-1 rounded font-mono flex-shrink-0">$CLAUDE_TOOL_NAME</code>
+                <span class="text-[11px] text-stone-400">Nome da ferramenta que disparou o hook</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <code class="text-[11px] bg-stone-700 text-violet-300 px-2 py-1 rounded font-mono flex-shrink-0">$CLAUDE_FILE_PATHS</code>
+                <span class="text-[11px] text-stone-400">Arquivos afetados pela operação (PostToolUse)</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <code class="text-[11px] bg-stone-700 text-violet-300 px-2 py-1 rounded font-mono flex-shrink-0">$CLAUDE_SESSION_ID</code>
+                <span class="text-[11px] text-stone-400">ID único da sessão corrente</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-violet-50 rounded-xl border border-violet-100">
+              <h4 class="font-bold text-violet-800 text-sm mb-2">Por que Hooks e não CI/CD?</h4>
+              <p class="text-xs text-violet-900 leading-relaxed">
+                O CI/CD roda <em>depois</em> do push. O Hook roda <strong>durante</strong> a geração do código.
+                A IA recebe o erro do terminal em tempo real e não entrega o resultado até o comando retornar sucesso.
+              </p>
+            </div>
+            <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+              <h4 class="font-bold text-blue-800 text-sm mb-2">Global vs. Por Projeto</h4>
+              <p class="text-xs text-blue-900 leading-relaxed">
+                Hooks em <code class="font-mono bg-blue-100 px-0.5 rounded">~/.claude/settings.json</code> valem para todos os projetos.
+                Hooks em <code class="font-mono bg-blue-100 px-0.5 rounded">.claude/settings.json</code> são específicos do repositório
+                e podem ser versionados com o time.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 4: Limites & Cuidados -->
+        <section id="sec-limits" class="hidden">
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold text-stone-800 mb-2">⚠️ Limites & Cuidados</h2>
+            <p class="text-stone-600">
+              Hooks são poderosos, mas mal configurados podem travar seu workflow ou criar falsos positivos.
+              Conheça os riscos antes de colocar em produção.
+            </p>
+          </div>
+
+          <!-- Dangers -->
+          <div class="space-y-4 mb-8">
+            <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider">🔴 Riscos a evitar</h3>
+
+            <div class="danger-card bg-red-50 rounded-xl p-5">
+              <div class="flex items-start gap-3">
+                <span class="text-xl">∞</span>
+                <div>
+                  <h4 class="font-bold text-red-800 mb-1">Loop Infinito</h4>
+                  <p class="text-sm text-red-700 leading-relaxed">
+                    Se o hook sempre retorna falha (ex: lint com regra impossível de satisfazer),
+                    o Claude fica em loop tentando corrigir indefinidamente. Sempre teste o hook
+                    manualmente antes de ativar.
+                  </p>
+                  <div class="mt-2 bg-red-100 rounded-lg p-2">
+                    <p class="text-[11px] text-red-800 font-mono">✓ Defina um timeout máximo no comando: <code>timeout 30 npm run lint</code></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="danger-card bg-red-50 rounded-xl p-5">
+              <div class="flex items-start gap-3">
+                <span class="text-xl">🔓</span>
+                <div>
+                  <h4 class="font-bold text-red-800 mb-1">Permissões de Segurança</h4>
+                  <p class="text-sm text-red-700 leading-relaxed">
+                    Hooks executam com <strong>suas permissões de sistema</strong>. Um hook mal escrito ou
+                    injetado pode executar comandos arbitrários. Nunca copie configurações de hooks de fontes
+                    desconhecidas sem revisar.
+                  </p>
+                  <div class="mt-2 bg-red-100 rounded-lg p-2">
+                    <p class="text-[11px] text-red-800 font-mono">✓ Prefira hooks com escopo mínimo necessário</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Warnings -->
+          <div class="space-y-4 mb-8">
+            <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider">🟡 Pontos de atenção</h3>
+
+            <div class="warning-card bg-amber-50 rounded-xl p-5">
+              <div class="flex items-start gap-3">
+                <span class="text-xl">🐢</span>
+                <div>
+                  <h4 class="font-bold text-amber-800 mb-1">Performance em projetos grandes</h4>
+                  <p class="text-sm text-amber-700 leading-relaxed">
+                    Rodar toda a suíte de testes a cada <code class="bg-amber-100 rounded px-1 font-mono text-xs">PostToolUse</code>
+                    em um monorepo com 10k testes vai paralisar seu fluxo. Use o matcher para limitar o escopo
+                    e filtre apenas os testes relacionados ao arquivo modificado.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="warning-card bg-amber-50 rounded-xl p-5">
+              <div class="flex items-start gap-3">
+                <span class="text-xl">🌐</span>
+                <div>
+                  <h4 class="font-bold text-amber-800 mb-1">Dependências externas</h4>
+                  <p class="text-sm text-amber-700 leading-relaxed">
+                    Hooks que chamam APIs externas, bancos de dados ou serviços de rede podem falhar por razões
+                    fora do seu controle (timeout, sem internet). Isso vai bloquear o Claude mesmo que o código
+                    esteja correto. Isole hooks de validação de código dos hooks de integração.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="warning-card bg-amber-50 rounded-xl p-5">
+              <div class="flex items-start gap-3">
+                <span class="text-xl">🤖</span>
+                <div>
+                  <h4 class="font-bold text-amber-800 mb-1">A IA não substitui julgamento humano</h4>
+                  <p class="text-sm text-amber-700 leading-relaxed">
+                    Hooks validam o que é <strong>verificável por máquina</strong>: sintaxe, tipos, cobertura.
+                    Eles não detectam lógica de negócio errada, edge cases não cobertos por testes, ou decisões
+                    arquiteturais ruins. O código revisado pela IA ainda precisa de olho humano, só que em um
+                    nível mais alto.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Good practices -->
+          <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
+            <h3 class="font-bold text-emerald-800 mb-4 flex items-center gap-2"><span>✅</span> Boas práticas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold text-sm flex-shrink-0">1.</span>
+                <p class="text-sm text-emerald-800">Comece com um único hook simples. Adicione complexidade gradualmente.</p>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold text-sm flex-shrink-0">2.</span>
+                <p class="text-sm text-emerald-800">Sempre use <code class="bg-emerald-100 font-mono text-xs px-1 rounded">timeout</code> em comandos que podem travar.</p>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold text-sm flex-shrink-0">3.</span>
+                <p class="text-sm text-emerald-800">Versione o <code class="bg-emerald-100 font-mono text-xs px-1 rounded">.claude/settings.json</code> no repositório do projeto.</p>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold text-sm flex-shrink-0">4.</span>
+                <p class="text-sm text-emerald-800">Documente no README o que cada hook faz e por quê existe.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 5: Métricas de Confiança -->
+        <section id="sec-metrics" class="hidden">
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold text-stone-800 mb-2">📊 Impacto no Gargalo</h2>
+            <p class="text-stone-600">
+              A economia de tempo não vem da escrita, mas da <strong>revisão</strong>. Quando a IA se auto-corrige,
+              o tempo humano é liberado para decisões arquiteturais.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-xl border border-stone-200">
+            <div class="chart-container">
+              <canvas id="metricsChart"></canvas>
+            </div>
+            <div class="space-y-4">
+              <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-rose-500">
+                <h4 class="font-bold text-sm text-rose-700 uppercase">Revisão Manual (Antes)</h4>
+                <p class="text-xs text-stone-600 italic mt-1">
+                  "Faltou um ponto e vírgula", "Esse nome de variável está ruim", "Esqueceu de tratar o catch".
+                </p>
+              </div>
+              <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-auto-violet">
+                <h4 class="font-bold text-sm text-auto-violet uppercase">Revisão com Hooks (Depois)</h4>
+                <p class="text-xs text-stone-600 italic mt-1">
+                  "Essa abstração faz sentido para o negócio?", "O design da API é escalável?".
+                </p>
+              </div>
+              <p class="text-[11px] text-stone-400 leading-tight">
+                Dados simulam a transição de esforço após implementação de hooks. O tempo de revisão manual
+                cai progressivamente conforme a confiança na suíte de testes aumenta.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 6: O Novo Code Review -->
+        <section id="sec-review" class="hidden">
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold text-stone-800 mb-2">🔍 De Revisor de Sintaxe a Arquiteto</h2>
+            <p class="text-stone-600">
+              Como fica o seu dia a dia após desentupir o gargalo? Sua sênioridade agora é aplicada onde a IA ainda
+              falha: <strong>Intencionalidade e Negócio</strong>.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Before Card -->
+            <div class="border border-stone-200 p-6 rounded-2xl bg-stone-50">
+              <h3 class="font-bold text-red-700 mb-4 flex items-center gap-2"><span>❌</span> Review "Old School"</h3>
+              <div class="space-y-3">
+                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-red-100 opacity-60">
+                  <span class="text-xs font-mono bg-red-50 text-red-800 px-2 py-1 rounded w-10 text-center flex-shrink-0">1h</span>
+                  <span class="text-xs text-stone-700">Verificando indentação e linter.</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-red-100 opacity-60">
+                  <span class="text-xs font-mono bg-red-50 text-red-800 px-2 py-1 rounded w-10 text-center flex-shrink-0">2h</span>
+                  <span class="text-xs text-stone-700">Apontando erros de lógica básica.</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-red-100 opacity-60">
+                  <span class="text-xs font-mono bg-red-50 text-red-800 px-2 py-1 rounded w-10 text-center flex-shrink-0">30m</span>
+                  <span class="text-xs text-red-800 font-bold">Fadigado para o que importa.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- After Card -->
+            <div class="border-2 border-auto-violet p-6 rounded-2xl bg-violet-50/30">
+              <h3 class="font-bold text-auto-violet mb-4 flex items-center gap-2">
+                <span>✅</span> Review "AI-Augmented"
+              </h3>
+              <div class="space-y-3">
+                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-violet-100 shadow-sm">
+                  <span class="text-xs font-mono bg-violet-100 text-auto-violet px-2 py-1 rounded w-10 text-center flex-shrink-0">0m</span>
+                  <span class="text-xs text-stone-700">Linter e testes já passaram nos Hooks.</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-violet-100 shadow-sm">
+                  <span class="text-xs font-mono bg-violet-100 text-auto-violet px-2 py-1 rounded w-10 text-center flex-shrink-0">15m</span>
+                  <span class="text-xs text-stone-700">Validando contrato da API e segurança.</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-violet-200 shadow-sm">
+                  <span class="text-xs font-mono bg-violet-600 text-white px-2 py-1 rounded w-10 text-center flex-shrink-0">2h</span>
+                  <span class="text-xs text-stone-900 font-bold">Focando em Arquitetura e Negócio.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8 p-6 bg-stone-900 text-stone-100 rounded-2xl border-l-8 border-auto-violet shadow-xl">
+            <h4 class="font-bold mb-2 text-stone-400 text-xs uppercase tracking-widest">O Mantra da Parte 3:</h4>
+            <p class="text-lg italic font-serif">"A máquina valida o que é verificável. Você julga o que é intencional."</p>
+          </div>
+        </section>
+
+        <!-- SECTION 7: Próximos Passos -->
+        <section id="sec-nextsteps" class="hidden">
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold text-stone-800 mb-2">🚀 Como começar hoje</h2>
+            <p class="text-stone-600">
+              Não precisa configurar tudo de uma vez. O caminho mais seguro é começar simples,
+              validar, e expandir. Aqui está um roteiro de 4 passos.
+            </p>
+          </div>
+
+          <!-- Steps -->
+          <div class="space-y-4 mb-10">
+
+            <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+              <div class="step-number flex-shrink-0">1</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-stone-800 mb-1">Crie o arquivo de configuração</h4>
+                <p class="text-sm text-stone-600 mb-3">Crie ou edite o arquivo de hooks do seu projeto:</p>
+                <pre class="text-xs !p-3">mkdir -p .claude
+touch .claude/settings.json</pre>
+              </div>
+            </div>
+
+            <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+              <div class="step-number flex-shrink-0">2</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-stone-800 mb-1">Adicione um hook de lint como primeiro teste</h4>
+                <p class="text-sm text-stone-600 mb-3">Comece apenas com lint pois é rápido, seguro e dá feedback imediato:</p>
+                <pre class="text-xs !p-3">{
+  <span class="text-violet-400">"hooks"</span>: {
+    <span class="text-violet-400">"PostToolUse"</span>: [
+      {
+        <span class="text-blue-400">"matcher"</span>: <span class="text-emerald-400">"Write|Edit"</span>,
+        <span class="text-blue-400">"hooks"</span>: [
+          {
+            <span class="text-blue-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
+            <span class="text-blue-400">"command"</span>: <span class="text-emerald-400">"cd $CLAUDE_PROJECT_DIR &amp;&amp; timeout 20 npm run lint"</span>
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+              </div>
+            </div>
+
+            <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+              <div class="step-number flex-shrink-0">3</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-stone-800 mb-1">Valide em uma task real</h4>
+                <p class="text-sm text-stone-600 mb-3">Peça ao Claude para criar ou modificar um arquivo e observe o hook disparar no terminal. Confirme que:</p>
+                <ul class="text-sm text-stone-600 space-y-1">
+                  <li class="flex items-center gap-2"><span class="text-violet-500 font-bold">→</span> O lint rodou automaticamente após a escrita</li>
+                  <li class="flex items-center gap-2"><span class="text-violet-500 font-bold">→</span> Um erro de lint forçou o Claude a tentar novamente</li>
+                  <li class="flex items-center gap-2"><span class="text-violet-500 font-bold">→</span> O resultado final entregue já estava limpo</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+              <div class="step-number flex-shrink-0">4</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-stone-800 mb-1">Expanda com testes e versione com o time</h4>
+                <p class="text-sm text-stone-600 mb-3">Quando lint estiver funcionando bem, adicione testes. Depois faça commit do <code class="bg-stone-100 font-mono text-xs px-1 rounded">.claude/settings.json</code> para que todo o time se beneficie:</p>
+                <pre class="text-xs !p-3">git add .claude/settings.json
+git commit -m "feat: add Claude Code hooks for lint and tests"</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resources -->
+          <div class="bg-stone-50 border border-stone-200 rounded-2xl p-6">
+            <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>📚</span> Referências</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                <span class="text-lg">📖</span>
+                <div>
+                  <p class="text-sm font-bold text-stone-700">Documentação oficial de Hooks</p>
+                  <p class="text-xs text-stone-500 font-mono">docs.anthropic.com/claude-code/hooks</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                <span class="text-lg">⚙️</span>
+                <div>
+                  <p class="text-sm font-bold text-stone-700">Referência de settings.json</p>
+                  <p class="text-xs text-stone-500 font-mono">docs.anthropic.com/claude-code/settings</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                <span class="text-lg">💬</span>
+                <div>
+                  <p class="text-sm font-bold text-stone-700">Repositório de exemplos da comunidade</p>
+                  <p class="text-xs text-stone-500 font-mono">github.com/anthropics/claude-code</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                <span class="text-lg">🎓</span>
+                <div>
+                  <p class="text-sm font-bold text-stone-700">Próximo módulo: Claude como agente autônomo</p>
+                  <p class="text-xs text-stone-500">Engineering Hour - Parte 4</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+      let currentState = { activeSection: 'loop', chart: null };
+
+      const nodeData = {
+        1: {
+          icon: '✍️',
+          title: 'Escrita',
+          badge: 'Ponto de partida',
+          body: 'A IA propõe o código com base no seu prompt. Sem hooks, esse seria o fim da linha, e você teria que revisar manualmente cada detalhe de sintaxe e estilo.',
+        },
+        2: {
+          icon: '🧼',
+          title: 'Lint & Estilo',
+          badge: 'PostToolUse → Write|Edit',
+          body: 'O hook <code class="bg-violet-50 text-violet-700 px-1 py-0.5 rounded text-xs font-mono">PostToolUse</code> com matcher <code class="bg-violet-50 text-violet-700 px-1 py-0.5 rounded text-xs font-mono">Write|Edit</code> dispara assim que o arquivo é salvo e roda o <strong>Prettier/ESLint</strong>. Se houver erro, a IA recebe o log completo do terminal e tenta uma nova correção automaticamente.',
+        },
+        3: {
+          icon: '🧪',
+          title: 'Testes',
+          badge: 'PostToolUse → Write|Edit',
+          body: 'O hook executa <code class="bg-violet-50 text-violet-700 px-1 py-0.5 rounded text-xs font-mono">vitest run</code> ou <code class="bg-violet-50 text-violet-700 px-1 py-0.5 rounded text-xs font-mono">jest</code> nos arquivos afetados. A IA "sente" em tempo real se quebrou algo na lógica existente e inclui o stack trace na próxima tentativa de correção.',
+        },
+        4: {
+          icon: '🔧',
+          title: 'Correção Autônoma',
+          badge: 'Loop até exit 0',
+          body: 'Quando lint ou testes falham, o Claude lê o output do terminal, entende o erro e reescreve o trecho problemático. O ciclo se repete até que <strong>todos os hooks retornem código 0</strong> (sucesso). Só então o resultado é entregue a você.',
+        },
+      };
+
+      function navigate(sectionId) {
+        document.querySelectorAll('.nav-item').forEach((btn) => btn.classList.remove('active'));
+        document.getElementById(`nav-${sectionId}`).classList.add('active');
+
+        document.querySelectorAll('main > section').forEach((sec) => sec.classList.add('hidden'));
+        document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
+
+        if (sectionId === 'metrics' && !currentState.chart) initChart();
+        currentState.activeSection = sectionId;
+      }
+
+      function activateNode(id) {
+        document.querySelectorAll('.loop-node').forEach((n) => n.classList.remove('loop-active'));
+        document.getElementById(`node-${id}`).classList.add('loop-active');
+
+        const data = nodeData[id];
+        document.getElementById('node-info-placeholder').classList.add('hidden');
+        document.getElementById('node-info-content').classList.remove('hidden');
+        document.getElementById('node-info-icon').textContent = data.icon;
+        document.getElementById('node-info-title').textContent = data.title;
+        document.getElementById('node-info-badge').textContent = data.badge;
+        document.getElementById('node-info-body').innerHTML = data.body;
+      }
+
+      function initChart() {
+        const ctx = document.getElementById('metricsChart').getContext('2d');
+        currentState.chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Fix de bug', 'Feature nova', 'Refactor', 'Hotfix crítico', 'Integração API'],
+            datasets: [
+              {
+                label: 'Revisão Manual (min)',
+                data: [48, 55, 40, 35, 60],
+                borderColor: '#e11d48',
+                backgroundColor: 'rgba(225, 29, 72, 0.08)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+              },
+              {
+                label: 'Revisão com Hooks (min)',
+                data: [12, 10, 7, 5, 14],
+                borderColor: '#6d28d9',
+                backgroundColor: 'rgba(109, 40, 217, 0.08)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+              },
+            ],
+          },
+          options: {
+            maintainAspectRatio: false,
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Tempo de revisão (min)', font: { size: 10 } },
+              },
+              x: {
+                ticks: { font: { size: 10 } },
+              },
+            },
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+            },
+          },
+        });
+      }
+    </script>
+  </body>
+</html>

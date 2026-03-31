@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour P6: Skills no Claude Code</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+                            300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
+                        },
+                        skill: {
+                            indigo: '#4f46e5',
+                            light: '#eef2ff',
+                            border: '#c7d2fe',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #fafaf9; color: #292524; }
+        .nav-item.active {
+            background-color: #e7e5e4;
+            border-left: 4px solid #4f46e5;
+            font-weight: 600;
+        }
+        .nav-group-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #a8a29e;
+            padding: 0.5rem 0.25rem 0.25rem;
+        }
+        .step-number {
+            width: 2rem; height: 2rem;
+            border-radius: 9999px;
+            background: #4f46e5;
+            color: white;
+            font-weight: 700;
+            font-size: 0.875rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .antipattern-wrong { border-left: 4px solid #e11d48; }
+        .antipattern-right { border-left: 4px solid #059669; }
+        pre {
+            background-color: #1c1917;
+            color: #d6d3d1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            line-height: 1.65;
+        }
+        .copy-btn {
+            font-size: 0.65rem;
+            background: #374151;
+            color: #9ca3af;
+            border: none;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+        }
+        .copy-btn:hover { background: #4b5563; color: white; }
+        .skill-card { transition: all 0.2s; }
+        .skill-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px -4px rgba(79,70,229,0.15); }
+        .skill-card.selected { border-color: #4f46e5 !important; background: #eef2ff; }
+        .fm-line { cursor: pointer; transition: background 0.1s; border-radius: 3px; padding: 0 2px; }
+        .fm-line:hover { background: rgba(165,180,252,0.15); }
+        .fm-line.active { background: rgba(165,180,252,0.2); }
+        .invoke-row { transition: all 0.2s; }
+        .invoke-row:hover { background: #f5f5f4; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: auto;
+            height: 300px;
+        }
+        .bundled-card { transition: all 0.15s; }
+        .bundled-card:hover { background: #eef2ff; border-color: #c7d2fe; }
+        .tab-btn { transition: all 0.15s; }
+        .tab-btn.active { background: #4f46e5; color: white; font-weight: 600; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">⚡</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">
+                    Engineering Hour <span style="color:#4f46e5">P6</span>
+                </h1>
+            </div>
+            <div class="text-sm font-medium text-stone-500 hidden sm:block">
+                Módulo 6: Skills — Ferramentas que o Claude usa por você
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
+
+        <!-- Sidebar Navigation -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+
+            <p class="nav-group-label">O Conceito</p>
+            <button onclick="navigate('conceito')" id="nav-conceito" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🎯</span> O que são Skills
+            </button>
+            <button onclick="navigate('comparacao')" id="nav-comparacao" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚖️</span> Commands vs Skills
+            </button>
+            <button onclick="navigate('anatomia')" id="nav-anatomia" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔬</span> Anatomia: SKILL.md
+            </button>
+
+            <p class="nav-group-label mt-2">Na Prática</p>
+            <button onclick="navigate('bundled')" id="nav-bundled" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📦</span> Skills Nativas
+            </button>
+            <button onclick="navigate('invocacao')" id="nav-invocacao" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🕹️</span> Modos de Invocação
+            </button>
+            <button onclick="navigate('criando')" id="nav-criando" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🛠️</span> Criando sua Skill
+            </button>
+            <button onclick="navigate('subskills')" id="nav-subskills" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🗃️</span> Sub-Skills &amp; Índice
+            </button>
+
+            <p class="nav-group-label mt-2">Impacto</p>
+            <button onclick="navigate('avancado')" id="nav-avancado" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> Padrões Avançados
+            </button>
+            <button onclick="navigate('limites')" id="nav-limites" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚠️</span> Limites &amp; Cuidados
+            </button>
+
+            <p class="nav-group-label mt-2">Ação</p>
+            <button onclick="navigate('proximos')" id="nav-proximos" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📋</span> Próximos Passos
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+
+            <!-- ============================================================ -->
+            <!-- SECTION 1: O que são Skills                                   -->
+            <!-- ============================================================ -->
+            <section id="sec-conceito" class="block">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🎯 O que são Skills?</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Skills estendem o que o Claude consegue fazer. Você cria um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> com instruções e o Claude passa a ter essa ferramenta disponível. Você pode invocar diretamente com <code class="font-mono bg-stone-100 px-1 rounded text-xs">/nome-da-skill</code>, mas a parte poderosa é outra: <strong>o Claude pode decidir usar a skill sozinho</strong> quando percebe que ela é relevante para o que você pediu.
+                    </p>
+                </div>
+
+                <!-- The key insight: two-sided -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div class="p-5 rounded-2xl border-2 border-stone-200 bg-stone-50">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">🧑‍💻</span>
+                            <h3 class="font-bold text-stone-800">Você invoca</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 leading-relaxed mb-3">Digita <code class="font-mono bg-white px-1 rounded text-xs">/deploy</code> quando quer executar o deploy. Você controla o timing — útil para workflows com efeitos colaterais.</p>
+                        <pre class="text-xs">$ /review-pr 142</pre>
+                    </div>
+                    <div class="p-5 rounded-2xl border-2 border-indigo-200 bg-indigo-50">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">🤖</span>
+                            <h3 class="font-bold text-indigo-900">O Claude invoca</h3>
+                        </div>
+                        <p class="text-sm text-indigo-800 leading-relaxed mb-3">Você pede "como este código funciona?" e o Claude detecta que a skill <code class="font-mono bg-white px-1 rounded text-xs">explain-code</code> é relevante e a carrega automaticamente.</p>
+                        <pre class="text-xs"><span style="color:#a5b4fc"># A description da skill diz:</span>
+"Use quando o usuário perguntar
+ como algo funciona."</pre>
+                    </div>
+                </div>
+
+                <!-- Skills vs Commands legacy -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6 flex gap-3 items-start">
+                    <span class="text-xl flex-shrink-0">🗂️</span>
+                    <div>
+                        <h4 class="font-bold text-amber-900 text-sm mb-1">Já existe outro formato: <code class="font-mono bg-amber-100 px-1 rounded">.claude/commands/</code></h4>
+                        <p class="text-sm text-amber-800 leading-relaxed">Antes das Skills, o Claude Code usava <strong>Commands</strong> — arquivos <code class="font-mono bg-amber-100 px-1 rounded text-xs">.md</code> simples em <code class="font-mono bg-amber-100 px-1 rounded text-xs">.claude/commands/</code>. Ambos criam comandos slash e continuam funcionando. Skills são o formato evoluído: suportam frontmatter YAML, invocação automática pelo Claude, arquivos de suporte e execução em subagentes. Veja o comparativo completo na seção <button onclick="navigate('comparacao')" class="underline font-semibold">Commands vs Skills</button>.</p>
+                    </div>
+                </div>
+
+                <!-- Where skills live -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm">📁 Onde as Skills vivem</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b border-stone-200">
+                                    <th class="text-left py-2 pr-4 text-stone-500 font-semibold">Nível</th>
+                                    <th class="text-left py-2 pr-4 text-stone-500 font-semibold">Caminho</th>
+                                    <th class="text-left py-2 text-stone-500 font-semibold">Escopo</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100">
+                                <tr class="invoke-row">
+                                    <td class="py-2 pr-4 font-medium text-stone-700">Enterprise</td>
+                                    <td class="py-2 pr-4 font-mono text-stone-500">managed settings</td>
+                                    <td class="py-2 text-stone-600">Todos os usuários da org</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2 pr-4 font-medium text-stone-700">Pessoal</td>
+                                    <td class="py-2 pr-4 font-mono text-stone-500">~/.claude/skills/&lt;nome&gt;/</td>
+                                    <td class="py-2 text-stone-600">Todos os seus projetos</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2 pr-4 font-medium" style="color:#4f46e5">Projeto</td>
+                                    <td class="py-2 pr-4 font-mono text-stone-500">.claude/skills/&lt;nome&gt;/</td>
+                                    <td class="py-2 text-stone-600">Apenas este projeto</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2 pr-4 font-medium text-stone-700">Plugin</td>
+                                    <td class="py-2 pr-4 font-mono text-stone-500">&lt;plugin&gt;/skills/&lt;nome&gt;/</td>
+                                    <td class="py-2 text-stone-600">Onde o plugin está ativo</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-3">Quando skills têm o mesmo nome em níveis diferentes, a prioridade é: enterprise &gt; pessoal &gt; projeto.</p>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 1.5: Commands vs Skills                              -->
+            <!-- ============================================================ -->
+            <section id="sec-comparacao" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚖️ Commands vs Skills</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Ambos criam comandos slash invocáveis com <code class="font-mono bg-stone-100 px-1 rounded text-xs">/nome</code>. A diferença está em <strong>como são definidos</strong> e no que conseguem fazer. Skills são o formato recomendado — Commands continuam funcionando e seguem suportados.
+                    </p>
+                </div>
+
+                <!-- Side-by-side files -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-base">📄</span>
+                            <p class="text-xs font-bold text-stone-500 uppercase">Command (legado)</p>
+                        </div>
+                        <pre class="text-xs"><span style="color:#78716c"># .claude/commands/review-pr.md</span>
+<span style="color:#78716c"># (arquivo único, sem frontmatter obrigatório)</span>
+
+Revise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
+
+- Segurança: inputs não validados
+- Performance: N+1 queries
+- Testes: casos de borda
+
+Responda com Status + lista de Issues.</pre>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-base">📁</span>
+                            <p class="text-xs font-bold text-stone-500 uppercase">Skill (recomendado)</p>
+                        </div>
+                        <pre class="text-xs"><span style="color:#78716c"># .claude/skills/review-pr/SKILL.md</span>
+<span style="color:#78716c"># (diretório + frontmatter YAML)</span>
+
+<span style="color:#78716c">---</span>
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">review-pr</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisa PRs. Use ao analisar</span>
+<span style="color:#6ee7b7">  um pull request ou diff.</span>
+<span style="color:#a5b4fc">disable-model-invocation</span>: <span style="color:#fb923c">true</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Bash(gh *), Read</span>
+<span style="color:#78716c">---</span>
+
+Revise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
+<span style="color:#78716c"># ... mesmo conteúdo do command ...</span></pre>
+                    </div>
+                </div>
+
+                <!-- Feature comparison table -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm">Comparativo de recursos</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b-2 border-stone-200">
+                                    <th class="text-left py-2 pr-6 text-stone-500 font-semibold">Recurso</th>
+                                    <th class="text-center py-2 pr-6 text-stone-500 font-semibold">Command</th>
+                                    <th class="text-center py-2 text-stone-500 font-semibold">Skill</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100">
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700">Cria comando <code class="font-mono bg-stone-100 px-1 rounded">/nome</code></td>
+                                    <td class="py-2.5 pr-6 text-center text-emerald-600 font-bold">✅</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700">Suporte a <code class="font-mono bg-stone-100 px-1 rounded">$ARGUMENTS</code></td>
+                                    <td class="py-2.5 pr-6 text-center text-emerald-600 font-bold">✅</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700">Versionável no git</td>
+                                    <td class="py-2.5 pr-6 text-center text-emerald-600 font-bold">✅</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700">Frontmatter YAML (controle de comportamento)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700">Claude invoca automaticamente (por description)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700">Controle de invocação (<code class="font-mono bg-stone-100 px-1 rounded">disable-model-invocation</code>)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700">Arquivos de suporte no diretório</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700">Execução em subagente (<code class="font-mono bg-stone-100 px-1 rounded">context: fork</code>)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700">Restrição de ferramentas (<code class="font-mono bg-stone-100 px-1 rounded">allowed-tools</code>)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700">Injeção de contexto dinâmico (<code class="font-mono bg-stone-100 px-1 rounded">!`cmd`</code>)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Migration tip -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 rounded-xl bg-stone-50 border border-stone-200">
+                        <h4 class="font-bold text-stone-700 text-sm mb-2">🔄 Migrar ou não migrar?</h4>
+                        <p class="text-xs text-stone-600 leading-relaxed">Commands existentes <strong>não precisam ser migrados</strong>. Continue usando-os se atendem à necessidade. Migre para Skills quando quiser auto-invocação, arquivos de suporte, ou controle de quando o Claude pode acionar.</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+                        <h4 class="font-bold text-indigo-800 text-sm mb-2">⚡ Quando usar cada um</h4>
+                        <ul class="text-xs text-indigo-800 space-y-1 leading-relaxed">
+                            <li><strong>Command:</strong> instrução simples, sem controle de invocação necessário</li>
+                            <li><strong>Skill:</strong> quando você quer que o Claude saiba usar por conta própria, ou precisa de frontmatter, arquivos de suporte ou subagente isolado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Precedence note -->
+                <div class="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 flex gap-3 items-start">
+                    <span class="text-lg flex-shrink-0">⚠️</span>
+                    <p class="text-xs text-amber-800 leading-relaxed"><strong>Conflito de nomes:</strong> se existir um Command e uma Skill com o mesmo nome, a Skill tem precedência. Evite nomes duplicados entre <code class="font-mono bg-amber-100 px-1 rounded">.claude/commands/</code> e <code class="font-mono bg-amber-100 px-1 rounded">.claude/skills/</code>.</p>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 2: Anatomia do SKILL.md                              -->
+            <!-- ============================================================ -->
+            <section id="sec-anatomia" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🔬 Anatomia: SKILL.md</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Cada skill é um <strong>diretório</strong> com um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> obrigatório. O arquivo tem duas partes: frontmatter YAML entre <code class="font-mono bg-stone-100 px-1 rounded text-xs">---</code> que configura o comportamento, e o corpo Markdown com as instruções. Clique em cada campo para entender o que faz.
+                    </p>
+                </div>
+
+                <!-- File structure -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <p class="text-xs font-bold text-stone-400 uppercase mb-3">Estrutura do diretório</p>
+                    <pre class="text-xs">.claude/skills/
+└── <span style="color:#a5b4fc">review-pr/</span>
+    ├── <span style="color:#6ee7b7">SKILL.md</span>          <span style="color:#78716c"># obrigatório — instruções e frontmatter</span>
+    ├── <span style="color:#fbbf24">checklist.md</span>      <span style="color:#78716c"># opcional — referência carregada quando necessário</span>
+    └── scripts/
+        └── <span style="color:#fbbf24">validate.sh</span>   <span style="color:#78716c"># opcional — script que o Claude pode executar</span></pre>
+                </div>
+
+                <!-- Interactive frontmatter viewer -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs font-bold text-stone-400 uppercase">.claude/skills/review-pr/SKILL.md</p>
+                            <button class="copy-btn" onclick="copyCode('skill-anatomy')">copiar</button>
+                        </div>
+                        <pre id="skill-anatomy" class="text-xs leading-relaxed"><span style="color:#78716c">---</span>
+<span class="fm-line" id="fm-name" onclick="showFm('name')"><span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">review-pr</span></span>
+<span class="fm-line" id="fm-desc" onclick="showFm('desc')"><span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisa PRs buscando problemas</span>
+<span style="color:#6ee7b7">  de segurança e performance. Use</span>
+<span style="color:#6ee7b7">  quando revisar um pull request.</span></span>
+<span class="fm-line" id="fm-dim" onclick="showFm('dim')"><span style="color:#a5b4fc">disable-model-invocation</span>: <span style="color:#fb923c">true</span></span>
+<span class="fm-line" id="fm-tools" onclick="showFm('tools')"><span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Bash(gh *), Read</span></span>
+<span class="fm-line" id="fm-hint" onclick="showFm('hint')"><span style="color:#a5b4fc">argument-hint</span>: <span style="color:#6ee7b7">[número-do-pr]</span></span>
+<span style="color:#78716c">---</span>
+
+Você é um revisor sênior deste projeto.
+Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
+
+- Segurança: inputs não validados
+- Performance: N+1 queries
+- Testes: casos de borda descobertos
+
+<span class="fm-line" id="fm-ref" onclick="showFm('ref')">Para critérios completos, veja
+[checklist.md](checklist.md).</span>
+
+## Output Format
+**Status**: ✅ Aprovado / ⚠️ Ajustes
+**Issues**: ordenados por severidade</pre>
+                    </div>
+
+                    <!-- Annotation panel -->
+                    <div id="fm-panel" class="bg-stone-900 rounded-xl p-5 text-stone-200 flex flex-col justify-center min-h-56">
+                        <div id="fm-default">
+                            <p class="text-stone-400 text-sm text-center">👆 Clique em qualquer linha do frontmatter para entender o que ela controla.</p>
+                        </div>
+                        <div id="fm-content" class="hidden">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span id="fm-icon" class="text-2xl"></span>
+                                <h4 id="fm-title" class="font-bold" style="color:#a5b4fc"></h4>
+                            </div>
+                            <p id="fm-desc-text" class="text-sm text-stone-300 leading-relaxed"></p>
+                            <div id="fm-tip" class="mt-3 p-3 bg-stone-800 rounded-lg text-xs text-stone-400 leading-relaxed"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- $ARGUMENTS -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                    <h3 class="font-bold text-stone-800 mb-3 text-sm">📥 Variáveis de Substituição</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono text-indigo-600">$ARGUMENTS</code>
+                            <p class="text-stone-500 mt-1">Tudo que foi passado após o nome da skill.</p>
+                            <p class="text-stone-400 mt-1"><code>/fix-issue 123</code> → <code>$ARGUMENTS</code> = <code>123</code></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono text-indigo-600">$ARGUMENTS[0], $0</code>
+                            <p class="text-stone-500 mt-1">Argumento por posição (índice 0).</p>
+                            <p class="text-stone-400 mt-1"><code>/migrate SearchBar React Vue</code> → <code>$0</code> = <code>SearchBar</code></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono text-indigo-600">${CLAUDE_SKILL_DIR}</code>
+                            <p class="text-stone-500 mt-1">Diretório da skill. Útil para referenciar scripts bundled.</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono text-indigo-600">${CLAUDE_SESSION_ID}</code>
+                            <p class="text-stone-500 mt-1">ID da sessão atual. Útil para logs por sessão.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 3: Skills Nativas (Bundled)                          -->
+            <!-- ============================================================ -->
+            <section id="sec-bundled" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📦 Skills Nativas do Claude Code</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Skills nativas já vêm com o Claude Code e estão disponíveis em qualquer sessão. Diferente dos comandos built-in que executam lógica fixa, essas skills são <strong>orientadas por prompt</strong> — o Claude orquestra o trabalho usando suas ferramentas, podendo criar agentes paralelos e adaptar a execução ao seu projeto.
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <!-- /batch -->
+                    <div onclick="showBundled('batch')" class="bundled-card cursor-pointer p-5 rounded-2xl border-2 border-stone-100 bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-sm font-bold" style="color:#4f46e5">/batch</code>
+                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Agente Paralelo</span>
+                            </div>
+                            <span id="toggle-batch" class="text-stone-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2">Orquestra mudanças em larga escala no codebase em paralelo. Decompõe em 5–30 unidades independentes e abre um PR por unidade.</p>
+                        <div id="detail-batch" class="hidden mt-4 pt-4 border-t border-stone-100">
+                            <pre class="text-xs">/batch migrate src/ de Solid para React</pre>
+                            <p class="text-xs text-stone-500 mt-2">Pesquisa o codebase, apresenta o plano para aprovação, e só então spawna os agentes. Requer repositório git.</p>
+                        </div>
+                    </div>
+
+                    <!-- /simplify -->
+                    <div onclick="showBundled('simplify')" class="bundled-card cursor-pointer p-5 rounded-2xl border-2 border-stone-100 bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-sm font-bold" style="color:#4f46e5">/simplify</code>
+                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">3 Agentes em Paralelo</span>
+                            </div>
+                            <span id="toggle-simplify" class="text-stone-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2">Revisa arquivos alterados recentemente em busca de problemas de reuso, qualidade e eficiência — e os corrige.</p>
+                        <div id="detail-simplify" class="hidden mt-4 pt-4 border-t border-stone-100">
+                            <pre class="text-xs">/simplify focus on memory efficiency</pre>
+                            <p class="text-xs text-stone-500 mt-2">Spawna 3 agentes de review em paralelo, agrega os achados e aplica as correções. Pode receber foco opcional.</p>
+                        </div>
+                    </div>
+
+                    <!-- /loop -->
+                    <div onclick="showBundled('loop')" class="bundled-card cursor-pointer p-5 rounded-2xl border-2 border-stone-100 bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-sm font-bold" style="color:#4f46e5">/loop</code>
+                                <span class="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-semibold">Polling</span>
+                            </div>
+                            <span id="toggle-loop" class="text-stone-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2">Executa um prompt repetidamente em um intervalo enquanto a sessão estiver aberta.</p>
+                        <div id="detail-loop" class="hidden mt-4 pt-4 border-t border-stone-100">
+                            <pre class="text-xs">/loop 5m verificar se o deploy terminou</pre>
+                            <p class="text-xs text-stone-500 mt-2">Útil para monitorar deploys, babysit de PRs, ou re-executar outra skill periodicamente.</p>
+                        </div>
+                    </div>
+
+                    <!-- /debug -->
+                    <div onclick="showBundled('debug')" class="bundled-card cursor-pointer p-5 rounded-2xl border-2 border-stone-100 bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-sm font-bold" style="color:#4f46e5">/debug</code>
+                                <span class="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-semibold">Diagnóstico</span>
+                            </div>
+                            <span id="toggle-debug" class="text-stone-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2">Ativa logging de debug para a sessão atual e analisa o log para diagnosticar problemas.</p>
+                        <div id="detail-debug" class="hidden mt-4 pt-4 border-t border-stone-100">
+                            <pre class="text-xs">/debug o Claude parou de responder corretamente</pre>
+                            <p class="text-xs text-stone-500 mt-2">Debug está desligado por padrão. Executar <code>/debug</code> no meio de uma sessão começa a capturar logs a partir daquele ponto.</p>
+                        </div>
+                    </div>
+
+                    <!-- /claude-api -->
+                    <div onclick="showBundled('api')" class="bundled-card cursor-pointer p-5 rounded-2xl border-2 border-stone-100 bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-sm font-bold" style="color:#4f46e5">/claude-api</code>
+                                <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">Auto-invocada</span>
+                            </div>
+                            <span id="toggle-api" class="text-stone-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2">Carrega referência da API Anthropic e Agent SDK. Ativa automaticamente quando o código importa <code class="font-mono bg-stone-100 px-1 rounded text-xs">anthropic</code> ou <code class="font-mono bg-stone-100 px-1 rounded text-xs">@anthropic-ai/sdk</code>.</p>
+                        <div id="detail-api" class="hidden mt-4 pt-4 border-t border-stone-100">
+                            <p class="text-xs text-stone-500">Exemplo clássico de invocação automática: você abre um arquivo que importa o SDK Anthropic e o Claude já sabe a documentação da API sem você precisar pedir.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 4: Modos de Invocação                               -->
+            <!-- ============================================================ -->
+            <section id="sec-invocacao" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🕹️ Modos de Invocação</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Dois campos de frontmatter controlam quem pode acionar uma skill. Entendê-los é fundamental para criar skills que se comportam como você espera.
+                    </p>
+                </div>
+
+                <!-- Invocation matrix -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm">Matriz de Invocação</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b-2 border-stone-200">
+                                    <th class="text-left py-3 pr-4 text-stone-500 font-semibold">Frontmatter</th>
+                                    <th class="text-center py-3 pr-4 text-stone-500 font-semibold">Você invoca</th>
+                                    <th class="text-center py-3 pr-4 text-stone-500 font-semibold">Claude invoca</th>
+                                    <th class="text-left py-3 text-stone-500 font-semibold">Quando usar</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100">
+                                <tr class="invoke-row">
+                                    <td class="py-3 pr-4 font-mono text-stone-600">(padrão)</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold">✅ Sim</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold">✅ Sim</td>
+                                    <td class="py-3 text-stone-600">Skills de referência ou conhecimento que Claude deve aplicar quando relevante.</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-3 pr-4 font-mono" style="color:#4f46e5">disable-model-invocation: true</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold">✅ Sim</td>
+                                    <td class="py-3 pr-4 text-center text-red-500 font-bold">❌ Não</td>
+                                    <td class="py-3 text-stone-600">Workflows com efeitos colaterais: <code class="font-mono bg-stone-100 px-1 rounded">/deploy</code>, <code class="font-mono bg-stone-100 px-1 rounded">/commit</code>, <code class="font-mono bg-stone-100 px-1 rounded">/send-slack</code>. Você controla quando rodar.</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-3 pr-4 font-mono" style="color:#4f46e5">user-invocable: false</td>
+                                    <td class="py-3 pr-4 text-center text-red-500 font-bold">❌ Não</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold">✅ Sim</td>
+                                    <td class="py-3 text-stone-600">Conhecimento de contexto que Claude usa internamente. Ex: <code class="font-mono bg-stone-100 px-1 rounded">legacy-system-context</code> — não faz sentido como ação para o dev.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Examples side by side -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs font-bold text-stone-400 uppercase mb-2">Skill manual: apenas você aciona</p>
+                        <pre class="text-xs">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">deploy</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Deploy para produção</span>
+<span style="color:#a5b4fc">disable-model-invocation</span>: <span style="color:#fb923c">true</span>
+---
+
+Deploy <span style="color:#fb923c">$ARGUMENTS</span> para produção:
+1. Rode os testes
+2. Build da aplicação
+3. Push para o target
+4. Verifique a saúde</pre>
+                        <p class="text-xs text-stone-500 mt-2">O Claude <strong>nunca decide fazer um deploy por conta</strong> mesmo que o código pareça pronto.</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-stone-400 uppercase mb-2">Skill de contexto: apenas Claude usa</p>
+                        <pre class="text-xs">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">legacy-context</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Contexto do sistema legado.</span>
+<span style="color:#6ee7b7">  Use quando editar módulos de</span>
+<span style="color:#6ee7b7">  pagamento ou integração com SAP.</span>
+<span style="color:#a5b4fc">user-invocable</span>: <span style="color:#fb923c">false</span>
+---
+
+O módulo de pagamento usa SOAP
+porque o banco parceiro não suporta
+REST. Não tente refatorar para HTTP
+sem falar com o time de integração.</pre>
+                        <p class="text-xs text-stone-500 mt-2">O Claude carrega esse contexto ao trabalhar em pagamentos. <code>/legacy-context</code> não aparece no menu.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 5: Criando sua Skill                                 -->
+            <!-- ============================================================ -->
+            <section id="sec-criando" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🛠️ Criando sua Skill</h2>
+                    <p class="text-stone-600">Do zero a uma skill funcional compartilhada com o time em 4 passos.</p>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-6">
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Crie o diretório da skill</h4>
+                            <p class="text-sm text-stone-600 mb-3">O nome do diretório vira o comando slash. <code class="font-mono bg-stone-100 px-1 rounded text-xs">review-pr/</code> → <code class="font-mono bg-stone-100 px-1 rounded text-xs">/review-pr</code>.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">mkdir -p .claude/skills/review-pr</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('mkdir -p .claude/skills/review-pr')">copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Escreva o <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> com frontmatter</h4>
+                            <p class="text-sm text-stone-600 mb-3">A <code class="font-mono bg-stone-100 px-1 rounded text-xs">description</code> é o campo mais importante — é ela que diz ao Claude quando usar a skill automaticamente.</p>
+                            <pre class="text-xs">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">review-pr</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisa PRs com foco em segurança</span>
+<span style="color:#6ee7b7">  e performance. Use ao revisar um</span>
+<span style="color:#6ee7b7">  pull request ou diff de código.</span>
+<span style="color:#a5b4fc">disable-model-invocation</span>: <span style="color:#fb923c">true</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Bash(gh *), Read</span>
+<span style="color:#a5b4fc">argument-hint</span>: <span style="color:#6ee7b7">[número-do-pr]</span>
+---
+
+Você é um revisor sênior deste projeto (NestJS + Prisma).
+Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
+
+- Segurança: inputs sem validação, segredos expostos
+- Performance: N+1 queries, loops custosos
+- Testes: casos de borda descobertos
+
+**Status**: ✅ Aprovado / ⚠️ Ajustes
+**Issues**: por severidade (Alta / Média / Baixa)</pre>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Teste e refine</h4>
+                            <p class="text-sm text-stone-600">Execute com um PR real do time. Avalie se o output é preciso e específico para o seu stack. Itere 2–3 vezes na description e nas instruções até o resultado ser confiável.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Versione e compartilhe</h4>
+                            <p class="text-sm text-stone-600 mb-3">Comite o diretório <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/skills/</code>. Ao clonar o repositório, todo dev já tem a skill disponível. Trate skills como documentação executável — atualize junto com o código.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">git add .claude/skills/review-pr/
+git commit -m "feat: add /review-pr skill"</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('git add .claude/skills/review-pr/\ngit commit -m \"feat: add /review-pr skill\"')">copiar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- ============================================================ -->
+            <!-- SECTION 5.5: Sub-Skills & Índice                             -->
+            <!-- ============================================================ -->
+            <section id="sec-subskills" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🗃️ Sub-Skills &amp; o Padrão Índice</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Uma skill não precisa saber tudo de uma vez. Quando o domínio é grande — uma biblioteca UI, um sistema de design, uma API com dezenas de endpoints — carregar tudo no contexto seria desperdício. O <strong>Padrão Índice</strong> resolve isso: o <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> vira um mapa leve que aponta para arquivos detalhados. O Claude carrega apenas o que a tarefa requer.
+                    </p>
+                </div>
+
+                <!-- The problem -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div class="p-5 rounded-2xl border-2 border-red-100 bg-red-50">
+                        <h3 class="font-bold text-red-700 text-sm mb-3">❌ Sem o padrão índice</h3>
+                        <pre class="text-xs mb-3">.claude/skills/
+├── button/SKILL.md      <span style="color:#f87171"># 300 linhas</span>
+├── modal/SKILL.md       <span style="color:#f87171"># 280 linhas</span>
+├── table/SKILL.md       <span style="color:#f87171"># 420 linhas</span>
+├── data-grid/SKILL.md   <span style="color:#f87171"># 500 linhas</span>
+├── form/SKILL.md        <span style="color:#f87171"># 350 linhas</span>
+└── tooltip/SKILL.md     <span style="color:#f87171"># 180 linhas</span></pre>
+                        <p class="text-xs text-red-800 leading-relaxed">Todas as descriptions são carregadas no contexto ao iniciar a sessão. Com 6 skills detalhadas, você consome centenas de tokens antes de digitar uma linha.</p>
+                    </div>
+                    <div class="p-5 rounded-2xl border-2 border-emerald-200 bg-emerald-50">
+                        <h3 class="font-bold text-emerald-700 text-sm mb-3">✅ Com o padrão índice</h3>
+                        <pre class="text-xs mb-3">.claude/skills/
+└── <span style="color:#6ee7b7">ui-library/</span>
+    ├── <span style="color:#6ee7b7">SKILL.md</span>         <span style="color:#a7f3d0"># ~30 linhas — índice</span>
+    ├── button.md        <span style="color:#a7f3d0"># carregado sob demanda</span>
+    ├── modal.md         <span style="color:#a7f3d0"># carregado sob demanda</span>
+    ├── table.md         <span style="color:#a7f3d0"># carregado sob demanda</span>
+    ├── data-grid.md     <span style="color:#a7f3d0"># carregado sob demanda</span>
+    ├── form.md          <span style="color:#a7f3d0"># carregado sob demanda</span>
+    └── tooltip.md       <span style="color:#a7f3d0"># carregado sob demanda</span></pre>
+                        <p class="text-xs text-emerald-800 leading-relaxed">Apenas a description da skill <code class="font-mono bg-emerald-100 px-1 rounded">ui-library</code> entra no contexto inicial. O conteúdo detalhado de cada componente só é lido quando o Claude precisa.</p>
+                    </div>
+                </div>
+
+                <!-- How it works: flow diagram -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm">Como funciona em runtime</h3>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#4f46e5">1</div>
+                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200 text-xs text-stone-700">
+                                <strong>Sessão inicia</strong> — apenas a description de <code class="font-mono bg-stone-100 px-1 rounded">ui-library</code> é carregada: <em>"Guia da biblioteca UI. Use ao trabalhar com Button, Modal, Table, DataGrid, Form, Tooltip."</em>
+                            </div>
+                        </div>
+                        <div class="ml-4 border-l-2 border-dashed border-stone-300 h-4"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#4f46e5">2</div>
+                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200 text-xs text-stone-700">
+                                <strong>Você pede:</strong> <em>"Cria um DataGrid com seleção múltipla e ordenação por coluna"</em>
+                            </div>
+                        </div>
+                        <div class="ml-4 border-l-2 border-dashed border-stone-300 h-4"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#4f46e5">3</div>
+                            <div class="flex-1 p-3 bg-indigo-50 rounded-lg border border-indigo-100 text-xs text-indigo-800">
+                                <strong>Claude invoca a skill</strong> e lê o <code class="font-mono bg-indigo-100 px-1 rounded">SKILL.md</code> (índice). Identifica que a tarefa é sobre DataGrid → lê apenas <code class="font-mono bg-indigo-100 px-1 rounded">data-grid.md</code>.
+                            </div>
+                        </div>
+                        <div class="ml-4 border-l-2 border-dashed border-stone-300 h-4"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#059669">4</div>
+                            <div class="flex-1 p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-xs text-emerald-800">
+                                <strong>Executa a tarefa</strong> com conhecimento completo sobre DataGrid — sem ter carregado Button, Modal, Form ou qualquer outro componente.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The SKILL.md index template -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs font-bold text-stone-400 uppercase">.claude/skills/ui-library/SKILL.md — o índice</p>
+                        <button class="copy-btn" onclick="copyCode('subskill-index')">copiar</button>
+                    </div>
+                    <pre id="subskill-index" class="text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">ui-library</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Guia completo da biblioteca de componentes UI</span>
+<span style="color:#6ee7b7">  deste projeto. Use ao criar, editar ou entender</span>
+<span style="color:#6ee7b7">  qualquer componente: Button, Modal, Table,</span>
+<span style="color:#6ee7b7">  DataGrid, Form ou Tooltip.</span>
+---
+
+<span style="color:#78716c"># Esta skill é um índice. Leia o arquivo do componente</span>
+<span style="color:#78716c"># relevante antes de executar qualquer tarefa.</span>
+
+## Componentes disponíveis
+
+| Componente | Arquivo          | Quando carregar                          |
+|------------|-----------------|------------------------------------------|
+| Button     | [button.md](button.md)     | Props, variantes, acessibilidade         |
+| Modal      | [modal.md](modal.md)       | Portais, animações, foco trap            |
+| Table      | [table.md](table.md)       | Ordenação, paginação, seleção de linhas  |
+| DataGrid   | [data-grid.md](data-grid.md)  | Virtualização, edição inline, filtros    |
+| Form       | [form.md](form.md)         | Validação, campos controlados, submit    |
+| Tooltip    | [tooltip.md](tooltip.md)     | Posicionamento, delays, acessibilidade   |
+
+## Instruções
+
+1. Identifique qual componente é relevante para a tarefa
+2. Leia o arquivo correspondente da tabela acima
+3. Siga rigorosamente as convenções documentadas
+4. Se a tarefa envolver múltiplos componentes, leia cada arquivo
+
+<span style="color:#78716c"># Nunca assuma convenções — sempre leia o arquivo antes.</span></pre>
+                </div>
+
+                <!-- One sub-skill example -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs font-bold text-stone-400 uppercase">.claude/skills/ui-library/data-grid.md — sub-skill detalhada</p>
+                        <button class="copy-btn" onclick="copyCode('subskill-detail')">copiar</button>
+                    </div>
+                    <pre id="subskill-detail" class="text-xs leading-relaxed"><span style="color:#78716c"># DataGrid — Guia completo</span>
+
+## Instalação e import
+<span style="color:#6ee7b7">import</span> { DataGrid } <span style="color:#6ee7b7">from</span> <span style="color:#fb923c">'@acme/ui/data-grid'</span>
+
+## Props obrigatórias
+- <span style="color:#a5b4fc">rows</span>: Row[]           <span style="color:#78716c">— dados da grade</span>
+- <span style="color:#a5b4fc">columns</span>: ColDef[]     <span style="color:#78716c">— definição de colunas</span>
+- <span style="color:#a5b4fc">rowId</span>: keyof Row      <span style="color:#78716c">— campo único por linha</span>
+
+## Seleção múltipla
+Ative com <span style="color:#a5b4fc">selectionMode="multiple"</span>.
+Use <span style="color:#a5b4fc">onSelectionChange</span> para capturar linhas selecionadas.
+<span style="color:#78716c">Não use selectedRows como state externo — o componente</span>
+<span style="color:#78716c">gerencia internamente. Use selectedRowIds para seed inicial.</span>
+
+## Ordenação
+Ative com <span style="color:#a5b4fc">sortable</span> em cada ColDef.
+Ordenação server-side: use <span style="color:#a5b4fc">onSortChange</span> + <span style="color:#a5b4fc">externalSort=true</span>.
+
+## Padrão obrigatório: loading state
+Sempre passe <span style="color:#a5b4fc">loading={isLoading}</span>.
+Nunca renderize DataGrid sem dados — use o esqueleto nativo.
+
+## Anti-patterns conhecidos
+- ❌ Não use índice de array como rowId — quebrará seleção
+- ❌ Não mute rows diretamente — sempre passe novo array</pre>
+                </div>
+
+                <!-- Insight box -->
+                <div class="p-5 rounded-xl border border-indigo-200 bg-indigo-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">💡</span>
+                    <div>
+                        <h4 class="font-bold text-indigo-900 mb-1">O ganho não é só tokens — é qualidade</h4>
+                        <p class="text-sm text-indigo-800 leading-relaxed">Quando o Claude foca apenas no sub-skill relevante, ele lê o documento <em>inteiro e com atenção</em> — sem dividir atenção com 5 outros componentes que não têm nada a ver com a tarefa. O resultado é mais preciso, menos alucinação de props, e convenções seguidas corretamente.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 6: Padrões Avançados                                 -->
+            <!-- ============================================================ -->
+            <section id="sec-avancado" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🚀 Padrões Avançados</h2>
+                    <p class="text-stone-600">Recursos que ampliam o que skills conseguem fazer além de instruções simples.</p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex gap-2 mb-6">
+                    <button onclick="showAdvTab('injection')" id="tab-injection" class="tab-btn active text-sm px-4 py-2 rounded-lg border border-stone-200">Injeção de Contexto</button>
+                    <button onclick="showAdvTab('fork')" id="tab-fork" class="tab-btn text-sm px-4 py-2 rounded-lg border border-stone-200">Subagente Isolado</button>
+                    <button onclick="showAdvTab('files')" id="tab-files" class="tab-btn text-sm px-4 py-2 rounded-lg border border-stone-200">Arquivos de Suporte</button>
+                </div>
+
+                <!-- Injection tab -->
+                <div id="adv-injection" class="block">
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed">
+                        A sintaxe <code class="font-mono bg-stone-100 px-1 rounded text-xs">!`comando`</code> executa um shell command <strong>antes</strong> do conteúdo ser enviado ao Claude. O output substitui o placeholder — o Claude recebe dados reais, não o comando em si.
+                    </p>
+                    <pre class="text-xs mb-4">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">pr-summary</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Resume mudanças de um PR com contexto real</span>
+<span style="color:#a5b4fc">context</span>: <span style="color:#6ee7b7">fork</span>
+<span style="color:#a5b4fc">agent</span>: <span style="color:#6ee7b7">Explore</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Bash(gh *)</span>
+---
+
+## Contexto do PR
+- Diff: <span style="color:#fb923c">!`gh pr diff`</span>
+- Comentários: <span style="color:#fb923c">!`gh pr view --comments`</span>
+- Arquivos mudados: <span style="color:#fb923c">!`gh pr diff --name-only`</span>
+
+## Tarefa
+Resuma este PR: o que mudou, por que,
+e quais riscos existem.</pre>
+                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 text-xs text-stone-600">
+                        <strong>Como funciona:</strong> Cada <code class="font-mono bg-white px-1 rounded">!`comando`</code> executa imediatamente (pré-processamento). O output é injetado no prompt. O Claude recebe o resultado final com dados reais — não vê os comandos em si.
+                    </div>
+                </div>
+
+                <!-- Fork tab -->
+                <div id="adv-fork" class="hidden">
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed">
+                        <code class="font-mono bg-stone-100 px-1 rounded text-xs">context: fork</code> executa a skill em um <strong>subagente isolado</strong>. O conteúdo do <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> vira o prompt que direciona o subagente, sem acesso ao histórico da conversa principal.
+                    </p>
+                    <pre class="text-xs mb-4">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">deep-research</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Pesquisa profunda em um tópico do codebase</span>
+<span style="color:#a5b4fc">context</span>: <span style="color:#6ee7b7">fork</span>
+<span style="color:#a5b4fc">agent</span>: <span style="color:#6ee7b7">Explore</span>
+---
+
+Pesquise <span style="color:#fb923c">$ARGUMENTS</span> em profundidade:
+
+1. Use Glob e Grep para encontrar arquivos relevantes
+2. Leia e analise o código
+3. Resuma os achados com referências de arquivo</pre>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                            <strong class="text-indigo-700 block mb-1">1. Contexto isolado</strong>
+                            <p class="text-indigo-800">Subagente não tem acesso ao histórico da sessão principal.</p>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                            <strong class="text-indigo-700 block mb-1">2. Agent define ferramentas</strong>
+                            <p class="text-indigo-800"><code>agent: Explore</code> → ferramentas de leitura otimizadas para exploração.</p>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                            <strong class="text-indigo-700 block mb-1">3. Resultado retorna</strong>
+                            <p class="text-indigo-800">O output do subagente é resumido e devolvido para a conversa principal.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Files tab -->
+                <div id="adv-files" class="hidden">
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed">
+                        O diretório da skill pode ter arquivos de suporte. O <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> referencia eles — o Claude os carrega <strong>somente quando necessário</strong>, mantendo o contexto enxuto.
+                    </p>
+                    <pre class="text-xs mb-4">.claude/skills/review-pr/
+├── <span style="color:#6ee7b7">SKILL.md</span>           <span style="color:#78716c"># instrução principal (máx. 500 linhas recomendado)</span>
+├── <span style="color:#fbbf24">security-rules.md</span>  <span style="color:#78716c"># OWASP Top 10 detalhado — carregado quando necessário</span>
+├── <span style="color:#fbbf24">examples.md</span>        <span style="color:#78716c"># exemplos de output esperado</span>
+└── scripts/
+    └── <span style="color:#fbbf24">fetch-pr.sh</span>    <span style="color:#78716c"># script executável — não carregado, executado</span></pre>
+                    <p class="text-xs font-bold text-stone-400 uppercase mb-2">Referenciando em SKILL.md</p>
+                    <pre class="text-xs">## Recursos adicionais
+
+Para regras completas de segurança, veja
+[security-rules.md](security-rules.md).
+
+Para exemplos de output esperado, veja
+[examples.md](examples.md).</pre>
+                    <p class="text-xs text-stone-500 mt-3">Documentação detalhada, specs de API, ou coleções de exemplos não precisam ser carregados toda vez que a skill roda. Isso evita consumo desnecessário de contexto.</p>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 7: Limites & Cuidados                                -->
+            <!-- ============================================================ -->
+            <section id="sec-limites" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚠️ Limites &amp; Cuidados</h2>
+                    <p class="text-stone-600">Skills mal configuradas criam comportamentos inesperados — especialmente com invocação automática.</p>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-8">
+                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl">
+                        <h4 class="font-bold text-red-700 text-sm mb-2">❌ Description vaga → Claude usa quando não deve</h4>
+                        <pre class="text-xs">description: Analisa código.</pre>
+                        <p class="text-xs text-red-800 mt-2">O Claude vai interpretar isso como relevante para qualquer coisa envolvendo código — a skill dispara em contextos que você não previa.</p>
+                    </div>
+                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2">✅ Description com gatilhos específicos</h4>
+                        <pre class="text-xs">description: Revisa PRs de APIs REST em busca de problemas de
+  segurança e performance. Use ao revisar um pull request ou
+  quando o usuário pedir para analisar um diff.</pre>
+                    </div>
+
+                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
+                        <h4 class="font-bold text-red-700 text-sm mb-2">❌ Skill de deploy sem <code class="font-mono bg-red-100 px-1 rounded">disable-model-invocation</code></h4>
+                        <p class="text-xs text-red-800">O Claude pode decidir executar um deploy por conta própria ao detectar que "o código parece pronto". Workflows com efeitos colaterais irreversíveis <strong>sempre</strong> precisam de <code class="font-mono bg-red-100 px-1 rounded text-xs">disable-model-invocation: true</code>.</p>
+                    </div>
+                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2">✅ Separar skills de conhecimento de skills de ação</h4>
+                        <p class="text-xs text-emerald-800">Skills que <em>informam</em> (convenções, contexto legado) → deixe o Claude invocar. Skills que <em>agem</em> (deploy, commit, enviar mensagem) → <code class="font-mono bg-emerald-100 px-1 rounded text-xs">disable-model-invocation: true</code>.</p>
+                    </div>
+
+                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
+                        <h4 class="font-bold text-red-700 text-sm mb-2">❌ Skill com <code class="font-mono bg-red-100 px-1 rounded">context: fork</code> sem tarefa clara</h4>
+                        <p class="text-xs text-red-800">Um <code class="font-mono bg-red-100 px-1 rounded text-xs">context: fork</code> em uma skill de guias de estilo ("use estas convenções…") faz o subagente receber diretrizes mas nenhuma tarefa acionável — retorna sem fazer nada.</p>
+                    </div>
+                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2">✅ <code class="font-mono bg-emerald-100 px-1 rounded">context: fork</code> apenas para tarefas com instruções explícitas</h4>
+                        <p class="text-xs text-emerald-800">Use fork para skills que têm uma tarefa clara: pesquisa, geração de relatório, execução de script. Para conhecimento de referência, use o modo padrão (inline).</p>
+                    </div>
+                </div>
+
+                <!-- Warning -->
+                <div class="p-5 rounded-xl border border-amber-200 bg-amber-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">🧠</span>
+                    <div>
+                        <h4 class="font-bold text-amber-900 mb-1">Budget de contexto de skills</h4>
+                        <p class="text-sm text-amber-800 leading-relaxed">As descriptions das skills são carregadas no contexto para o Claude saber o que está disponível. Com muitas skills, elas podem exceder o budget (2% da janela de contexto, máx. ~16.000 chars). Execute <code class="font-mono bg-amber-100 px-1 rounded text-xs">/context</code> para verificar se há skills sendo excluídas.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 8: Próximos Passos                                   -->
+            <!-- ============================================================ -->
+            <section id="sec-proximos" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📋 Próximos Passos</h2>
+                    <p class="text-stone-600">Uma skill simples esta semana. Um catálogo do time no próximo mês.</p>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-8">
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Explore as skills nativas que já estão disponíveis</h4>
+                            <p class="text-sm text-stone-600 mb-2">Antes de criar qualquer coisa, teste <code class="font-mono bg-stone-100 px-1 rounded text-xs">/simplify</code> no seu projeto atual. Veja como o padrão de skill funciona na prática.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">/simplify</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('/simplify')">copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Crie sua primeira skill de conhecimento</h4>
+                            <p class="text-sm text-stone-600 mb-2">Comece com uma skill de contexto sem efeitos colaterais. Ex: convenções do seu projeto que o Claude deve sempre respeitar ao editar código.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">mkdir -p .claude/skills/project-conventions
+touch .claude/skills/project-conventions/SKILL.md</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('mkdir -p .claude/skills/project-conventions\ntouch .claude/skills/project-conventions/SKILL.md')">copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Crie uma skill de ação com <code class="font-mono bg-stone-100 px-1 rounded text-xs">disable-model-invocation: true</code></h4>
+                            <p class="text-sm text-stone-600">Escolha uma tarefa que você repete manualmente: review de PR, mensagem de commit, checklist de deploy. Configure <code class="font-mono bg-stone-100 px-1 rounded text-xs">disable-model-invocation: true</code> para manter controle total.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Construa o catálogo com o time</h4>
+                            <p class="text-sm text-stone-600">Faça uma sessão de 30 min: "Qual tarefa repetitiva você quer delegar?" Cada resposta é uma skill em potencial. Distribua a criação, faça commit de <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/skills/</code> e compartilhe via git.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Closing mantra -->
+                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl shadow-xl" style="border-left: 8px solid #4f46e5">
+                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#a5b4fc">Mantra da Parte 6:</h4>
+                    <p class="text-lg italic font-serif">"Uma skill bem descrita não é um atalho — é o Claude aprendendo quando e como ajudar, sem você precisar pedir."</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // ── Navigation ────────────────────────────────────────────────────
+        function navigate(sectionId) {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${sectionId}`).classList.add('active');
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
+        }
+
+        // ── Frontmatter annotation data ───────────────────────────────────
+        const fmData = {
+            name: {
+                icon: '🏷️',
+                title: 'name',
+                desc: 'Define o nome da skill e o comando slash. Se omitido, usa o nome do diretório. Aceita letras minúsculas, números e hífens (máx. 64 caracteres).',
+                tip: 'O nome do diretório e o campo name devem ser iguais. review-pr/ → name: review-pr → /review-pr.'
+            },
+            desc: {
+                icon: '🎯',
+                title: 'description',
+                desc: 'O campo mais crítico. É com base nele que o Claude decide carregar a skill automaticamente quando é relevante para o que você pediu.',
+                tip: 'Inclua gatilhos explícitos: "Use quando o usuário perguntar X" ou "Ative ao editar arquivos em src/payments/". Quanto mais específico, menos falsos positivos.'
+            },
+            dim: {
+                icon: '🔒',
+                title: 'disable-model-invocation',
+                desc: 'Quando true, o Claude nunca invoca esta skill por conta própria. Apenas você pode acioná-la com /nome-da-skill.',
+                tip: 'Use sempre em skills com efeitos colaterais: /deploy, /commit, /send-slack. Você não quer que o Claude decida fazer um deploy porque o código "parece pronto".'
+            },
+            tools: {
+                icon: '🔧',
+                title: 'allowed-tools',
+                desc: 'Ferramentas que o Claude pode usar sem pedir permissão quando esta skill está ativa. Restringe o escopo de acesso.',
+                tip: 'Use Bash(gh *) para permitir apenas comandos GitHub CLI. Use Read, Grep para skills de análise somente leitura. Princípio do menor privilégio.'
+            },
+            hint: {
+                icon: '💬',
+                title: 'argument-hint',
+                desc: 'Texto exibido no autocomplete quando o dev digita / para mostrar quais argumentos a skill espera.',
+                tip: 'Exemplos: [número-do-pr], [filename] [format], [issue-number]. Ajuda devs que não memorizam os argumentos.'
+            },
+            ref: {
+                icon: '📎',
+                title: 'Arquivos de suporte referenciados',
+                desc: 'Links para arquivos no diretório da skill. O Claude os carrega somente quando necessário, mantendo o contexto principal enxuto.',
+                tip: 'Mantenha SKILL.md abaixo de 500 linhas. Mova documentação detalhada, specs e exemplos para arquivos separados e referencie aqui.'
+            }
+        };
+
+        function showFm(key) {
+            const data = fmData[key];
+            document.querySelectorAll('.fm-line').forEach(l => l.classList.remove('active'));
+            document.getElementById(`fm-${key}`)?.classList.add('active');
+            document.getElementById('fm-default').classList.add('hidden');
+            document.getElementById('fm-content').classList.remove('hidden');
+            document.getElementById('fm-icon').textContent = data.icon;
+            document.getElementById('fm-title').textContent = data.title;
+            document.getElementById('fm-desc-text').textContent = data.desc;
+            document.getElementById('fm-tip').textContent = '💡 ' + data.tip;
+        }
+
+        // ── Bundled skills accordion ──────────────────────────────────────
+        const openBundled = new Set();
+        function showBundled(key) {
+            const detail = document.getElementById(`detail-${key}`);
+            const toggle = document.getElementById(`toggle-${key}`);
+            if (openBundled.has(key)) {
+                detail.classList.add('hidden');
+                toggle.textContent = '▼';
+                openBundled.delete(key);
+            } else {
+                detail.classList.remove('hidden');
+                toggle.textContent = '▲';
+                openBundled.add(key);
+            }
+        }
+
+        // ── Advanced tabs ─────────────────────────────────────────────────
+        function showAdvTab(tab) {
+            ['injection', 'fork', 'files'].forEach(t => {
+                document.getElementById(`adv-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('active');
+            });
+            document.getElementById(`adv-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        // ── Copy helper ───────────────────────────────────────────────────
+        function copyCode(id) {
+            navigator.clipboard.writeText(document.getElementById(id).innerText);
+        }
+
+        // ── Init ──────────────────────────────────────────────────────────
+        window.onload = () => navigate('conceito');
+    </script>
+</body>
+</html>

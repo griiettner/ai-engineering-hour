@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour P1: AI-Augmented Developer</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+                            300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
+                        },
+                        accent: {
+                            blue: '#0284c7',
+                            green: '#059669',
+                            red: '#e11d48',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #fafaf9; color: #292524; }
+
+        .nav-item.active {
+            background-color: #e7e5e4;
+            border-left: 4px solid #0284c7;
+            font-weight: 600;
+        }
+        .nav-group-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #a8a29e;
+            padding: 0.5rem 0.25rem 0.25rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            margin: auto;
+            height: 280px;
+        }
+        pre {
+            background-color: #1c1917;
+            color: #d6d3d1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.825rem;
+            line-height: 1.6;
+        }
+        .step-number {
+            width: 2rem; height: 2rem;
+            border-radius: 9999px;
+            background: #0284c7;
+            color: white;
+            font-weight: 700;
+            font-size: 0.875rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .guardrail-tab.active {
+            background: white;
+            border-bottom-color: white;
+            font-weight: 700;
+            color: #1c1917;
+        }
+        .antipattern-wrong { border-left: 4px solid #e11d48; }
+        .antipattern-right { border-left: 4px solid #059669; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🚀</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">
+                    Engineering Hour <span class="text-accent-blue">P1</span>
+                </h1>
+            </div>
+            <div class="text-sm font-medium text-stone-500 hidden sm:block">
+                Módulo 1: Setup & Regras de Ouro
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
+
+        <!-- Sidebar Navigation -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+
+            <div class="nav-group-label">Fundamentos</div>
+            <button onclick="navigate('tools')" id="nav-tools"
+                class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚔️</span> Ferramentas
+            </button>
+            <button onclick="navigate('context')" id="nav-context"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🧠</span> Janela de Contexto
+            </button>
+
+            <div class="nav-group-label mt-2">Guardrails</div>
+            <button onclick="navigate('guardrails')" id="nav-guardrails"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🛡️</span> Guardrails por Ferramenta
+            </button>
+            <button onclick="navigate('trio')" id="nav-trio"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📂</span> O Trio Essencial
+            </button>
+            <button onclick="navigate('antipatterns')" id="nav-antipatterns"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚫</span> Anti-Patterns
+            </button>
+
+            <div class="nav-group-label mt-2">Execução</div>
+            <button onclick="navigate('workflow')" id="nav-workflow"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚙️</span> Fluxo de Trabalho
+            </button>
+            <button onclick="navigate('nextsteps')" id="nav-nextsteps"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> Próximos Passos
+            </button>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+
+            <!-- SECTION 1: Ferramentas -->
+            <section id="sec-tools" class="block">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>⚔️</span> IDE vs. CLI vs. Web
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        O primeiro passo para aumentar a produtividade com IA é <strong>sair do chat do navegador</strong>.
+                        Cada interface tem um propósito diferente — usar a errada cria fricção desnecessária e ignora os
+                        guardrails que você definiu para o projeto.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <!-- IDE Card -->
+                    <div class="border border-stone-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-stone-50 relative overflow-hidden flex flex-col">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-accent-green"></div>
+                        <div class="text-3xl mb-3">💻</div>
+                        <h3 class="font-bold text-lg mb-2 text-stone-800">IDE</h3>
+                        <p class="text-xs text-stone-500 font-mono mb-3">Cursor / VS Code + Copilot</p>
+                        <ul class="text-sm text-stone-700 space-y-2 flex-1">
+                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> Código gerado já respeita seu padrão</li>
+                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> Sem copiar/colar — edita direto no arquivo</li>
+                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> Autocomplete ciente de todo o codebase</li>
+                        </ul>
+                        <div class="mt-4 pt-3 border-t border-stone-200 text-[11px] text-stone-500">
+                            <strong class="text-accent-green">Use quando:</strong> desenvolvimento do dia a dia, features incrementais, edições pontuais.
+                        </div>
+                    </div>
+
+                    <!-- CLI Card -->
+                    <div class="border border-stone-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-stone-50 relative overflow-hidden flex flex-col">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-accent-blue"></div>
+                        <div class="text-3xl mb-3">⌨️</div>
+                        <h3 class="font-bold text-lg mb-2 text-stone-800">CLI Agente</h3>
+                        <p class="text-xs text-stone-500 font-mono mb-3">Claude Code / Gemini CLI</p>
+                        <ul class="text-sm text-stone-700 space-y-2 flex-1">
+                            <li class="flex items-start gap-2"><span class="text-accent-blue">✅</span> Executa tarefas em lote autonomamente</li>
+                            <li class="flex items-start gap-2"><span class="text-accent-blue">✅</span> Roda comandos, testes e linter sozinho</li>
+                            <li class="flex items-start gap-2"><span class="text-accent-blue">✅</span> Ideal para refatorações e migrações grandes</li>
+                        </ul>
+                        <div class="mt-4 pt-3 border-t border-stone-200 text-[11px] text-stone-500">
+                            <strong class="text-accent-blue">Use quando:</strong> automação pesada, refatoração de monorepos, tarefas multi-arquivo.
+                        </div>
+                    </div>
+
+                    <!-- Web Card -->
+                    <div class="border border-stone-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-stone-50 relative overflow-hidden flex flex-col">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-accent-red"></div>
+                        <div class="text-3xl mb-3">🌐</div>
+                        <h3 class="font-bold text-lg mb-2 text-stone-800">Chat Web</h3>
+                        <p class="text-xs text-stone-500 font-mono mb-3">Claude.ai / ChatGPT</p>
+                        <ul class="text-sm text-stone-700 space-y-2 flex-1">
+                            <li class="flex items-start gap-2"><span class="text-stone-400">❌</span> <span class="text-stone-500">Perda constante de contexto do projeto</span></li>
+                            <li class="flex items-start gap-2"><span class="text-stone-400">❌</span> <span class="text-stone-500">Erros de indentação por copiar/colar</span></li>
+                            <li class="flex items-start gap-2 font-semibold"><span class="text-accent-red">❌</span> <span class="text-accent-red">Ignora completamente seus Guardrails</span></li>
+                        </ul>
+                        <div class="mt-4 pt-3 border-t border-stone-200 text-[11px] text-stone-500">
+                            <strong class="text-accent-red">Use quando:</strong> exploração conceitual, perguntas sem código, brainstorm inicial de arquitetura.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rule of 3 environments banner -->
+                <div class="bg-stone-900 text-stone-100 rounded-2xl p-5 flex items-start gap-4">
+                    <span class="text-2xl flex-shrink-0">💡</span>
+                    <div>
+                        <h4 class="font-bold mb-1">A Regra dos 3 Ambientes</h4>
+                        <p class="text-sm text-stone-300 leading-relaxed">
+                            Devs experientes usam os três. <strong class="text-white">Web</strong> para pensar,
+                            <strong class="text-white">IDE</strong> para construir,
+                            <strong class="text-white">CLI</strong> para automatizar.
+                            O erro mais comum é tentar construir código de produção no Web — sem contexto, sem guardrails, sem rastreabilidade.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Janela de Contexto -->
+            <section id="sec-context" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>🧠</span> Anatomia da IA: Janela de Contexto
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Por que a IA "começa a falar bobagem" em conversas longas? Porque ela tem uma
+                        <strong>memória de curto prazo finita</strong>, medida em tokens. Quando esse espaço se esgota,
+                        ela descarta as informações mais antigas — incluindo seus guardrails.
+                    </p>
+                </div>
+
+                <div class="bg-stone-50 rounded-xl p-6 border border-stone-200 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="font-bold text-lg mb-3 text-stone-800">O que é um Token?</h3>
+                            <p class="text-sm text-stone-600 mb-4">
+                                Pedaços de palavras processados pelo modelo. Em média,
+                                <strong>1.000 tokens ≈ 750 palavras</strong>.
+                                Claude tem uma janela de <strong>200k tokens</strong> — mas atenção seletiva importa mais do que tamanho bruto.
+                            </p>
+
+                            <h3 class="font-bold text-lg mb-2 text-stone-800">A "Memória de Curto Prazo"</h3>
+                            <p class="text-sm text-stone-600 mb-4">
+                                Quando projeto + histórico de conversa excedem a janela, a IA começa a
+                                <strong>descartar as instruções do início</strong> — exatamente onde ficam seus guardrails e regras de projeto.
+                            </p>
+
+                            <div class="bg-red-50 text-accent-red p-3 rounded-lg text-sm border border-red-100 flex gap-2 mb-4">
+                                <span class="flex-shrink-0">⚠️</span>
+                                <div>
+                                    <strong>O Risco da Distração:</strong> Enviar <code>node_modules</code>, <code>dist</code>
+                                    ou logs gigantes consome tokens valiosos e "distrai" a atenção da IA do que realmente importa.
+                                </div>
+                            </div>
+
+                            <div class="bg-emerald-50 text-emerald-800 p-3 rounded-lg text-sm border border-emerald-100 flex gap-2">
+                                <span class="flex-shrink-0">✅</span>
+                                <div>
+                                    <strong>A Solução:</strong> Crie um arquivo
+                                    <code class="bg-emerald-100 font-mono px-1 rounded text-xs">.claudeignore</code> (Claude Code) ou
+                                    <code class="bg-emerald-100 font-mono px-1 rounded text-xs">.cursorignore</code> (Cursor)
+                                    para excluir pastas ruidosas do contexto automaticamente.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center gap-4">
+                            <!-- Toggle buttons -->
+                            <div class="flex rounded-lg border border-stone-300 overflow-hidden text-sm font-medium">
+                                <button id="btn-context-dirty" onclick="toggleContext('dirty')"
+                                    class="px-4 py-2 bg-red-50 text-accent-red border-r border-stone-300 transition-colors">
+                                    😵 Contexto Poluído
+                                </button>
+                                <button id="btn-context-clean" onclick="toggleContext('clean')"
+                                    class="px-4 py-2 bg-white text-stone-500 transition-colors hover:bg-stone-50">
+                                    ✨ Contexto Limpo
+                                </button>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="contextChart"></canvas>
+                            </div>
+                            <p id="context-caption" class="text-xs text-center text-stone-500 italic">
+                                65% dos tokens gastos com ruído — a IA "vê" mal o código que importa.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Guardrails -->
+            <section id="sec-guardrails" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>🛡️</span> Guardrails por Ferramenta
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Cada ferramenta lê as regras do projeto de um arquivo diferente — mas o objetivo é sempre o mesmo:
+                        dar uma <strong>bússola</strong> à IA para que o código gerado já saia alinhado com os padrões do time.
+                    </p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="border border-stone-200 rounded-xl overflow-hidden">
+                    <div class="flex border-b border-stone-200 bg-stone-100 text-sm">
+                        <button onclick="switchGuardrailTab('claude')" id="gtab-claude"
+                            class="guardrail-tab active px-5 py-3 border-r border-stone-200 font-mono text-xs font-bold">
+                            CLAUDE.md
+                        </button>
+                        <button onclick="switchGuardrailTab('cursor')" id="gtab-cursor"
+                            class="guardrail-tab px-5 py-3 border-r border-stone-200 font-mono text-xs text-stone-500 hover:bg-white transition-colors">
+                            .cursorrules
+                        </button>
+                        <button onclick="switchGuardrailTab('copilot')" id="gtab-copilot"
+                            class="guardrail-tab px-5 py-3 font-mono text-xs text-stone-500 hover:bg-white transition-colors">
+                            copilot-instructions.md
+                        </button>
+                    </div>
+
+                    <!-- CLAUDE.md panel -->
+                    <div id="gpanel-claude" class="guardrail-panel block">
+                        <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex justify-between items-center">
+                            <span class="font-mono text-xs font-bold text-stone-700">📄 CLAUDE.md — Claude Code</span>
+                            <button onclick="copyGuardrail('claude')" id="copybtn-claude"
+                                class="text-xs bg-white border border-stone-300 px-2 py-1 rounded hover:bg-stone-50 transition-colors flex items-center gap-1">
+                                <span>📋</span> Copiar
+                            </button>
+                        </div>
+                        <pre id="code-claude" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-emerald-400"># Regras do Engenheiro Sênior — Projeto X</span>
+
+<span class="text-blue-400">## Perfil</span>
+- Você é um Engenheiro de Software Sênior especializado em TypeScript e Clean Architecture.
+- Suas respostas devem ser concisas e focadas em código testável.
+
+<span class="text-blue-400">## Guardrails de Design (Regras de Ouro)</span>
+- <span class="text-yellow-300">**Injeção de Dependência:**</span> Nunca instancie classes diretamente; use inversão de controle.
+- <span class="text-yellow-300">**Tratamento de Erros:**</span> Todo código assíncrono deve ter try/catch com logging.
+- <span class="text-yellow-300">**Tipagem:**</span> Proibido o uso de `any`. Use `unknown` se o tipo for incerto.
+- <span class="text-yellow-300">**Testes:**</span> Para cada feature, inclua o esqueleto do teste unitário em Vitest.
+
+<span class="text-blue-400">## Stack Atual</span>
+- Frontend: React 19 + Vite + TailwindCSS
+- Backend: Node.js + Fastify + Prisma
+- Testes: Vitest + Testing Library</pre>
+                        <div class="p-4 bg-white text-sm text-stone-600 border-t border-stone-200">
+                            Lido automaticamente pelo Claude Code em cada sessão. Coloque na raiz do projeto e versione com o time.
+                        </div>
+                    </div>
+
+                    <!-- .cursorrules panel -->
+                    <div id="gpanel-cursor" class="guardrail-panel hidden">
+                        <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex justify-between items-center">
+                            <span class="font-mono text-xs font-bold text-stone-700">📄 .cursorrules — Cursor IDE</span>
+                            <button onclick="copyGuardrail('cursor')" id="copybtn-cursor"
+                                class="text-xs bg-white border border-stone-300 px-2 py-1 rounded hover:bg-stone-50 transition-colors flex items-center gap-1">
+                                <span>📋</span> Copiar
+                            </button>
+                        </div>
+                        <pre id="code-cursor" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-stone-400"># Cursor Rules — Projeto X</span>
+
+<span class="text-violet-400">You are a Senior TypeScript engineer. Follow these rules strictly:</span>
+
+<span class="text-blue-400">## Code Style</span>
+- Never use `any`. Prefer `unknown` for unsafe types.
+- All async functions must have explicit return types.
+- Use dependency injection — never instantiate services inline.
+
+<span class="text-blue-400">## Architecture</span>
+- Feature Folders pattern: keep domain logic inside `src/features/`.
+- No business logic in controllers. Controllers are thin adapters only.
+
+<span class="text-blue-400">## Testing</span>
+- Always suggest a Vitest skeleton for new functionality.
+- Mocks must use `vi.fn()`, never manual class overrides.</pre>
+                        <div class="p-4 bg-white text-sm text-stone-600 border-t border-stone-200">
+                            O Cursor também suporta regras por pasta em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.cursor/rules/*.mdc</code> — útil para regras específicas por domínio.
+                        </div>
+                    </div>
+
+                    <!-- copilot panel -->
+                    <div id="gpanel-copilot" class="guardrail-panel hidden">
+                        <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex justify-between items-center">
+                            <span class="font-mono text-xs font-bold text-stone-700">📄 .github/copilot-instructions.md — GitHub Copilot</span>
+                            <button onclick="copyGuardrail('copilot')" id="copybtn-copilot"
+                                class="text-xs bg-white border border-stone-300 px-2 py-1 rounded hover:bg-stone-50 transition-colors flex items-center gap-1">
+                                <span>📋</span> Copiar
+                            </button>
+                        </div>
+                        <pre id="code-copilot" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-stone-400"># GitHub Copilot Instructions — Projeto X</span>
+
+<span class="text-blue-400">## Language and Stack</span>
+- TypeScript only. No JavaScript files should be created.
+- Use React 19 functional components with hooks — no class components.
+- State management: Zustand. Do not suggest Redux or Context API.
+
+<span class="text-blue-400">## Code Conventions</span>
+- Named exports only. No default exports except for page components.
+- Error handling: always use Result types (Ok/Err pattern), no raw throws.
+- API calls: use the internal `httpClient` wrapper, never raw `fetch`.
+
+<span class="text-blue-400">## Testing</span>
+- Framework: Vitest + @testing-library/react.
+- Test files live alongside source: `Button.test.tsx` next to `Button.tsx`.</pre>
+                        <div class="p-4 bg-white text-sm text-stone-600 border-t border-stone-200">
+                            Funciona com Copilot Chat e autocompletion. Deve estar em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.github/copilot-instructions.md</code> na raiz do repositório.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-900">
+                    <strong>O princípio é o mesmo para todos:</strong> definir <em>quem</em> a IA é no seu projeto e <em>como</em> ela deve se comportar.
+                    A ferramenta muda, o conceito não. Versione sempre esses arquivos junto com o código.
+                </div>
+            </section>
+
+            <!-- SECTION 4: O Trio Essencial -->
+            <section id="sec-trio" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>📂</span> Planejamento Básico: O Trio Essencial
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Antes de pedir à IA para escrever a primeira linha de código, garanta que ela conheça o terreno.
+                        Três arquivos simples servem de <strong>âncora de contexto</strong> — evitando sugestões fora do padrão,
+                        versões erradas de libs, e estruturas incompatíveis com o projeto.
+                    </p>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Interactive Selector -->
+                    <div class="md:w-1/3 flex flex-col gap-3">
+                        <button onclick="showTrioInfo('tech')" id="btn-trio-tech"
+                            class="trio-btn w-full text-left px-4 py-4 rounded-xl border-2 border-accent-blue bg-blue-50 font-mono font-bold text-stone-800 transition-all flex justify-between items-center shadow-sm">
+                            TECH_STACK.md <span>👉</span>
+                        </button>
+                        <button onclick="showTrioInfo('arch')" id="btn-trio-arch"
+                            class="trio-btn w-full text-left px-4 py-4 rounded-xl border-2 border-transparent bg-stone-100 hover:bg-stone-200 font-mono font-bold text-stone-600 transition-all flex justify-between items-center">
+                            ARCHITECTURE.md <span class="opacity-0">👉</span>
+                        </button>
+                        <button onclick="showTrioInfo('req')" id="btn-trio-req"
+                            class="trio-btn w-full text-left px-4 py-4 rounded-xl border-2 border-transparent bg-stone-100 hover:bg-stone-200 font-mono font-bold text-stone-600 transition-all flex justify-between items-center">
+                            REQUIREMENTS.md <span class="opacity-0">👉</span>
+                        </button>
+                        <div class="px-4 py-3 rounded-xl border-2 border-dashed border-stone-200 font-mono text-xs text-stone-400 flex justify-between items-center">
+                            <span>DECISIONS.md</span>
+                            <span class="bg-stone-100 text-stone-400 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Avançado</span>
+                        </div>
+                    </div>
+
+                    <!-- Display Panel -->
+                    <div class="md:w-2/3 bg-stone-50 border border-stone-200 rounded-xl overflow-hidden">
+                        <!-- TECH_STACK -->
+                        <div id="trio-content-tech" class="trio-content block">
+                            <div class="p-6 border-b border-stone-200">
+                                <h3 class="text-xl font-bold text-accent-blue mb-2 font-mono">TECH_STACK.md</h3>
+                                <p class="text-stone-700 mb-3">Lista exata das bibliotecas, frameworks e versões utilizadas.</p>
+                                <div class="bg-white p-3 rounded-lg border border-stone-200 text-sm border-l-4 border-l-accent-blue">
+                                    <strong>Objetivo:</strong> Evita que a IA sugira React 17 quando você usa 19, ou instale <code>axios</code> quando o projeto já usa <code>ky</code>.
+                                </div>
+                            </div>
+                            <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Tech Stack — Projeto X</span>
+
+<span class="text-blue-400">## Frontend</span>
+- React 19.0 + TypeScript 5.4
+- Vite 5.2 (build) | Vitest 2.0 (testes)
+- TailwindCSS 3.4 | Radix UI (componentes)
+- Zustand 4.5 (estado global)
+
+<span class="text-blue-400">## Backend</span>
+- Node.js 22 + Fastify 4.x
+- Prisma 5.x (ORM) | PostgreSQL 16
+- Zod (validação de schema)</pre>
+                        </div>
+
+                        <!-- ARCHITECTURE -->
+                        <div id="trio-content-arch" class="trio-content hidden">
+                            <div class="p-6 border-b border-stone-200">
+                                <h3 class="text-xl font-bold text-accent-green mb-2 font-mono">ARCHITECTURE.md</h3>
+                                <p class="text-stone-700 mb-3">Explica a organização estrutural e os padrões de comunicação.</p>
+                                <div class="bg-white p-3 rounded-lg border border-stone-200 text-sm border-l-4 border-l-accent-green">
+                                    <strong>Objetivo:</strong> Se diz "Feature Folders", a IA não criará arquivos soltos em <code>/controllers</code> ou <code>/views</code> gigantes.
+                                </div>
+                            </div>
+                            <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Architecture — Projeto X</span>
+
+<span class="text-blue-400">## Padrão: Feature Folders</span>
+src/
+  features/
+    auth/
+      auth.service.ts   <span class="text-stone-500"># lógica de negócio</span>
+      auth.routes.ts    <span class="text-stone-500"># controller fino</span>
+      auth.schema.ts    <span class="text-stone-500"># validação Zod</span>
+      auth.test.ts      <span class="text-stone-500"># testes unitários</span>
+  shared/
+    http/               <span class="text-stone-500"># wrapper httpClient</span>
+    errors/             <span class="text-stone-500"># Result types</span>
+
+<span class="text-blue-400">## Regras</span>
+- Controllers são adaptadores finos — zero lógica de negócio.
+- Serviços recebem dependências via parâmetro (sem instanciar).</pre>
+                        </div>
+
+                        <!-- REQUIREMENTS -->
+                        <div id="trio-content-req" class="trio-content hidden">
+                            <div class="p-6 border-b border-stone-200">
+                                <h3 class="text-xl font-bold text-accent-red mb-2 font-mono">REQUIREMENTS.md</h3>
+                                <p class="text-stone-700 mb-3">Descreve a regra de negócio central, casos de uso e edge cases.</p>
+                                <div class="bg-white p-3 rounded-lg border border-stone-200 text-sm border-l-4 border-l-accent-red">
+                                    <strong>Objetivo:</strong> Mantém a IA focada no "o que" estamos construindo. Impede que ignore casos de borda cruciais ou proponha soluções que não atendem o usuário real.
+                                </div>
+                            </div>
+                            <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Requirements — Feature: Autenticação</span>
+
+<span class="text-blue-400">## Fluxo Principal</span>
+1. Usuário envia email + senha via POST /auth/login
+2. Sistema valida credenciais contra hash bcrypt
+3. Retorna JWT (access: 15min) + Refresh token (7 dias)
+
+<span class="text-blue-400">## Edge Cases Críticos</span>
+- Após 5 tentativas falhas: bloquear por 15 min (rate limit por IP)
+- Token expirado: retornar 401 com código "TOKEN_EXPIRED" (não 403)
+- Refresh token rotativo: invalidar o anterior ao emitir novo
+
+<span class="text-blue-400">## Fora do Escopo (v1)</span>
+- OAuth / SSO — será na v2
+- 2FA — será na v2</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: Anti-Patterns -->
+            <section id="sec-antipatterns" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>🚫</span> Anti-Patterns Mais Comuns
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Saber o que <em>não</em> fazer acelera mais do que qualquer dica de produtividade.
+                        Estes são os 4 comportamentos que mais drenam o potencial da IA no dia a dia.
+                    </p>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Anti-pattern 1 -->
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3">Anti-pattern #1</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
+                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> O Prompt Obra</h4>
+                                <p class="text-sm text-red-700 mb-3">Jogar todos os requisitos de uma vez esperando que a IA entregue tudo perfeito.</p>
+                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-600 italic">
+                                    "Crie um sistema de autenticação completo com JWT, refresh token, rate limit, logs de auditoria, 2FA e integração com OAuth do Google."
+                                </div>
+                            </div>
+                            <div class="antipattern-right bg-emerald-50 rounded-xl p-5">
+                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> O Prompt Cirúrgico</h4>
+                                <p class="text-sm text-emerald-700 mb-3">Uma tarefa por vez, validando e construindo incrementalmente sobre o que foi aprovado.</p>
+                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 italic">
+                                    "Baseando-se no REQUIREMENTS.md, implemente o endpoint POST /auth/login. Apenas login por email e senha por agora."
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Anti-pattern 2 -->
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3">Anti-pattern #2</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
+                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> Corrigir Só no Chat</h4>
+                                <p class="text-sm text-red-700 mb-3">Quando a IA usa <code>axios</code> e você quer <code>ky</code>, você fala no chat — e na próxima sessão ela usa <code>axios</code> de novo.</p>
+                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-600 italic">
+                                    "Não, use ky ao invés de axios"
+                                    <span class="block mt-1 text-red-500 font-semibold">→ Correto apenas nesta mensagem.</span>
+                                </div>
+                            </div>
+                            <div class="antipattern-right bg-emerald-50 rounded-xl p-5">
+                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> Corrigir na Raiz</h4>
+                                <p class="text-sm text-emerald-700 mb-3">Vá no <code>CLAUDE.md</code> e adicione a regra. O comportamento muda permanentemente para todo o time.</p>
+                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 font-mono">
+                                    <span class="text-emerald-600"># Em CLAUDE.md:</span><br>
+                                    - HTTP: use sempre `ky`, nunca `axios` ou `fetch` diretamente.
+                                    <span class="block mt-1 text-emerald-600 font-sans font-semibold">→ Correto para sempre.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Anti-pattern 3 -->
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3">Anti-pattern #3</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
+                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> Arrastar a Conversa</h4>
+                                <p class="text-sm text-red-700 mb-3">Continuar uma sessão longa mesmo depois de notar que a IA está esquecendo contexto, gerando inconsistências ou repetindo erros.</p>
+                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-500 italic">
+                                    Conversa com 80 mensagens, IA ignora as regras do início, sugere padrões que já foram corrigidos antes.
+                                </div>
+                            </div>
+                            <div class="antipattern-right bg-emerald-50 rounded-xl p-5">
+                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> Abrir Nova Sessão</h4>
+                                <p class="text-sm text-emerald-700 mb-3">Detecte o sinal de deriva e encerre. Abra uma nova sessão com um prompt de "handoff" resumindo o que foi feito.</p>
+                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 italic">
+                                    "Contexto: implementamos o login e o refresh token. Os testes passam. Próxima tarefa: implementar o rate limit por IP."
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Anti-pattern 4 -->
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3">Anti-pattern #4</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
+                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> Aceitar Sem Ler</h4>
+                                <p class="text-sm text-red-700 mb-3">Aprovar o código gerado sem entender a intenção — criando dívida técnica oculta que ninguém consegue manter depois.</p>
+                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-500 italic">
+                                    "Parece certo, aceitar tudo." → 3 semanas depois ninguém sabe por que aquele código existe.
+                                </div>
+                            </div>
+                            <div class="antipattern-right bg-emerald-50 rounded-xl p-5">
+                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> Revisão de Intenção</h4>
+                                <p class="text-sm text-emerald-700 mb-3">Você não precisa verificar cada vírgula (o hook faz isso). Mas precisa entender <em>por que</em> essa solução foi escolhida.</p>
+                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 italic">
+                                    "Explica por que usaste um Map aqui ao invés de um array com find()."
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 6: Fluxo de Trabalho -->
+            <section id="sec-workflow" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>⚙️</span> O Fluxo de Trabalho (Mão na Massa)
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Com ferramentas e arquivos base prontos, este é o ritual para iniciar qualquer tarefa.
+                        Seguir este fluxo transforma a dinâmica de "ditador de código" para <strong>orquestrador</strong>.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Indexação da IDE</h4>
+                            <p class="text-sm text-stone-600">Ao abrir o projeto, aguarde (ou force) a IDE indexar o repositório.
+                            A IA só pode consultar o que ela sabe que existe. Sem indexação, ela opera no escuro.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">O "Check-in" — Primeiro Prompt</h4>
+                            <p class="text-sm text-stone-600 mb-3">Sempre contextualize a IA com os arquivos âncora <em>antes</em> de pedir a tarefa. Não presuma que ela lembrou da sessão anterior.</p>
+                            <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
+                                <span class="text-lg flex-shrink-0">💬</span>
+                                "Leia os arquivos TECH_STACK.md, ARCHITECTURE.md e CLAUDE.md na raiz. Confirme que entendeu os padrões antes de prosseguirmos."
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Validação Estrutural</h4>
+                            <p class="text-sm text-stone-600 mb-3">Avalie a resposta. Se ela sugerir algo que viola seu padrão (ex: usou <code class="bg-stone-100 rounded px-1 font-mono text-xs">axios</code> quando você usa <code class="bg-stone-100 rounded px-1 font-mono text-xs">ky</code>), não corrija apenas no chat.</p>
+                            <div class="bg-stone-800 text-stone-100 p-4 rounded-lg text-sm border-l-4 border-accent-blue">
+                                💡 <strong>O Segredo:</strong> Vá no <code>CLAUDE.md</code>, adicione a regra restritiva lá, e peça para a IA reler.
+                                <strong>Você corrige a "raiz" do comportamento, não apenas uma linha temporária.</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">O Loop de Iteração</h4>
+                            <p class="text-sm text-stone-600 mb-3">Após a primeira resposta aprovada, construa incrementalmente. Cada prompt subsequente deve referenciar o que já foi feito.</p>
+                            <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
+                                <span class="text-lg flex-shrink-0">💬</span>
+                                "O endpoint de login está funcionando e os testes passam. Agora adicione o mecanismo de refresh token conforme o REQUIREMENTS.md."
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">5</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Fechando a Sessão</h4>
+                            <p class="text-sm text-stone-600 mb-3">
+                                Sessões longas degradam. Detecte os sinais — IA repetindo erros já corrigidos, ignorando regras, gerando código inconsistente — e encerre.
+                                Abra uma nova sessão com um <strong>prompt de handoff</strong>:
+                            </p>
+                            <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
+                                <span class="text-lg flex-shrink-0">💬</span>
+                                "Retomando contexto: implementamos login + refresh token. Testes passam. Próxima tarefa: rate limit por IP (ver REQUIREMENTS.md, seção Edge Cases)."
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 7: Próximos Passos -->
+            <section id="sec-nextsteps" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>🚀</span> Como começar hoje
+                    </h2>
+                    <p class="text-stone-600">
+                        Não precisa configurar tudo de uma vez. Quatro ações concretas que você pode fazer ainda hoje para
+                        sair do setup zero para um ambiente funcional.
+                    </p>
+                </div>
+
+                <div class="space-y-4 mb-10">
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Escolha e instale sua ferramenta principal</h4>
+                            <p class="text-sm text-stone-600 mb-3">Para desenvolvimento do dia a dia, escolha uma IDE. Para automações pesadas, instale o Claude Code.</p>
+                            <pre class="text-xs !p-3"># Instalar Claude Code (CLI agente)
+npm install -g @anthropic-ai/claude-code
+
+# Verificar instalação
+claude --version</pre>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Crie o arquivo de guardrails com pelo menos 3 regras</h4>
+                            <p class="text-sm text-stone-600 mb-3">Não espere o arquivo estar perfeito. Comece com o mínimo e evolua conforme encontra comportamentos que precisa corrigir.</p>
+                            <pre class="text-xs !p-3"># Para Claude Code:
+touch CLAUDE.md
+
+# Para Cursor:
+touch .cursorrules
+
+# Para Copilot:
+mkdir -p .github && touch .github/copilot-instructions.md</pre>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Crie TECH_STACK.md e ARCHITECTURE.md (mínimo viável)</h4>
+                            <p class="text-sm text-stone-600 mb-3">10 linhas cada é suficiente para começar. O objetivo é que a IA não "adivinhe" sua stack.</p>
+                            <pre class="text-xs !p-3">git add CLAUDE.md TECH_STACK.md ARCHITECTURE.md .claudeignore
+git commit -m "feat: add AI context files for Claude Code"</pre>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Execute o "Check-in" na sua próxima tarefa real</h4>
+                            <p class="text-sm text-stone-600 mb-3">Use o template do Passo 2 do Fluxo de Trabalho na próxima feature que você for implementar. Observe a diferença de qualidade na primeira resposta.</p>
+                            <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
+                                <span class="text-lg flex-shrink-0">💬</span>
+                                Template: "Leia TECH_STACK.md, ARCHITECTURE.md e CLAUDE.md. Confirme que entendeu os padrões. Depois, [descreva a tarefa]."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- References -->
+                <div class="bg-stone-50 border border-stone-200 rounded-2xl p-6">
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>📚</span> Referências</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">📖</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700">Documentação Claude Code</p>
+                                <p class="text-xs text-stone-500 font-mono">docs.anthropic.com/claude-code</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">⚙️</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700">Cursor Rules (Docs)</p>
+                                <p class="text-xs text-stone-500 font-mono">docs.cursor.com/context/rules</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">🤖</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700">GitHub Copilot Instructions</p>
+                                <p class="text-xs text-stone-500 font-mono">docs.github.com/copilot/customizing</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">🎓</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700">Próximo módulo: Prompts & Contexto Avançado</p>
+                                <p class="text-xs text-stone-500">Engineering Hour — Parte 2</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        let currentState = { activeSection: 'tools', chartInstance: null, contextMode: 'dirty' };
+
+        // ── Navigation ──────────────────────────────────────────────
+        function navigate(sectionId) {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${sectionId}`).classList.add('active');
+
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
+
+            if (sectionId === 'context' && !currentState.chartInstance) initChart();
+            currentState.activeSection = sectionId;
+        }
+
+        // ── Trio ────────────────────────────────────────────────────
+        function showTrioInfo(type) {
+            document.querySelectorAll('.trio-btn').forEach(btn => {
+                btn.classList.remove('border-accent-blue', 'bg-blue-50', 'border-accent-green', 'bg-green-50', 'border-accent-red', 'bg-red-50', 'text-stone-800');
+                btn.classList.add('border-transparent', 'bg-stone-100', 'text-stone-600');
+                btn.querySelector('span').classList.add('opacity-0');
+            });
+
+            const activeBtn = document.getElementById(`btn-trio-${type}`);
+            const colorMap = {
+                tech: ['border-accent-blue', 'bg-blue-50'],
+                arch: ['border-accent-green', 'bg-green-50'],
+                req:  ['border-accent-red',   'bg-red-50'],
+            };
+            activeBtn.classList.remove('border-transparent', 'bg-stone-100', 'text-stone-600');
+            activeBtn.classList.add(...colorMap[type], 'text-stone-800');
+            activeBtn.querySelector('span').classList.remove('opacity-0');
+
+            document.querySelectorAll('.trio-content').forEach(c => { c.classList.add('hidden'); c.classList.remove('block'); });
+            document.getElementById(`trio-content-${type}`).classList.add('block');
+            document.getElementById(`trio-content-${type}`).classList.remove('hidden');
+        }
+
+        // ── Guardrail tabs ───────────────────────────────────────────
+        function switchGuardrailTab(tool) {
+            document.querySelectorAll('.guardrail-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`gtab-${tool}`).classList.add('active');
+            document.querySelectorAll('.guardrail-panel').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`gpanel-${tool}`).classList.remove('hidden');
+        }
+
+        // ── Copy button (real clipboard) ─────────────────────────────
+        function copyGuardrail(tool) {
+            const preEl = document.getElementById(`code-${tool}`);
+            const btn = document.getElementById(`copybtn-${tool}`);
+            navigator.clipboard.writeText(preEl.innerText).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<span>✅</span> Copiado!';
+                btn.classList.add('bg-green-50', 'text-green-700', 'border-green-200');
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.classList.remove('bg-green-50', 'text-green-700', 'border-green-200');
+                }, 2000);
+            });
+        }
+
+        // ── Context Chart ────────────────────────────────────────────
+        const contextData = {
+            dirty: {
+                data: [15, 20, 65],
+                colors: ['#059669', '#0284c7', '#e11d48'],
+                labels: ['Código Útil (15%)', 'Histórico Relevante (20%)', 'Ruído — logs/dist/node_modules (65%)'],
+                caption: '65% dos tokens gastos com ruído — a IA "vê" mal o código que importa.',
+            },
+            clean: {
+                data: [55, 35, 10],
+                colors: ['#059669', '#0284c7', '#e11d48'],
+                labels: ['Código Útil (55%)', 'Histórico Relevante (35%)', 'Ruído residual (10%)'],
+                caption: 'Com .claudeignore configurado: 90% dos tokens focados no que importa.',
+            },
+        };
+
+        function initChart() {
+            const ctx = document.getElementById('contextChart').getContext('2d');
+            const d = contextData.dirty;
+            currentState.chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: d.labels,
+                    datasets: [{ data: d.data, backgroundColor: d.colors, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 4 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 12, font: { family: 'Inter, sans-serif', size: 11 }, color: '#44403c' } },
+                        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed}% da Janela de Contexto` } }
+                    },
+                    cutout: '62%'
+                }
+            });
+        }
+
+        function toggleContext(mode) {
+            if (!currentState.chartInstance) return;
+            currentState.contextMode = mode;
+            const d = contextData[mode];
+            currentState.chartInstance.data.labels = d.labels;
+            currentState.chartInstance.data.datasets[0].data = d.data;
+            currentState.chartInstance.data.datasets[0].backgroundColor = d.colors;
+            currentState.chartInstance.update();
+            document.getElementById('context-caption').textContent = d.caption;
+
+            const dirtyBtn = document.getElementById('btn-context-dirty');
+            const cleanBtn = document.getElementById('btn-context-clean');
+            if (mode === 'dirty') {
+                dirtyBtn.className = 'px-4 py-2 bg-red-50 text-accent-red border-r border-stone-300 transition-colors font-medium';
+                cleanBtn.className = 'px-4 py-2 bg-white text-stone-500 transition-colors hover:bg-stone-50';
+            } else {
+                cleanBtn.className = 'px-4 py-2 bg-emerald-50 text-emerald-700 transition-colors font-medium';
+                dirtyBtn.className = 'px-4 py-2 bg-white text-stone-500 border-r border-stone-300 transition-colors hover:bg-stone-50';
+            }
+        }
+    </script>
+</body>
+</html>

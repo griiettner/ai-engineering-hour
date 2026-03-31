@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour P2: Planejamento Avançado</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+                            300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
+                        },
+                        gov: {
+                            emerald: '#065f46',
+                            gold: '#b45309',
+                            slate: '#334155',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #fafaf9; color: #292524; }
+        .nav-item.active {
+            background-color: #e7e5e4;
+            border-left: 4px solid #065f46;
+            font-weight: 600;
+        }
+        .nav-group-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #a8a29e;
+            padding: 0.5rem 0.25rem 0.25rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: auto;
+            height: 300px;
+        }
+        .step-number {
+            width: 2rem; height: 2rem;
+            border-radius: 9999px;
+            background: #065f46;
+            color: white;
+            font-weight: 700;
+            font-size: 0.875rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .doc-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .doc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+        .doc-card:hover .doc-icon { transform: scale(1.1) rotate(5deg); }
+        .doc-icon { transition: transform 0.2s ease; }
+        .antipattern-wrong { border-left: 4px solid #e11d48; }
+        .antipattern-right { border-left: 4px solid #059669; }
+        pre {
+            background-color: #1c1917;
+            color: #d6d3d1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.825rem;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🏛️</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">
+                    Engineering Hour <span class="text-gov-emerald">P2</span>
+                </h1>
+            </div>
+            <div class="text-sm font-medium text-stone-500 hidden sm:block">
+                Módulo 2: Planejamento Avançado & Governança
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
+
+        <!-- Sidebar Navigation -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+
+            <div class="nav-group-label">O Conceito</div>
+            <button onclick="navigate('maturity')" id="nav-maturity"
+                class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📈</span> Maturação de Contexto
+            </button>
+            <button onclick="navigate('constitution')" id="nav-constitution"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📜</span> A Constituição (.md)
+            </button>
+
+            <div class="nav-group-label mt-2">Execução</div>
+            <button onclick="navigate('lifecycle')" id="nav-lifecycle"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🗺️</span> Ritual do Plan.md
+            </button>
+            <button onclick="navigate('decision')" id="nav-decision"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚖️</span> Estratégia vs Código
+            </button>
+
+            <div class="nav-group-label mt-2">Cuidados</div>
+            <button onclick="navigate('limits')" id="nav-limits"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚠️</span> Limites & Cuidados
+            </button>
+
+            <div class="nav-group-label mt-2">Ação</div>
+            <button onclick="navigate('nextsteps')" id="nav-nextsteps"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> Próximos Passos
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+
+            <!-- SECTION 1: Maturação -->
+            <section id="sec-maturity" class="block">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📈 Maturação: O Fim do "Chute"</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Quanto mais madura é a sua documentação, menos a IA precisa adivinhar.
+                        A Parte 1 cobriu o mínimo viável — aqui saímos do básico e entramos na <strong>governança corporativa</strong>.
+                        O gráfico mostra como documentos específicos eliminam riscos de desenvolvimento.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-xl border border-stone-200 mb-6">
+                    <div class="chart-container">
+                        <canvas id="maturityChart"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-gov-emerald">
+                            <h4 class="font-bold text-sm text-gov-emerald uppercase">Escalabilidade de Contexto</h4>
+                            <p class="text-sm text-stone-600 mt-1">Documentos granulares permitem que a IA carregue <em>apenas o necessário</em> para cada tarefa — economizando tokens e mantendo precisão.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-gov-gold">
+                            <h4 class="font-bold text-sm text-gov-gold uppercase">Segurança de Decisão</h4>
+                            <p class="text-sm text-stone-600 mt-1">Com um histórico de decisões (ADRs), a IA para de sugerir padrões que o time já decidiu abandonar no passado.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-stone-400">
+                            <h4 class="font-bold text-sm text-stone-600 uppercase">A Evolução Natural</h4>
+                            <p class="text-sm text-stone-500 mt-1">
+                                Parte 1: <code class="bg-stone-100 font-mono px-1 rounded text-xs">CLAUDE.md + TECH_STACK + ARCHITECTURE</code><br>
+                                Parte 2: + Constituição completa + Plan.md ritual
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: A Constituição -->
+            <section id="sec-constitution" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📜 A Constituição do Projeto</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Uma estrutura documental avançada é o que chamamos de "Constituição" — ela define os <strong>limites inegociáveis</strong>
+                        da IA no projeto. Cada categoria tem um propósito distinto na mente do modelo.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+
+                    <!-- Comportamento -->
+                    <div class="doc-card border border-stone-200 p-5 rounded-xl bg-stone-50">
+                        <div class="doc-icon text-2xl mb-3">🤖</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-1">Comportamento (LLM)</h3>
+                        <p class="text-xs text-stone-500 mb-3">Define quem a IA é e como ela deve agir.</p>
+                        <div class="space-y-1">
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CLAUDE.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">LLM_CONTEXT.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CLI_AND_DEV_RULES.md</span>
+                        </div>
+                    </div>
+
+                    <!-- Design & Padrões -->
+                    <div class="doc-card border border-stone-200 p-5 rounded-xl bg-stone-50">
+                        <div class="doc-icon text-2xl mb-3">📐</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-1">Design & Padrões</h3>
+                        <p class="text-xs text-stone-500 mb-3">Impede que a IA invente estruturas ou padrões não aprovados.</p>
+                        <div class="space-y-1">
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">FOLDER_STRUCTURE.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CODING_GUIDELINES.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">API_SPEC.md</span>
+                        </div>
+                    </div>
+
+                    <!-- Histórico & Decisões -->
+                    <div class="doc-card border border-stone-200 p-5 rounded-xl bg-stone-50">
+                        <div class="doc-icon text-2xl mb-3">🕰️</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-1">Histórico & Decisões</h3>
+                        <p class="text-xs text-stone-500 mb-3">Evita que a IA repita erros do passado ou reverta decisões já tomadas.</p>
+                        <div class="space-y-1">
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">DECISIONS.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">DATABASE_DISCOVERIES.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CHANGELOG.md</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The LLM_CONTEXT index tip -->
+                <div class="bg-stone-900 text-stone-100 rounded-2xl p-6 mb-6">
+                    <h4 class="font-bold mb-3 flex items-center gap-2"><span>💡</span> O Truque do Índice — LLM_CONTEXT.md</h4>
+                    <p class="text-sm text-stone-300 mb-4 leading-relaxed">
+                        Com muitos documentos, a IA pode não saber qual ler primeiro. O <code class="bg-stone-700 text-emerald-300 font-mono px-1 rounded text-xs">LLM_CONTEXT.md</code>
+                        funciona como um roteador: instrui a IA a carregar o documento certo para cada tipo de tarefa.
+                    </p>
+                    <pre class="text-xs !p-3 !bg-stone-800"><span class="text-emerald-400"># LLM_CONTEXT.md — Índice de Instruções</span>
+
+<span class="text-blue-400">## Antes de qualquer tarefa, leia:</span>
+- CLAUDE.md → regras gerais de comportamento
+- TECH_STACK.md → versões e libs disponíveis
+
+<span class="text-blue-400">## Se for mexer em banco de dados:</span>
+- DATABASE_DISCOVERIES.md → gotchas e decisões sobre o schema
+
+<span class="text-blue-400">## Se for criar uma nova feature:</span>
+- ARCHITECTURE.md → padrão Feature Folders
+- REQUIREMENTS.md → regras de negócio vigentes
+
+<span class="text-blue-400">## Se for alterar algo existente:</span>
+- DECISIONS.md → verifique se existe ADR sobre o componente</pre>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Ritual do Plan.md -->
+            <section id="sec-lifecycle" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🗺️ O Ritual do Plan.md</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        O <code class="bg-stone-100 font-mono px-1 rounded text-sm">plan.md</code> é onde a IA "pensa alto" antes de escrever uma linha de código.
+                        Você aprova a <strong>estratégia</strong> antes da execução — eliminando retrabalho por decisões erradas de arquitetura.
+                    </p>
+                </div>
+
+                <div class="space-y-4 mb-8">
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">1</div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-bold text-stone-800">A Proposta</h4>
+                                <span class="text-xs bg-stone-800 text-white px-2 py-1 rounded-full">IA escreve</span>
+                            </div>
+                            <p class="text-sm text-stone-600">Você pede: <em>"Antes de começar, crie um plan.md listando cada arquivo que será alterado e por quê."</em> A IA mapeia o impacto completo da mudança.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">2</div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-bold text-stone-800">O Crivo do Arquiteto</h4>
+                                <span class="text-xs bg-gov-gold text-white px-2 py-1 rounded-full">Você revisa</span>
+                            </div>
+                            <p class="text-sm text-stone-600">Você lê o plano. Se a IA quer alterar um Provider que você não quer mexer, ou ignora um edge case — você corrige o plano <em>antes</em> da execução, não depois.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">3</div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-bold text-stone-800">Execução de Baixa Fricção</h4>
+                                <span class="text-xs bg-gov-emerald text-white px-2 py-1 rounded-full">IA executa</span>
+                            </div>
+                            <p class="text-sm text-stone-600">Com a estratégia aprovada, a IA executa. Erros de lógica e de arquitetura caem drasticamente — porque foram eliminados no passo 2.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real plan.md example -->
+                <div class="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden">
+                    <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex items-center gap-3">
+                        <span class="font-mono text-xs font-bold text-stone-700">📄 plan.md — Exemplo real</span>
+                        <span class="text-[10px] bg-emerald-100 text-gov-emerald font-bold px-2 py-0.5 rounded-full">template para copiar</span>
+                    </div>
+                    <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Plan: Adicionar rate limit no endpoint de login</span>
+
+<span class="text-blue-400">## Contexto</span>
+POST /auth/login não tem proteção contra brute force.
+Ref: REQUIREMENTS.md → "Edge Cases Críticos"
+
+<span class="text-blue-400">## Arquivos a MODIFICAR</span>
+1. `src/features/auth/auth.routes.ts`
+   → adicionar middleware de rate limit antes do handler
+2. `src/features/auth/auth.test.ts`
+   → adicionar testes: 5 tentativas ok, 6ª retorna 429
+
+<span class="text-blue-400">## Arquivos a CRIAR</span>
+3. `src/shared/middleware/rate-limit.ts`
+   → encapsular lógica do @fastify/rate-limit (já no TECH_STACK.md)
+
+<span class="text-blue-400">## Arquivos que NÃO serão modificados</span>
+- Qualquer coisa fora de `src/features/auth/` e `src/shared/middleware/`
+- Schema do banco — não há mudança de persistência
+
+<span class="text-blue-400">## Riscos identificados</span>
+- Usuários atrás de proxy corporativo podem compartilhar IP
+- Rate limit distribuído requer Redis — não está no TECH_STACK.md (confirmar antes)
+
+<span class="text-blue-400">## Aguardando aprovação para prosseguir.</span></pre>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Estratégia vs Código -->
+            <section id="sec-decision" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚖️ Estratégia vs. Implementação</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Desentupir o gargalo significa parar de olhar ponto e vírgula e começar a olhar a arquitetura.
+                        O Plan.md ritual muda o <em>tipo</em> de conversa que você tem com a IA.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="antipattern-wrong bg-red-50 rounded-xl p-6">
+                        <h3 class="font-bold text-red-800 mb-4 flex items-center gap-2"><span>⚠️</span> O Gargalo Antigo</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-red-100">
+                                <span class="text-red-400 flex-shrink-0">❌</span>
+                                <span class="text-sm text-stone-600">Revisão de sintaxe linha por linha.</span>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-red-100">
+                                <span class="text-red-400 flex-shrink-0">❌</span>
+                                <span class="text-sm text-stone-600">IA decide a arquitetura, dev descobre só no código.</span>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-red-100 font-semibold">
+                                <span class="text-red-400 flex-shrink-0">❌</span>
+                                <span class="text-sm text-red-700">Retrabalho por decisão errada já codificada.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="antipattern-right bg-emerald-50 rounded-xl p-6">
+                        <h3 class="font-bold text-gov-emerald mb-4 flex items-center gap-2"><span>✅</span> O Fluxo Novo</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-emerald-100 shadow-sm">
+                                <span class="text-gov-emerald flex-shrink-0">✅</span>
+                                <span class="text-sm text-stone-600">Guardrails automatizados eliminam revisão de sintaxe.</span>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-emerald-100 shadow-sm">
+                                <span class="text-gov-emerald flex-shrink-0">✅</span>
+                                <span class="text-sm text-stone-600">Você aprova a <strong>estratégia</strong> no Plan.md antes do código existir.</span>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-emerald-100 shadow-sm font-semibold">
+                                <span class="text-gov-emerald flex-shrink-0">✅</span>
+                                <span class="text-sm text-gov-emerald">Retrabalho arquitetural cai por eliminação.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk prompt example -->
+                <div class="bg-stone-50 border border-stone-200 rounded-xl p-5 mb-8">
+                    <h4 class="font-bold text-stone-800 mb-3 flex items-center gap-2"><span>💬</span> Prompts de Alto Valor para Estratégia</h4>
+                    <div class="space-y-3">
+                        <div class="bg-gov-emerald/10 border border-gov-emerald/20 p-3 rounded-lg">
+                            <p class="text-xs font-bold text-gov-emerald mb-1">Prompt de Riscos</p>
+                            <p class="text-sm text-stone-700 italic">"Antes de aplicar este plano, analise o RISKS.md e liste 3 possíveis efeitos colaterais desta mudança na camada de autenticação."</p>
+                        </div>
+                        <div class="bg-gov-gold/10 border border-gov-gold/20 p-3 rounded-lg">
+                            <p class="text-xs font-bold text-gov-gold mb-1">Prompt de Verificação Histórica</p>
+                            <p class="text-sm text-stone-700 italic">"Antes de criar um novo cache layer, verifique o DECISIONS.md — já tomamos alguma decisão sobre caching que eu deva conhecer?"</p>
+                        </div>
+                        <div class="bg-stone-100 border border-stone-200 p-3 rounded-lg">
+                            <p class="text-xs font-bold text-stone-500 mb-1">Prompt de Escopo</p>
+                            <p class="text-sm text-stone-700 italic">"No plan.md, liste explicitamente os arquivos que NÃO devem ser modificados nesta tarefa."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mantra -->
+                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl border-l-8 border-gov-emerald shadow-xl">
+                    <h4 class="font-bold mb-2 text-stone-400 text-xs uppercase tracking-widest">O Mantra da Parte 2:</h4>
+                    <p class="text-lg italic font-serif">"Aprovamos estratégias, não linhas de código. A IA executa o que o arquiteto aprovou."</p>
+                </div>
+            </section>
+
+            <!-- SECTION 5: Limites & Cuidados -->
+            <section id="sec-limits" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚠️ Limites & Cuidados</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Governança excessiva é tão prejudicial quanto governança insuficiente. Documentação em excesso
+                        ou mal mantida pode confundir a IA mais do que ajudá-la.
+                    </p>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider">🔴 Riscos a evitar</h3>
+
+                    <div class="bg-red-50 rounded-xl p-5 border-l-4 border-red-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">🦠</span>
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1">Documentation Rot</h4>
+                                <p class="text-sm text-red-700 leading-relaxed">
+                                    Documentos que não são atualizados ficam desatualizados e passam a <strong>mentir</strong> para a IA.
+                                    Um <code class="bg-red-100 font-mono px-1 rounded text-xs">TECH_STACK.md</code> com React 17 quando você usa 19 é pior do que não ter o arquivo.
+                                </p>
+                                <div class="mt-2 bg-red-100 rounded-lg p-2">
+                                    <p class="text-[11px] text-red-800">✓ Defina um dono por documento e revise no início de cada sprint.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 rounded-xl p-5 border-l-4 border-red-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">📚</span>
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1">Documentação Demais</h4>
+                                <p class="text-sm text-red-700 leading-relaxed">
+                                    30 arquivos de contexto fragmentados consomem o contexto da IA antes mesmo de ela começar a trabalhar.
+                                    Se a IA precisa ler 15 arquivos para entender uma tarefa simples, a estrutura está errada.
+                                </p>
+                                <div class="mt-2 bg-red-100 rounded-lg p-2">
+                                    <p class="text-[11px] text-red-800">✓ Use o <code class="font-mono">LLM_CONTEXT.md</code> como índice — só carregue o necessário para cada tarefa.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider">🟡 Pontos de atenção</h3>
+
+                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">⚔️</span>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-1">Regras Conflitantes</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed">
+                                    Se o <code class="bg-amber-100 font-mono px-1 rounded text-xs">CLAUDE.md</code> diz "use Zustand" e o
+                                    <code class="bg-amber-100 font-mono px-1 rounded text-xs">CODING_GUIDELINES.md</code> diz "evite estado global",
+                                    a IA vai flutuar entre os dois. Conflitos silenciosos são difíceis de diagnosticar.
+                                </p>
+                                <div class="mt-2 bg-amber-100 rounded-lg p-2">
+                                    <p class="text-[11px] text-amber-800">✓ Quando alterar uma regra, busque contradições nos outros arquivos.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">🗺️</span>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-1">Plan.md não é contrato imutável</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed">
+                                    Durante a execução, a IA pode descobrir que o plano era inviável por um motivo técnico.
+                                    Isso é normal — a IA deve te avisar e propor revisão, não executar mesmo assim ou parar silenciosamente.
+                                    Instrua isso explicitamente no <code class="bg-amber-100 font-mono px-1 rounded text-xs">CLAUDE.md</code>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">🤖</span>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-1">Governança não elimina revisão humana</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed">
+                                    Documentação avançada reduz erros de <em>padrão</em>, não erros de <em>lógica de negócio</em>.
+                                    A IA pode gerar código perfeitamente estruturado que resolve o problema errado.
+                                    Revisar a intenção da solução ainda é responsabilidade humana.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Good practices -->
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
+                    <h3 class="font-bold text-gov-emerald mb-4 flex items-center gap-2"><span>✅</span> Boas práticas</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start gap-2">
+                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">1.</span>
+                            <p class="text-sm text-gov-emerald">Comece com 3-5 arquivos. Só adicione um novo quando sentir a falta dele.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">2.</span>
+                            <p class="text-sm text-gov-emerald">Revise a Constituição toda vez que uma regra for violada — atualize, não apenas corrija no chat.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">3.</span>
+                            <p class="text-sm text-gov-emerald">Adicione uma data de atualização no header de cada arquivo de contexto.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">4.</span>
+                            <p class="text-sm text-gov-emerald">Versione todos os arquivos de contexto junto com o código — PRs devem incluir mudanças de docs.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 6: Próximos Passos -->
+            <section id="sec-nextsteps" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🚀 Como começar hoje</h2>
+                    <p class="text-stone-600">
+                        Evolua a partir do que foi criado na Parte 1. Quatro passos para ir do mínimo viável
+                        para uma Constituição funcional.
+                    </p>
+                </div>
+
+                <div class="space-y-4 mb-10">
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Crie o DECISIONS.md com as últimas 3 decisões do time</h4>
+                            <p class="text-sm text-stone-600 mb-3">Não precisa ser retroativo. Documente as 3 decisões mais recentes que a IA deveria conhecer antes de sugerir algo.</p>
+                            <pre class="text-xs !p-3"><span class="text-emerald-400"># DECISIONS.md</span>
+
+<span class="text-blue-400">## [2025-03] Migração de Axios para ky</span>
+<span class="text-stone-400">Motivo: ky é mais leve e tem melhor suporte a streams.
+Status: Migração completa. Não usar axios em código novo.</span>
+
+<span class="text-blue-400">## [2025-02] Abandonamos Redux</span>
+<span class="text-stone-400">Motivo: Over-engineering para o tamanho do projeto.
+Adotamos Zustand. Não sugerir Redux.</span></pre>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Transforme o CLAUDE.md em um índice de roteamento</h4>
+                            <p class="text-sm text-stone-600 mb-3">Adicione uma seção que instrui a IA a carregar documentos específicos para cada tipo de tarefa.</p>
+                            <pre class="text-xs !p-3"><span class="text-emerald-400"># Adicionar no CLAUDE.md:</span>
+
+<span class="text-blue-400">## Documentos de Contexto</span>
+- Para tarefas de banco: leia DATABASE_DISCOVERIES.md primeiro
+- Para novas features: leia ARCHITECTURE.md + REQUIREMENTS.md
+- Antes de qualquer decisão técnica: verifique DECISIONS.md</pre>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Execute o ritual Plan.md em uma tarefa real</h4>
+                            <p class="text-sm text-stone-600 mb-3">Pegue a próxima feature do seu backlog e execute o ritual completo: peça o plano, revise, aprove, execute.</p>
+                            <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
+                                <span class="text-lg flex-shrink-0">💬</span>
+                                "Leia o CLAUDE.md e o REQUIREMENTS.md. Antes de escrever qualquer código, crie um plan.md com os arquivos que serão modificados e os riscos que você identificou."
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Agende uma revisão trimestral da Constituição</h4>
+                            <p class="text-sm text-stone-600 mb-3">Documentação apodrecida é pior do que ausente. Reserve 30 minutos por trimestre para revisar cada arquivo de contexto com o time.</p>
+                            <div class="bg-stone-50 border border-stone-200 p-3 rounded-lg text-sm text-stone-600 flex gap-3">
+                                <span class="text-lg flex-shrink-0">📅</span>
+                                Checklist trimestral: versões no TECH_STACK ainda corretas? Decisões no DECISIONS.md ainda válidas? Regras no CLAUDE.md ainda seguidas?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- References -->
+                <div class="bg-stone-50 border border-stone-200 rounded-2xl p-6">
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>📚</span> Referências</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">📖</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700">Claude Code — CLAUDE.md docs</p>
+                                <p class="text-xs text-stone-500 font-mono">docs.anthropic.com/claude-code/memory</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">📐</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700">ADR (Architecture Decision Records)</p>
+                                <p class="text-xs text-stone-500 font-mono">adr.github.io</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">⬅️</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700">Módulo anterior: Setup & Regras de Ouro</p>
+                                <p class="text-xs text-stone-500">Engineering Hour — Parte 1</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">🎓</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700">Próximo módulo: Claude Hooks</p>
+                                <p class="text-xs text-stone-500">Engineering Hour — Parte 3</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        let currentState = { activeSection: 'maturity', chart: null };
+
+        function navigate(sectionId) {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${sectionId}`).classList.add('active');
+
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
+
+            if (sectionId === 'maturity' && !currentState.chart) initChart();
+            currentState.activeSection = sectionId;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('maturityChart').getContext('2d');
+            currentState.chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Segurança', 'Performance', 'Arquitetura', 'Negócio', 'Manutenibilidade'],
+                    datasets: [
+                        {
+                            label: 'Sem Documentação (Chute)',
+                            data: [30, 40, 20, 50, 25],
+                            backgroundColor: 'rgba(225, 29, 72, 0.15)',
+                            borderColor: '#e11d48',
+                            borderWidth: 1.5,
+                            pointBackgroundColor: '#e11d48',
+                        },
+                        {
+                            label: 'Com Constituição (Maturidade)',
+                            data: [90, 85, 95, 80, 90],
+                            backgroundColor: 'rgba(6, 95, 70, 0.15)',
+                            borderColor: '#065f46',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#065f46',
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { font: { size: 10 }, stepSize: 25 },
+                            pointLabels: { font: { size: 11 } },
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        // Load chart on first visit
+        window.onload = () => initChart();
+    </script>
+</body>
+</html>

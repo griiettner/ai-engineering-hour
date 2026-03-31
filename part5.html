@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour P5: Workspace Seguro & Guardrails</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+                            300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
+                        },
+                        safety: { orange: '#ea580c', light: '#fff7ed', border: '#fed7aa' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #fafaf9; color: #292524; }
+        .nav-item.active {
+            background-color: #e7e5e4;
+            border-left: 4px solid #ea580c;
+            font-weight: 600;
+        }
+        .nav-group-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #a8a29e;
+            padding: 0.5rem 0.25rem 0.25rem;
+        }
+        .step-number {
+            width: 2rem; height: 2rem;
+            border-radius: 9999px;
+            background: #ea580c;
+            color: white;
+            font-weight: 700;
+            font-size: 0.875rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .antipattern-wrong { border-left: 4px solid #e11d48; }
+        .antipattern-right { border-left: 4px solid #059669; }
+        .tree-node { cursor: pointer; transition: background 0.15s; }
+        .tree-node:hover { background: #f5f5f4; }
+        pre {
+            background-color: #1c1917;
+            color: #d6d3d1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            line-height: 1.65;
+        }
+        .copy-btn {
+            font-size: 0.65rem;
+            background: #374151;
+            color: #9ca3af;
+            border: none;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+        }
+        .copy-btn:hover { background: #4b5563; color: white; }
+        .tab-btn { transition: all 0.15s; }
+        .tab-btn.active {
+            background: #ea580c;
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🛡️</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">
+                    Engineering Hour <span class="text-safety-orange">P5</span>
+                </h1>
+            </div>
+            <div class="text-sm font-medium text-stone-500 hidden sm:block">
+                Módulo 5: Workspace Seguro - Guardrails & CONSTITUTION.md
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
+
+        <!-- Sidebar Navigation -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+
+            <div class="nav-group-label">O Problema</div>
+            <button onclick="navigate('incident')" id="nav-incident"
+                class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📛</span> O Incidente Real
+            </button>
+
+            <div class="nav-group-label mt-2">A Estrutura</div>
+            <button onclick="navigate('folder')" id="nav-folder"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📁</span> A Pasta .claude
+            </button>
+            <button onclick="navigate('constitution')" id="nav-constitution"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📜</span> CONSTITUTION.md
+            </button>
+            <button onclick="navigate('index')" id="nav-index"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🗺️</span> CLAUDE.md como Índice
+            </button>
+
+            <div class="nav-group-label mt-2">Segurança por Camada</div>
+            <button onclick="navigate('hooks')" id="nav-hooks"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚙️</span> Hooks & Permissões
+            </button>
+            <button onclick="navigate('mcpskills')" id="nav-mcpskills"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🧩</span> MCP, Skills & Comandos
+            </button>
+
+            <div class="nav-group-label mt-2">Cuidados</div>
+            <button onclick="navigate('limits')" id="nav-limits"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚠️</span> Limites & Cuidados
+            </button>
+
+            <div class="nav-group-label mt-2">Ação</div>
+            <button onclick="navigate('nextsteps')" id="nav-nextsteps"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> Próximos Passos
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+
+            <!-- SEÇÃO 1: O Incidente Real -->
+            <section id="sec-incident" class="block">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📛 O Incidente Real</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Isso não é hipotético. Durante nossas sessões, desenvolvedores deram autonomia total à IA,
+                        sem regras, sem limites, sem confirmações. O resultado foi destrutivo.
+                        Felizmente tínhamos backup. Mas o susto foi real.
+                    </p>
+                </div>
+
+                <!-- Incident cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div class="bg-red-50 border border-red-200 rounded-2xl p-5">
+                        <div class="flex items-start gap-3">
+                            <span class="text-2xl flex-shrink-0">🗄️</span>
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1">Incidente 1: Banco de Dados</h4>
+                                <p class="text-sm text-red-700 leading-relaxed">Dev pediu: <em>"limpa os dados de teste do banco"</em>. A IA interpretou como permissão irrestrita e executou <code class="bg-red-100 font-mono px-1 rounded text-xs">DROP TABLE</code> em múltiplas tabelas de produção sem nenhuma confirmação.</p>
+                                <div class="mt-2 bg-red-100 rounded-lg p-2 text-xs font-mono text-red-800">Tabelas perdidas: orders_2023, users_test, sessions</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-red-50 border border-red-200 rounded-2xl p-5">
+                        <div class="flex items-start gap-3">
+                            <span class="text-2xl flex-shrink-0">🗂️</span>
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1">Incidente 2: Arquivos do Projeto</h4>
+                                <p class="text-sm text-red-700 leading-relaxed">Dev pediu: <em>"reorganiza a estrutura do projeto"</em>. A IA deletou 47 arquivos que considerou "duplicados ou desnecessários", incluindo configs de CI/CD e migrations históricas.</p>
+                                <div class="mt-2 bg-red-100 rounded-lg p-2 text-xs font-mono text-red-800">Arquivos removidos: 47 · Recuperados do backup: 44</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson card -->
+                <div class="bg-stone-900 text-stone-100 rounded-2xl p-5 mb-8 border-l-8 border-safety-orange">
+                    <p class="text-base font-semibold">"O problema não foi a IA. Foi a ausência de limites."</p>
+                    <p class="text-sm text-stone-400 mt-1">A IA fez exatamente o que foi pedido de forma mais literal e abrangente do que o dev esperava. Sem regras explícitas, não havia como saber onde parar.</p>
+                </div>
+
+                <!-- Terminal simulation -->
+                <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2">
+                    <span>🖥️</span> Simulação: A mesma instrução, dois cenários
+                </h3>
+
+                <!-- Toggle -->
+                <div class="flex gap-2 mb-4">
+                    <button id="toggle-danger" onclick="showScenario('danger')"
+                        class="tab-btn active px-4 py-2 rounded-lg text-sm border border-stone-200 bg-stone-100 text-stone-700">
+                        🔴 Sem guardrails
+                    </button>
+                    <button id="toggle-safe" onclick="showScenario('safe')"
+                        class="tab-btn px-4 py-2 rounded-lg text-sm border border-stone-200 bg-stone-100 text-stone-700">
+                        🟢 Com guardrails
+                    </button>
+                </div>
+
+                <!-- Danger scenario -->
+                <div id="scenario-danger" class="bg-stone-900 rounded-2xl p-6 shadow-xl">
+                    <div class="flex items-center gap-2 mb-4 border-b border-stone-800 pb-3">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span class="text-[10px] text-stone-500 font-mono ml-3">claude-code sem CONSTITUTION.md</span>
+                    </div>
+                    <div class="space-y-4 text-sm">
+                        <div class="flex gap-3">
+                            <span>👤</span>
+                            <p class="text-stone-300"><span class="text-white font-bold">Dev:</span> "Limpa os dados de teste do banco."</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <span>🤖</span>
+                            <div class="text-stone-300 flex-1">
+                                <p class="text-emerald-400 font-bold mb-2">Claude:</p>
+                                <div class="bg-stone-800 p-2 rounded font-mono text-[11px] text-cyan-300 mb-2">
+                                    › Executando limpeza de dados de teste...
+                                </div>
+                                <div class="bg-red-950 border border-red-800 p-2 rounded font-mono text-[11px] text-red-300">
+                                    DROP TABLE orders_staging;<br>
+                                    DROP TABLE users_test;<br>
+                                    DROP TABLE sessions_dev;<br>
+                                    <span class="text-red-400 font-bold">✓ 3 tabelas removidas com sucesso.</span>
+                                </div>
+                                <p class="mt-2 text-stone-400 text-xs">Nenhuma confirmação solicitada. Nenhuma regra violada, porque não existiam regras.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safe scenario (hidden) -->
+                <div id="scenario-safe" class="bg-stone-900 rounded-2xl p-6 shadow-xl hidden">
+                    <div class="flex items-center gap-2 mb-4 border-b border-stone-800 pb-3">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span class="text-[10px] text-stone-500 font-mono ml-3">claude-code CONSTITUTION.md ativo</span>
+                    </div>
+                    <div class="space-y-4 text-sm">
+                        <div class="flex gap-3">
+                            <span>👤</span>
+                            <p class="text-stone-300"><span class="text-white font-bold">Dev:</span> "Limpa os dados de teste do banco."</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <span>🤖</span>
+                            <div class="text-stone-300 flex-1">
+                                <p class="text-emerald-400 font-bold mb-2">Claude:</p>
+                                <p class="mb-2">⚠️ A CONSTITUTION.md proíbe <code class="bg-stone-700 text-red-300 px-1 rounded text-xs">DROP TABLE</code> sem confirmação explícita. Antes de prosseguir:</p>
+                                <div class="bg-stone-800 p-3 rounded text-xs space-y-1">
+                                    <p class="text-yellow-300">1. Identifiquei as tabelas candidatas: <code>orders_staging</code>, <code>users_test</code>, <code>sessions_dev</code></p>
+                                    <p class="text-yellow-300">2. Essas tabelas têm dados relevantes em produção?</p>
+                                    <p class="text-yellow-300">3. Prefiro usar <code>TRUNCATE</code> (preserva estrutura) em vez de <code>DROP</code>. Posso criar um script reversível.</p>
+                                </div>
+                                <p class="mt-2 text-emerald-300 text-xs">Aguardando confirmação e esclarecimentos antes de executar qualquer ação.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 2: A Pasta .claude -->
+            <section id="sec-folder" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📁 A Anatomia da Pasta .claude</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        A pasta <code class="bg-stone-100 font-mono px-1 rounded text-sm">.claude/</code> é o sistema nervoso central do seu workspace seguro.
+                        Clique em cada arquivo ou pasta para entender seu propósito.
+                    </p>
+                </div>
+
+                <!-- Tree -->
+                <div class="bg-stone-50 border border-stone-200 rounded-xl p-5 font-mono text-sm mb-4">
+                    <p class="text-stone-500 text-xs mb-3">Estrutura recomendada (arquivos demo disponíveis em <code>demo/</code>)</p>
+
+                    <!-- Root CLAUDE.md -->
+                    <div class="tree-node flex items-center gap-2 px-2 py-1.5 rounded-lg mb-1" onclick="showFileDetail('claudemd')">
+                        <span>📄</span>
+                        <span class="text-emerald-600 font-bold">CLAUDE.md</span>
+                        <span class="text-stone-400 text-xs ml-auto">raiz do projeto</span>
+                    </div>
+
+                    <!-- .claude folder -->
+                    <div class="ml-4 border-l border-stone-300 pl-3 space-y-0.5">
+                        <div class="flex items-center gap-2 px-2 py-1 text-stone-500 text-xs">
+                            <span>📁</span><span class="font-bold text-stone-600">.claude/</span>
+                        </div>
+
+                        <!-- settings.json -->
+                        <div class="tree-node flex items-center gap-2 ml-4 px-2 py-1.5 rounded-lg" onclick="showFileDetail('settings')">
+                            <span>⚙️</span><span class="text-blue-600">settings.json</span>
+                            <span class="text-stone-400 text-xs ml-auto">runtime</span>
+                        </div>
+
+                        <!-- rules/ -->
+                        <div class="ml-4 border-l border-stone-300 pl-3">
+                            <div class="flex items-center gap-2 px-2 py-1 text-stone-500 text-xs">
+                                <span>📁</span><span class="font-bold text-stone-600">rules/</span>
+                            </div>
+                            <div class="ml-4 space-y-0.5">
+                                <div class="tree-node flex items-center gap-2 px-2 py-1.5 rounded-lg" onclick="showFileDetail('readme')">
+                                    <span>🗺️</span><span class="text-orange-600">README.md</span>
+                                    <span class="text-stone-400 text-xs ml-auto">índice de contexto</span>
+                                </div>
+                                <div class="tree-node flex items-center gap-2 px-2 py-1.5 rounded-lg" onclick="showFileDetail('constitution')">
+                                    <span>📜</span><span class="text-red-600 font-bold">CONSTITUTION.md</span>
+                                    <span class="text-stone-400 text-xs ml-auto">regras inegociáveis</span>
+                                </div>
+                                <div class="tree-node flex items-center gap-2 px-2 py-1.5 rounded-lg" onclick="showFileDetail('techstack')">
+                                    <span>🔧</span><span class="text-stone-600">TECH_STACK.md</span>
+                                    <span class="text-stone-400 text-xs ml-auto">sob demanda</span>
+                                </div>
+                                <div class="tree-node flex items-center gap-2 px-2 py-1.5 rounded-lg" onclick="showFileDetail('arch')">
+                                    <span>🏗️</span><span class="text-stone-600">ARCHITECTURE.md</span>
+                                    <span class="text-stone-400 text-xs ml-auto">sob demanda</span>
+                                </div>
+                                <div class="tree-node flex items-center gap-2 px-2 py-1.5 rounded-lg" onclick="showFileDetail('decisions')">
+                                    <span>🕰️</span><span class="text-stone-600">DECISIONS.md</span>
+                                    <span class="text-stone-400 text-xs ml-auto">sob demanda</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- commands/ -->
+                        <div class="ml-4 border-l border-stone-300 pl-3">
+                            <div class="flex items-center gap-2 px-2 py-1 text-stone-500 text-xs">
+                                <span>📁</span><span class="font-bold text-stone-600">commands/</span>
+                            </div>
+                            <div class="tree-node ml-4 flex items-center gap-2 px-2 py-1.5 rounded-lg" onclick="showFileDetail('commands')">
+                                <span>⚡</span><span class="text-violet-600">*.md</span>
+                                <span class="text-stone-400 text-xs ml-auto">skills customizadas</span>
+                            </div>
+                        </div>
+
+                        <!-- memory/ -->
+                        <div class="ml-4 border-l border-stone-300 pl-3">
+                            <div class="tree-node flex items-center gap-2 px-2 py-1.5 rounded-lg" onclick="showFileDetail('memory')">
+                                <span>📁</span><span class="font-bold text-stone-600">memory/</span>
+                                <span class="text-stone-400 text-xs ml-auto">gerada pela IA</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File detail card -->
+                <div id="file-detail" class="hidden bg-white rounded-2xl border border-stone-200 shadow-md overflow-hidden">
+                    <div id="file-detail-header" class="flex items-center gap-3 px-6 py-4 border-b bg-stone-50">
+                        <span id="file-detail-icon" class="text-xl"></span>
+                        <span id="file-detail-title" class="font-bold text-stone-800"></span>
+                        <span id="file-detail-badge" class="ml-auto text-xs font-bold px-2 py-1 rounded-full bg-orange-100 text-safety-orange"></span>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p id="file-detail-desc" class="text-sm text-stone-600 leading-relaxed mb-2"></p>
+                        <p id="file-detail-when" class="text-xs text-stone-400 italic"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 3: CONSTITUTION.md -->
+            <section id="sec-constitution" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📜 CONSTITUTION.md: As Regras Inegociáveis</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        A Constituição define o que a IA <strong>nunca pode fazer</strong>, o que precisa de confirmação,
+                        e os padrões obrigatórios de código e arquitetura. Ela é importada em toda conversa e serve como
+                        contrato entre o time e a IA.
+                    </p>
+                </div>
+
+                <!-- Category tabs -->
+                <div class="flex flex-wrap gap-2 mb-5">
+                    <button onclick="showConstitutionTab('never')" id="ctab-never"
+                        class="tab-btn active px-4 py-2 rounded-lg text-sm border border-stone-200 bg-stone-100 text-stone-700">
+                        🔴 Nunca Faça
+                    </button>
+                    <button onclick="showConstitutionTab('ask')" id="ctab-ask"
+                        class="tab-btn px-4 py-2 rounded-lg text-sm border border-stone-200 bg-stone-100 text-stone-700">
+                        🟡 Pergunte Antes
+                    </button>
+                    <button onclick="showConstitutionTab('must')" id="ctab-must"
+                        class="tab-btn px-4 py-2 rounded-lg text-sm border border-stone-200 bg-stone-100 text-stone-700">
+                        ✅ Padrões Obrigatórios
+                    </button>
+                    <button onclick="showConstitutionTab('arch')" id="ctab-arch"
+                        class="tab-btn px-4 py-2 rounded-lg text-sm border border-stone-200 bg-stone-100 text-stone-700">
+                        🏗️ Arquitetura
+                    </button>
+                </div>
+
+                <!-- Tab contents -->
+                <div id="ctab-content-never" class="space-y-3 mb-6">
+                    <p class="text-sm text-stone-500 mb-3">Estas ações são proibidas sem confirmação <strong>explícita e textual</strong> do desenvolvedor:</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                            <span class="text-red-500 font-bold text-sm flex-shrink-0">✗</span>
+                            <div><p class="text-sm font-mono font-bold text-red-800">DROP TABLE / TRUNCATE / DELETE sem WHERE</p><p class="text-xs text-red-600 mt-0.5">Qualquer remoção de dados em massa</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                            <span class="text-red-500 font-bold text-sm flex-shrink-0">✗</span>
+                            <div><p class="text-sm font-mono font-bold text-red-800">git push --force</p><p class="text-xs text-red-600 mt-0.5">Em qualquer branch, incluindo feature branches</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                            <span class="text-red-500 font-bold text-sm flex-shrink-0">✗</span>
+                            <div><p class="text-sm font-mono font-bold text-red-800">rm -rf / deletar arquivos sem backup</p><p class="text-xs text-red-600 mt-0.5">Exclusão permanente de arquivos do projeto</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                            <span class="text-red-500 font-bold text-sm flex-shrink-0">✗</span>
+                            <div><p class="text-sm font-mono font-bold text-red-800">Alterar .env de produção</p><p class="text-xs text-red-600 mt-0.5">Variáveis de ambiente de produção são intocáveis</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                            <span class="text-red-500 font-bold text-sm flex-shrink-0">✗</span>
+                            <div><p class="text-sm font-mono font-bold text-red-800">Expor secrets / tokens em código</p><p class="text-xs text-red-600 mt-0.5">Hardcoded API keys, senhas ou tokens</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                            <span class="text-red-500 font-bold text-sm flex-shrink-0">✗</span>
+                            <div><p class="text-sm font-mono font-bold text-red-800">DROP DATABASE / operações globais de schema</p><p class="text-xs text-red-600 mt-0.5">Destruição de bases inteiras</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ctab-content-ask" class="space-y-3 mb-6 hidden">
+                    <p class="text-sm text-stone-500 mb-3">Antes de executar estas ações, a IA deve <strong>pausar e obter confirmação</strong>:</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                            <span class="text-amber-500 font-bold text-sm flex-shrink-0">?</span>
+                            <div><p class="text-sm font-bold text-amber-800">Alterar schema de banco de dados</p><p class="text-xs text-amber-600 mt-0.5">Adicionar/remover colunas, índices ou constraints</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                            <span class="text-amber-500 font-bold text-sm flex-shrink-0">?</span>
+                            <div><p class="text-sm font-bold text-amber-800">Instalar dependências globais</p><p class="text-xs text-amber-600 mt-0.5">npm install -g, brew install, apt-get</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                            <span class="text-amber-500 font-bold text-sm flex-shrink-0">?</span>
+                            <div><p class="text-sm font-bold text-amber-800">Criar arquivos fora do escopo do plan.md</p><p class="text-xs text-amber-600 mt-0.5">Qualquer arquivo não listado no plano aprovado</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                            <span class="text-amber-500 font-bold text-sm flex-shrink-0">?</span>
+                            <div><p class="text-sm font-bold text-amber-800">Modificar migrations existentes</p><p class="text-xs text-amber-600 mt-0.5">Migrations já aplicadas não devem ser alteradas</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                            <span class="text-amber-500 font-bold text-sm flex-shrink-0">?</span>
+                            <div><p class="text-sm font-bold text-amber-800">Alterar pipelines de CI/CD</p><p class="text-xs text-amber-600 mt-0.5">.github/workflows, Dockerfile, scripts de deploy</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                            <span class="text-amber-500 font-bold text-sm flex-shrink-0">?</span>
+                            <div><p class="text-sm font-bold text-amber-800">Alterar configurações de autenticação</p><p class="text-xs text-amber-600 mt-0.5">Qualquer mudança no fluxo de auth/autorização</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ctab-content-must" class="space-y-3 mb-6 hidden">
+                    <p class="text-sm text-stone-500 mb-3">Padrões que se aplicam a <strong>todo código novo</strong>, sem exceção:</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                            <span class="text-emerald-600 font-bold text-sm flex-shrink-0">✓</span>
+                            <div><p class="text-sm font-bold text-emerald-800">TypeScript strict mode</p><p class="text-xs text-emerald-600 mt-0.5">Sem <code class="font-mono">any</code> implícito. Sem atalhos de tipagem.</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                            <span class="text-emerald-600 font-bold text-sm flex-shrink-0">✓</span>
+                            <div><p class="text-sm font-bold text-emerald-800">Testes para todo código novo</p><p class="text-xs text-emerald-600 mt-0.5">Unitários para lógica de negócio, integração para fluxos críticos</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                            <span class="text-emerald-600 font-bold text-sm flex-shrink-0">✓</span>
+                            <div><p class="text-sm font-bold text-emerald-800">Nomes em inglês, comentários em PT-BR</p><p class="text-xs text-emerald-600 mt-0.5">Variáveis, funções e arquivos em inglês</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                            <span class="text-emerald-600 font-bold text-sm flex-shrink-0">✓</span>
+                            <div><p class="text-sm font-bold text-emerald-800">Sem console.log em produção</p><p class="text-xs text-emerald-600 mt-0.5">Use o logger configurado no projeto</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                            <span class="text-emerald-600 font-bold text-sm flex-shrink-0">✓</span>
+                            <div><p class="text-sm font-bold text-emerald-800">Variáveis de ambiente via process.env</p><p class="text-xs text-emerald-600 mt-0.5">Nunca hardcoded. Sempre documentadas no .env.example</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                            <span class="text-emerald-600 font-bold text-sm flex-shrink-0">✓</span>
+                            <div><p class="text-sm font-bold text-emerald-800">Migrations reversíveis obrigatórias</p><p class="text-xs text-emerald-600 mt-0.5">Todo <code class="font-mono">up()</code> deve ter um <code class="font-mono">down()</code> funcional</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ctab-content-arch" class="space-y-3 mb-6 hidden">
+                    <p class="text-sm text-stone-500 mb-3">Decisões arquiteturais que a IA <strong>não pode contornar ou ignorar</strong>:</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start gap-3 p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                            <span class="text-blue-600 font-bold text-sm flex-shrink-0">⬡</span>
+                            <div><p class="text-sm font-bold text-blue-800">Feature Folders</p><p class="text-xs text-blue-600 mt-0.5">Código organizado por domínio, não por tipo de arquivo</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                            <span class="text-blue-600 font-bold text-sm flex-shrink-0">⬡</span>
+                            <div><p class="text-sm font-bold text-blue-800">Separação Repository / Service / Controller</p><p class="text-xs text-blue-600 mt-0.5">Sem lógica de negócio em controllers ou rotas</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                            <span class="text-blue-600 font-bold text-sm flex-shrink-0">⬡</span>
+                            <div><p class="text-sm font-bold text-blue-800">Erros tipados, não strings</p><p class="text-xs text-blue-600 mt-0.5">Use classes de erro customizadas, não throw "mensagem"</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                            <span class="text-blue-600 font-bold text-sm flex-shrink-0">⬡</span>
+                            <div><p class="text-sm font-bold text-blue-800">Dependências no TECH_STACK.md aprovadas</p><p class="text-xs text-blue-600 mt-0.5">Não instale libs fora do inventário aprovado sem discussão</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template code block -->
+                <div class="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden">
+                    <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex items-center justify-between">
+                        <span class="font-mono text-xs font-bold text-stone-700">📜 demo/.claude/rules/CONSTITUTION.md</span>
+                        <button class="copy-btn" onclick="copyCode('constitution-template')">copiar</button>
+                    </div>
+                    <pre id="constitution-template" class="m-0 rounded-none border-0 text-xs"><span class="text-stone-500"># CONSTITUTION.md: Regras Inegociáveis do Projeto</span>
+<span class="text-stone-500"># ⚠️ Este arquivo é importado automaticamente em toda conversa.</span>
+
+<span class="text-red-400">## 🔴 NUNCA FAÇA (sem confirmação explícita e textual)</span>
+- DROP TABLE, TRUNCATE ou DELETE sem cláusula WHERE
+- git push --force em qualquer branch
+- rm -rf ou exclusão permanente de arquivos sem backup confirmado
+- Alterar arquivos .env de produção ou staging
+- Hardcodar secrets, tokens ou senhas em código
+- DROP DATABASE ou operações destrutivas de schema global
+
+<span class="text-yellow-400">## 🟡 PERGUNTE ANTES DE EXECUTAR</span>
+- Qualquer alteração de schema de banco (ADD/DROP COLUMN, índices)
+- Instalar dependências globais no sistema
+- Criar arquivos fora do escopo definido no plan.md
+- Modificar migrations já aplicadas
+- Alterar pipelines de CI/CD ou Dockerfiles
+
+<span class="text-emerald-400">## ✅ PADRÕES OBRIGATÓRIOS (todo código novo)</span>
+- TypeScript strict mode sem `any` implícito
+- Testes unitários para lógica de negócio
+- Nomes de variáveis e funções em inglês
+- Comentários e documentação em Português Brasileiro
+- Sem console.log em código de produção
+- Migrations sempre reversíveis (up + down)
+
+<span class="text-blue-400">## 🏗️ ARQUITETURA (não negocie sem aprovação do time)</span>
+- Feature Folders: organização por domínio, não por tipo
+- Separação obrigatória: Repository / Service / Controller
+- Erros tipados com classes customizadas
+- Novas dependências somente se aprovadas no TECH_STACK.md</pre>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 4: CLAUDE.md como Índice -->
+            <section id="sec-index" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🗺️ CLAUDE.md como Índice, Não como Dump</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        O <code class="bg-stone-100 font-mono px-1 rounded text-sm">CLAUDE.md</code> é carregado em <strong>toda conversa</strong> com o Claude Code.
+                        Cada linha desnecessária infla o contexto, aumenta o custo e distrai o modelo.
+                        A solução: transformá-lo em um roteador inteligente.
+                    </p>
+                </div>
+
+                <!-- Antipattern vs correct -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+                    <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
+                        <h4 class="font-bold text-red-800 mb-3 flex items-center gap-2">❌ Antipadrão: Dump de regras</h4>
+                        <p class="text-xs text-red-700 mb-3">CLAUDE.md com 400+ linhas de regras inline. Carregado inteiro em toda conversa.</p>
+                        <div class="bg-red-100 rounded-lg p-3 font-mono text-[11px] text-red-800 space-y-1">
+                            <p># CLAUDE.md (400 linhas)</p>
+                            <p>## Regras de TypeScript</p>
+                            <p>Sempre use strict mode...</p>
+                            <p>Nunca use any...</p>
+                            <p>[... 50 linhas de TypeScript ...]</p>
+                            <p>## Regras de Banco de Dados</p>
+                            <p>[... 80 linhas de SQL rules ...]</p>
+                            <p>## Arquitetura</p>
+                            <p>[... 120 linhas ...]</p>
+                            <p class="text-red-500 font-bold">→ 400 linhas consumidas em TODO contexto</p>
+                        </div>
+                    </div>
+                    <div class="antipattern-right bg-emerald-50 rounded-xl p-5">
+                        <h4 class="font-bold text-emerald-800 mb-3 flex items-center gap-2">✅ Correto: Roteador inteligente</h4>
+                        <p class="text-xs text-emerald-700 mb-3">CLAUDE.md com ~20 linhas. Importa apenas o essencial, roteia o resto.</p>
+                        <div class="bg-emerald-100 rounded-lg p-3 font-mono text-[11px] text-emerald-800 space-y-1">
+                            <p># CLAUDE.md (~20 linhas)</p>
+                            <p>@.claude/rules/CONSTITUTION.md</p>
+                            <p></p>
+                            <p>Para demais contextos, consulte:</p>
+                            <p>.claude/rules/README.md</p>
+                            <p></p>
+                            <p>Carregue sob demanda:</p>
+                            <p>- Banco → TECH_STACK.md</p>
+                            <p>- Feature → ARCHITECTURE.md</p>
+                            <p class="text-emerald-700 font-bold">→ Apenas CONSTITUTION.md sempre presente</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CLAUDE.md template -->
+                <div class="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden mb-5">
+                    <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex items-center justify-between">
+                        <span class="font-mono text-xs font-bold text-stone-700">📄 demo/CLAUDE.md: template mínimo</span>
+                        <button class="copy-btn" onclick="copyCode('claudemd-template')">copiar</button>
+                    </div>
+                    <pre id="claudemd-template" class="m-0 rounded-none border-0 text-xs"><span class="text-stone-500"># CLAUDE.md: Ponto de Entrada do Projeto</span>
+
+<span class="text-emerald-400">@.claude/rules/CONSTITUTION.md</span>
+
+<span class="text-blue-400">## Documentos de Contexto</span>
+Consulte <span class="text-orange-400">.claude/rules/README.md</span> para saber qual documento
+carregar para cada tipo de tarefa. Não carregue tudo de uma vez.
+
+<span class="text-blue-400">## Regra de Ouro</span>
+Antes de qualquer ação destrutiva ou irreversível, releia a CONSTITUTION.md
+e confirme com o desenvolvedor. Quando em dúvida, pergunte, não execute.</pre>
+                </div>
+
+                <!-- README.md template -->
+                <div class="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden">
+                    <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex items-center justify-between">
+                        <span class="font-mono text-xs font-bold text-stone-700">🗺️ demo/.claude/rules/README.md: índice de roteamento</span>
+                        <button class="copy-btn" onclick="copyCode('readme-template')">copiar</button>
+                    </div>
+                    <pre id="readme-template" class="m-0 rounded-none border-0 text-xs"><span class="text-stone-500"># .claude/rules/README.md: Índice de Contexto</span>
+<span class="text-stone-500"># Carregue apenas o necessário para cada tarefa.</span>
+
+<span class="text-blue-400">## Sempre disponível (importado via CLAUDE.md)</span>
+- CONSTITUTION.md → regras inegociáveis de segurança e padrões
+
+<span class="text-blue-400">## Antes de tarefas de banco de dados</span>
+- TECH_STACK.md → versões, ORMs e configurações aprovadas
+- Verifique DECISIONS.md para decisões sobre o schema atual
+
+<span class="text-blue-400">## Antes de criar ou alterar features</span>
+- ARCHITECTURE.md → Feature Folders e padrões de camadas
+- REQUIREMENTS.md → regras de negócio vigentes
+
+<span class="text-blue-400">## Antes de sugerir algo "novo"</span>
+- DECISIONS.md → o time pode ter avaliado e descartado isso antes
+- TECH_STACK.md → a lib pode não estar aprovada
+
+<span class="text-blue-400">## Nunca carregue todos ao mesmo tempo</span>
+Carregue apenas o que for relevante para a tarefa atual.</pre>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 5: Hooks & Permissões -->
+            <section id="sec-hooks" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚙️ Hooks & Permissões: A Segunda Linha de Defesa</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        A CONSTITUTION.md instrui a <em>intenção</em>. Os hooks bloqueiam na <em>execução</em>.
+                        São camadas complementares, não substitutas.
+                        O <code class="bg-stone-100 font-mono px-1 rounded text-sm">.claude/settings.json</code> é onde você configura ambos.
+                    </p>
+                </div>
+
+                <!-- Layers comparison -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                        <h4 class="font-bold text-safety-orange mb-2 flex items-center gap-2"><span>📜</span> CONSTITUTION.md</h4>
+                        <p class="text-sm text-stone-600">Contexto da IA. A IA <em>sabe</em> que não deve fazer X, isso influencia o raciocínio antes de propor uma ação. Pode ser ignorado se instruído explicitamente.</p>
+                    </div>
+                    <div class="bg-stone-900 rounded-xl p-4 text-stone-100">
+                        <h4 class="font-bold text-emerald-400 mb-2 flex items-center gap-2"><span>⚙️</span> Hooks no settings.json</h4>
+                        <p class="text-sm text-stone-300">Execução real. O hook intercepta antes do comando rodar e pode bloqueá-lo com <code class="bg-stone-700 px-1 rounded text-xs">exit 2</code>. Não depende da IA, é uma barreira técnica.</p>
+                    </div>
+                </div>
+
+                <!-- PreToolUse hook -->
+                <div class="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden mb-5">
+                    <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex items-center justify-between">
+                        <span class="font-mono text-xs font-bold text-stone-700">⚙️ demo/.claude/settings.json: hook de segurança</span>
+                        <button class="copy-btn" onclick="copyCode('hooks-template')">copiar</button>
+                    </div>
+                    <pre id="hooks-template" class="m-0 rounded-none border-0 text-xs"><span class="text-stone-400">{</span>
+  <span class="text-stone-500">"_demo_notice"</span>: <span class="text-emerald-400">"DEMO: Engineering Hour Part 5: adapte antes de usar em produção."</span>,
+
+  <span class="text-violet-400">"hooks"</span><span class="text-stone-400">: {</span>
+    <span class="text-blue-400">"PreToolUse"</span><span class="text-stone-400">: [{</span>
+      <span class="text-violet-400">"matcher"</span><span class="text-stone-400">: </span><span class="text-emerald-400">"Bash"</span><span class="text-stone-400">,</span>
+      <span class="text-violet-400">"hooks"</span><span class="text-stone-400">: [{</span>
+        <span class="text-violet-400">"type"</span><span class="text-stone-400">: </span><span class="text-emerald-400">"command"</span><span class="text-stone-400">,</span>
+        <span class="text-violet-400">"command"</span><span class="text-stone-400">: </span><span class="text-emerald-400">"echo \"$CLAUDE_TOOL_INPUT\" | grep -iEq 'drop table|drop database|truncate|delete from|--force|rm -rf' && echo 'BLOQUEADO: comando destrutivo detectado pela CONSTITUTION' &gt;&amp;2 && exit 2 || exit 0"</span>
+      <span class="text-stone-400">}]</span>
+    <span class="text-stone-400">}],</span>
+
+    <span class="text-blue-400">"PostToolUse"</span><span class="text-stone-400">: [{</span>
+      <span class="text-violet-400">"matcher"</span><span class="text-stone-400">: </span><span class="text-emerald-400">"Bash"</span><span class="text-stone-400">,</span>
+      <span class="text-violet-400">"hooks"</span><span class="text-stone-400">: [{</span>
+        <span class="text-violet-400">"type"</span><span class="text-stone-400">: </span><span class="text-emerald-400">"command"</span><span class="text-stone-400">,</span>
+        <span class="text-violet-400">"command"</span><span class="text-stone-400">: </span><span class="text-emerald-400">"echo 'Comando executado, verifique o resultado antes de continuar' &gt;&amp;2; exit 0"</span>
+      <span class="text-stone-400">}]</span>
+    <span class="text-stone-400">}]</span>
+  <span class="text-stone-400">}</span>
+<span class="text-stone-400">}</span></pre>
+                </div>
+
+                <!-- Permissions deny -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+                    <h4 class="font-bold text-amber-800 mb-3 flex items-center gap-2"><span>🔒</span> Permissões no settings.json</h4>
+                    <p class="text-sm text-stone-600 mb-3">Além dos hooks, o Claude Code permite negar ferramentas específicas via <code class="bg-amber-100 font-mono px-1 rounded text-xs">permissions.deny</code>:</p>
+                    <pre class="text-xs !p-3"><span class="text-violet-400">"permissions"</span><span class="text-stone-400">: {</span>
+  <span class="text-blue-400">"deny"</span><span class="text-stone-400">: [</span>
+    <span class="text-emerald-400">"Bash(rm:*)"</span><span class="text-stone-400">,</span>         <span class="text-stone-500">// bloqueia rm completamente</span>
+    <span class="text-emerald-400">"Bash(git push:*)"</span><span class="text-stone-400">,</span>  <span class="text-stone-500">// bloqueia git push direto</span>
+    <span class="text-emerald-400">"WebFetch(*)"</span>           <span class="text-stone-500">// bloqueia fetch externo se necessário</span>
+  <span class="text-stone-400">]</span>
+<span class="text-stone-400">}</span></pre>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 6: MCP, Skills & Comandos -->
+            <section id="sec-mcpskills" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🧩 Segurança em MCP, Skills & Comandos</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Cada camada de extensão do Claude Code traz benefícios e novos vetores de risco.
+                        A CONSTITUTION.md deve cobrir todas elas explicitamente.
+                    </p>
+                </div>
+
+                <!-- Security matrix table -->
+                <div class="overflow-x-auto mb-8">
+                    <table class="w-full text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-stone-900 text-stone-100">
+                                <th class="text-left px-4 py-3 font-bold rounded-tl-xl">Camada</th>
+                                <th class="text-left px-4 py-3 font-bold">Mecanismo</th>
+                                <th class="text-left px-4 py-3 font-bold">Risco principal</th>
+                                <th class="text-left px-4 py-3 font-bold rounded-tr-xl">Proteção recomendada</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-100">
+                            <tr class="hover:bg-stone-50">
+                                <td class="px-4 py-3 font-mono text-xs font-bold text-orange-600">CONSTITUTION.md</td>
+                                <td class="px-4 py-3 text-stone-600">Contexto / instrução</td>
+                                <td class="px-4 py-3 text-red-600">Ações não intencionadas</td>
+                                <td class="px-4 py-3 text-emerald-700">Regras claras por categoria</td>
+                            </tr>
+                            <tr class="hover:bg-stone-50">
+                                <td class="px-4 py-3 font-mono text-xs font-bold text-blue-600">settings.json → hooks</td>
+                                <td class="px-4 py-3 text-stone-600">Bloqueio na execução</td>
+                                <td class="px-4 py-3 text-red-600">Comandos destrutivos</td>
+                                <td class="px-4 py-3 text-emerald-700">PreToolUse com regex</td>
+                            </tr>
+                            <tr class="hover:bg-stone-50">
+                                <td class="px-4 py-3 font-mono text-xs font-bold text-teal-600">MCP Servers</td>
+                                <td class="px-4 py-3 text-stone-600">Acesso a sistemas externos</td>
+                                <td class="px-4 py-3 text-red-600">Credenciais de produção / PII</td>
+                                <td class="px-4 py-3 text-emerald-700">Read-only + staging apenas</td>
+                            </tr>
+                            <tr class="hover:bg-stone-50">
+                                <td class="px-4 py-3 font-mono text-xs font-bold text-violet-600">.claude/commands/</td>
+                                <td class="px-4 py-3 text-stone-600">Skills customizadas</td>
+                                <td class="px-4 py-3 text-red-600">Automação excessiva</td>
+                                <td class="px-4 py-3 text-emerald-700">Revisão periódica + sem ações irreversíveis</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- MCP security -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider">🌐 MCP: Regras de Segurança</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="antipattern-wrong bg-red-50 rounded-xl p-4">
+                            <h4 class="font-bold text-red-800 mb-2 text-sm">❌ Configuração perigosa</h4>
+                            <pre class="text-xs !p-2 !bg-red-100 !text-red-800">"postgres": {
+  "args": [
+    "postgresql://admin:senha@prod-db/app"
+  ]
+}
+<span class="text-red-600 font-bold">// Credenciais de produção + write access</span></pre>
+                        </div>
+                        <div class="antipattern-right bg-emerald-50 rounded-xl p-4">
+                            <h4 class="font-bold text-emerald-800 mb-2 text-sm">✅ Configuração segura</h4>
+                            <pre class="text-xs !p-2 !bg-emerald-100 !text-emerald-800">"postgres": {
+  "args": [
+    "postgresql://readonly:*@staging-db/app"
+  ]
+}
+<span class="text-emerald-700 font-bold">// Staging + usuário read-only</span></pre>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm">
+                        <strong>Regra para CONSTITUTION.md:</strong> <em>"Servidores MCP só podem usar credenciais de staging com permissão de leitura. Nunca conectar a produção via MCP em ambiente local."</em>
+                    </div>
+                </div>
+
+                <!-- Skills/Commands security -->
+                <div class="space-y-4">
+                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider">⚡ Skills & Comandos: Boas Práticas</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="antipattern-wrong bg-red-50 rounded-xl p-4">
+                            <h4 class="font-bold text-red-800 mb-2 text-sm">❌ Skill com ação destrutiva automática</h4>
+                            <pre class="text-xs !p-2 !bg-red-100 !text-red-800 leading-relaxed"># commands/deploy.md
+Faça o build do projeto e
+em seguida execute git push
+origin main automaticamente.</pre>
+                        </div>
+                        <div class="antipattern-right bg-emerald-50 rounded-xl p-4">
+                            <h4 class="font-bold text-emerald-800 mb-2 text-sm">✅ Skill com passo de confirmação</h4>
+                            <pre class="text-xs !p-2 !bg-emerald-100 !text-emerald-800 leading-relaxed"># commands/deploy.md
+Faça o build e mostre o
+resultado. Liste os arquivos
+que serão enviados e aguarde
+confirmação antes de qualquer
+push ou deploy.</pre>
+                        </div>
+                    </div>
+                    <div class="bg-stone-50 border border-stone-200 rounded-xl p-4 text-sm text-stone-600">
+                        <strong>Auditoria trimestral de skills:</strong> Para cada arquivo em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/commands/</code>, verifique: quem criou, o que faz, ainda é necessário, tem alguma ação irreversível embutida.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 7: Limites & Cuidados -->
+            <section id="sec-limits" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚠️ Limites & Cuidados</h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        Guardrails bem configurados reduzem riscos, mas não os eliminam. Entender os limites é
+                        tão importante quanto implementar as proteções.
+                    </p>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <div class="bg-red-50 rounded-xl p-5 border-l-4 border-red-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">🗣️</span>
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1">Instrução ambígua supera qualquer regra</h4>
+                                <p class="text-sm text-red-700 leading-relaxed">"Limpa tudo" é perigoso independentemente de quantas regras existam. A CONSTITUTION.md protege contra ações não intencionadas, não contra instruções mal formuladas pelo dev. A responsabilidade de ser claro é sempre do humano.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-red-50 rounded-xl p-5 border-l-4 border-red-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">🤝</span>
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1">A IA pode ser convencida a ignorar regras</h4>
+                                <p class="text-sm text-red-700 leading-relaxed">Se o dev disser "ignore a CONSTITUTION.md para este caso", a IA provavelmente vai obedecer. Guardrails de contexto não são barreiras técnicas, são instruções. Para bloqueios reais, use hooks no <code class="font-mono bg-red-100 px-1 rounded text-xs">settings.json</code>.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">⚔️</span>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-1">Regras conflitantes paralisam ou confundem</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed">Se a CONSTITUTION.md diz "nunca instale dependências" e o CLAUDE.md diz "otimize o ambiente", a IA vai flutuar. Mantenha os arquivos coerentes e revise conflitos sempre que uma regra for alterada.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">🦠</span>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-1">Regras desatualizadas são perigosas</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed">Uma CONSTITUTION.md de 6 meses pode proibir práticas que o time já adotou, ou não cobrir riscos novos introduzidos por novas ferramentas. Regras obsoletas geram falsa sensação de segurança.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">🤖</span>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-1">Guardrails não substituem revisão humana</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed">A IA pode gerar código estruturalmente correto e dentro de todas as regras, mas que resolve o problema errado. O julgamento de <em>intenção</em> ainda é 100% humano.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mantra -->
+                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl border-l-8 border-safety-orange shadow-xl">
+                    <h4 class="font-bold mb-2 text-stone-400 text-xs uppercase tracking-widest">O Mantra da Parte 5:</h4>
+                    <p class="text-lg italic font-serif">"Guardrails não tornam a IA segura. Eles tornam os seus limites explícitos e explícito é sempre melhor que implícito."</p>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 8: Próximos Passos -->
+            <section id="sec-nextsteps" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🚀 Implemente hoje: 4 passos</h2>
+                    <p class="text-stone-600">
+                        Os arquivos demo estão disponíveis em <code class="bg-stone-100 font-mono px-1 rounded text-sm">demo/</code> neste repositório. Copie, adapte e use como ponto de partida.
+                    </p>
+                </div>
+
+                <div class="space-y-4 mb-10">
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Crie a estrutura <code class="bg-stone-100 font-mono text-sm px-1 rounded">.claude/rules/</code> com a CONSTITUTION.md</h4>
+                            <p class="text-sm text-stone-600 mb-3">Use o template da seção 3. Adapte as regras para o seu projeto. Envolva o time, a Constituição deve representar decisões coletivas, não imposições individuais.</p>
+                            <pre class="text-xs !p-3">mkdir -p .claude/rules .claude/commands .claude/memory
+<span class="text-stone-500"># Copie os templates de demo/ e adapte</span>
+cp demo/.claude/rules/CONSTITUTION.md .claude/rules/
+cp demo/.claude/rules/README.md .claude/rules/</pre>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Reescreva o <code class="bg-stone-100 font-mono text-sm px-1 rounded">CLAUDE.md</code> como roteador mínimo</h4>
+                            <p class="text-sm text-stone-600 mb-3">Substitua o conteúdo atual pelo template da seção 4. O único import obrigatório é a <code class="bg-stone-100 font-mono text-xs px-1 rounded">CONSTITUTION.md</code>. Tudo o mais é sob demanda.</p>
+                            <div class="bg-stone-50 border border-stone-200 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
+                                <span>💬</span>
+                                "Reestruture nosso CLAUDE.md para ter menos de 30 linhas, importar apenas a CONSTITUTION.md e rotear os demais contextos para .claude/rules/README.md."
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Adicione o hook de segurança no <code class="bg-stone-100 font-mono text-sm px-1 rounded">.claude/settings.json</code></h4>
+                            <p class="text-sm text-stone-600 mb-3">Copie o template de <code class="bg-stone-100 font-mono text-xs px-1 rounded">demo/.claude/settings.json</code> e adapte o regex de bloqueio para as operações mais críticas do seu projeto. Teste com um comando seguro primeiro.</p>
+                            <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-sm text-amber-800 flex gap-3">
+                                <span>⚠️</span>
+                                Hooks muito restritivos podem bloquear operações legítimas. Comece conservador e amplie gradualmente.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1">Agende revisão trimestral da Constituição + skills</h4>
+                            <p class="text-sm text-stone-600 mb-3">30 minutos a cada trimestre com o time: regras da CONSTITUTION.md ainda fazem sentido? Arquivos em <code class="bg-stone-100 font-mono text-xs px-1 rounded">.claude/commands/</code> ainda são necessários? Servidores MCP ativos ainda são seguros?</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                <div class="bg-stone-50 border border-stone-200 p-2 rounded-lg text-xs text-stone-600 text-center">📜 CONSTITUTION.md<br>ainda válida?</div>
+                                <div class="bg-stone-50 border border-stone-200 p-2 rounded-lg text-xs text-stone-600 text-center">⚡ Skills revisadas<br>e auditadas?</div>
+                                <div class="bg-stone-50 border border-stone-200 p-2 rounded-lg text-xs text-stone-600 text-center">🌐 MCP servers<br>ainda read-only?</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demo files reference -->
+                <div class="bg-safety-light border border-safety-border rounded-2xl p-6">
+                    <h3 class="font-bold text-safety-orange mb-4 flex items-center gap-2"><span>📁</span> Arquivos Demo disponíveis neste repositório</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span>📄</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700 font-mono">demo/CLAUDE.md</p>
+                                <p class="text-xs text-stone-500">Roteador mínimo com @import</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span>📜</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700 font-mono">demo/.claude/rules/CONSTITUTION.md</p>
+                                <p class="text-xs text-stone-500">Regras inegociáveis completas</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span>🗺️</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700 font-mono">demo/.claude/rules/README.md</p>
+                                <p class="text-xs text-stone-500">Índice de roteamento de contexto</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span>⚙️</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700 font-mono">demo/.claude/settings.json</p>
+                                <p class="text-xs text-stone-500">Hooks de segurança + permissões</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const fileDetails = {
+            claudemd: { icon: '📄', title: 'CLAUDE.md', badge: 'sempre carregado', desc: 'Ponto de entrada auto-carregado pelo Claude Code em toda conversa. Deve ser mínimo, importar a CONSTITUTION.md via @import e rotear demais contextos para o README.md. Cada linha extra aqui tem custo em tokens.', when: 'Carregado automaticamente. Mantenha com menos de 30 linhas.' },
+            settings: { icon: '⚙️', title: '.claude/settings.json', badge: 'runtime', desc: 'Configuração de execução: hooks (PreToolUse, PostToolUse), servidores MCP e permissões (allow/deny). Diferente dos arquivos .md, este não é contexto da IA, é configuração técnica que roda antes/depois das ferramentas.', when: 'Não é lido pela IA como contexto. É executado pelo runtime do Claude Code.' },
+            readme: { icon: '🗺️', title: '.claude/rules/README.md', badge: 'índice de contexto', desc: 'O roteador de conhecimento do projeto. Instrui a IA sobre qual documento carregar para cada tipo de tarefa, sem inflar o contexto com tudo de uma vez. É referenciado pelo CLAUDE.md mas não importado automaticamente.', when: 'Carregado sob demanda quando a IA precisa saber qual doc consultar.' },
+            constitution: { icon: '📜', title: '.claude/rules/CONSTITUTION.md', badge: 'regras inegociáveis', desc: 'O contrato entre o time e a IA. Define o que nunca pode ser feito, o que precisa de confirmação, e os padrões obrigatórios de código e arquitetura. É importado pelo CLAUDE.md e presente em toda conversa.', when: 'Importado automaticamente via @import no CLAUDE.md. Nunca omitir.' },
+            techstack: { icon: '🔧', title: '.claude/rules/TECH_STACK.md', badge: 'sob demanda', desc: 'Versões exatas das dependências, bibliotecas aprovadas e ferramentas do projeto. Evita que a IA sugira libs não aprovadas ou versões depreciadas.', when: 'Carregado quando a tarefa envolve dependências, bibliotecas ou configuração técnica.' },
+            arch: { icon: '🏗️', title: '.claude/rules/ARCHITECTURE.md', badge: 'sob demanda', desc: 'Padrões arquiteturais: estrutura de pastas, separação de camadas, convenções de nomenclatura. A IA consulta antes de criar novos arquivos ou refatorar estruturas.', when: 'Carregado para tarefas de novas features, refatoração ou organização de código.' },
+            decisions: { icon: '🕰️', title: '.claude/rules/DECISIONS.md', badge: 'sob demanda', desc: 'Registro de decisões arquiteturais (ADRs) o que foi avaliado, o que foi escolhido e por quê. Evita que a IA sugira abordagens que o time já descartou.', when: 'Carregado antes de qualquer sugestão de mudança arquitetural ou de bibliotecas.' },
+            commands: { icon: '⚡', title: '.claude/commands/*.md', badge: 'skills customizadas', desc: 'Skills e slash commands customizados do projeto. Cada arquivo .md é um comando disponível com /nome. Devem ser auditados trimestralmente, um comando desatualizado pode executar ações indesejadas.', when: 'Carregado quando o dev invoca o comando. Revisar periodicamente.' },
+            memory: { icon: '🧠', title: '.claude/memory/', badge: 'gerada pela IA', desc: 'Memória persistente mantida pela IA entre conversas. Contém contexto acumulado sobre o projeto. Atenção: a IA grava nesta pasta automaticamente, revise periodicamente para garantir que informações desatualizadas não influenciem decisões futuras.', when: 'Lida e escrita pela IA automaticamente. Auditoria manual recomendada a cada sprint.' }
+        };
+
+        let activeConstitutionTab = 'never';
+
+        function navigate(sectionId) {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${sectionId}`).classList.add('active');
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
+        }
+
+        function showScenario(type) {
+            document.getElementById('scenario-danger').classList.add('hidden');
+            document.getElementById('scenario-safe').classList.add('hidden');
+            document.getElementById(`scenario-${type}`).classList.remove('hidden');
+
+            document.getElementById('toggle-danger').classList.remove('active');
+            document.getElementById('toggle-safe').classList.remove('active');
+            document.getElementById(`toggle-${type}`).classList.add('active');
+        }
+
+        function showFileDetail(key) {
+            const d = fileDetails[key];
+            document.getElementById('file-detail-icon').textContent = d.icon;
+            document.getElementById('file-detail-title').textContent = d.title;
+            document.getElementById('file-detail-badge').textContent = d.badge;
+            document.getElementById('file-detail-desc').textContent = d.desc;
+            document.getElementById('file-detail-when').textContent = '⏱ ' + d.when;
+            document.getElementById('file-detail').classList.remove('hidden');
+        }
+
+        function showConstitutionTab(tab) {
+            ['never', 'ask', 'must', 'arch'].forEach(t => {
+                document.getElementById(`ctab-content-${t}`).classList.add('hidden');
+                document.getElementById(`ctab-${t}`).classList.remove('active');
+            });
+            document.getElementById(`ctab-content-${tab}`).classList.remove('hidden');
+            document.getElementById(`ctab-${tab}`).classList.add('active');
+            activeConstitutionTab = tab;
+        }
+
+        function copyCode(id) {
+            const el = document.getElementById(id);
+            navigator.clipboard.writeText(el.innerText).then(() => {
+                const btns = document.querySelectorAll('.copy-btn');
+                btns.forEach(btn => {
+                    if (btn.getAttribute('onclick')?.includes(id)) {
+                        const orig = btn.textContent;
+                        btn.textContent = 'copiado!';
+                        setTimeout(() => btn.textContent = orig, 1500);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
