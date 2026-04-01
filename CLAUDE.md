@@ -1,7 +1,7 @@
 # Engineering Hour — AI-Augmented Developer Series
 
 ## Projeto
-Série de apresentações interativas para developers da Ubivis sobre uso de IA no desenvolvimento.
+Série de apresentações interativas sobre uso de IA no desenvolvimento.
 Cada `partN.html` é uma SPA standalone em HTML + Tailwind CSS + Chart.js.
 
 ## Arquivos

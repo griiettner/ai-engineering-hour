@@ -10,6 +10,8 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="nav.js" defer></script>
+    <script src="i18n.js" defer></script>
 
     <script>
         tailwind.config = {
@@ -35,53 +37,10 @@
         }
     </script>
 
+    <link rel="stylesheet" href="shared.css">
     <style>
-        body { background-color: #fafaf9; color: #292524; }
-        .nav-item.active {
-            background-color: #e7e5e4;
-            border-left: 4px solid #4f46e5;
-            font-weight: 600;
-        }
-        .nav-group-label {
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #a8a29e;
-            padding: 0.5rem 0.25rem 0.25rem;
-        }
-        .step-number {
-            width: 2rem; height: 2rem;
-            border-radius: 9999px;
-            background: #4f46e5;
-            color: white;
-            font-weight: 700;
-            font-size: 0.875rem;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .antipattern-wrong { border-left: 4px solid #e11d48; }
-        .antipattern-right { border-left: 4px solid #059669; }
-        pre {
-            background-color: #1c1917;
-            color: #d6d3d1;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.8rem;
-            overflow-x: auto;
-            line-height: 1.65;
-        }
-        .copy-btn {
-            font-size: 0.65rem;
-            background: #374151;
-            color: #9ca3af;
-            border: none;
-            padding: 0.2rem 0.6rem;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-family: 'Fira Code', monospace;
-        }
-        .copy-btn:hover { background: #4b5563; color: white; }
+        :root { --accent: #4f46e5; }
+        .chart-container { height: 300px; }
         .skill-card { transition: all 0.2s; }
         .skill-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px -4px rgba(79,70,229,0.15); }
         .skill-card.selected { border-color: #4f46e5 !important; background: #eef2ff; }
@@ -90,13 +49,6 @@
         .fm-line.active { background: rgba(165,180,252,0.2); }
         .invoke-row { transition: all 0.2s; }
         .invoke-row:hover { background: #f5f5f4; }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 640px;
-            margin: auto;
-            height: 300px;
-        }
         .bundled-card { transition: all 0.15s; }
         .bundled-card:hover { background: #eef2ff; border-color: #c7d2fe; }
         .tab-btn { transition: all 0.15s; }
@@ -114,7 +66,7 @@
                     Engineering Hour <span style="color:#4f46e5">P6</span>
                 </h1>
             </div>
-            <div class="text-sm font-medium text-stone-500 hidden sm:block">
+            <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
                 Módulo 6: Skills — Ferramentas que o Claude usa por você
             </div>
         </div>
@@ -125,42 +77,42 @@
         <!-- Sidebar Navigation -->
         <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
 
-            <p class="nav-group-label">O Conceito</p>
+            <p class="nav-group-label" data-i18n="nav.group.conceito">O Conceito</p>
             <button onclick="navigate('conceito')" id="nav-conceito" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🎯</span> O que são Skills
+                <span>🎯</span> <span data-i18n="nav.conceito">O que são Skills</span>
             </button>
             <button onclick="navigate('comparacao')" id="nav-comparacao" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚖️</span> Commands vs Skills
+                <span>⚖️</span> <span data-i18n="nav.comparacao">Commands vs Skills</span>
             </button>
             <button onclick="navigate('anatomia')" id="nav-anatomia" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🔬</span> Anatomia: SKILL.md
+                <span>🔬</span> <span data-i18n="nav.anatomia">Anatomia: SKILL.md</span>
             </button>
 
-            <p class="nav-group-label mt-2">Na Prática</p>
+            <p class="nav-group-label mt-2" data-i18n="nav.group.pratica">Na Prática</p>
             <button onclick="navigate('bundled')" id="nav-bundled" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📦</span> Skills Nativas
+                <span>📦</span> <span data-i18n="nav.bundled">Skills Nativas</span>
             </button>
             <button onclick="navigate('invocacao')" id="nav-invocacao" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🕹️</span> Modos de Invocação
+                <span>🕹️</span> <span data-i18n="nav.invocacao">Modos de Invocação</span>
             </button>
             <button onclick="navigate('criando')" id="nav-criando" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🛠️</span> Criando sua Skill
+                <span>🛠️</span> <span data-i18n="nav.criando">Criando sua Skill</span>
             </button>
             <button onclick="navigate('subskills')" id="nav-subskills" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🗃️</span> Sub-Skills &amp; Índice
+                <span>🗃️</span> <span data-i18n="nav.subskills">Sub-Skills &amp; Índice</span>
             </button>
 
-            <p class="nav-group-label mt-2">Impacto</p>
+            <p class="nav-group-label mt-2" data-i18n="nav.group.impacto">Impacto</p>
             <button onclick="navigate('avancado')" id="nav-avancado" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🚀</span> Padrões Avançados
+                <span>🚀</span> <span data-i18n="nav.avancado">Padrões Avançados</span>
             </button>
             <button onclick="navigate('limites')" id="nav-limites" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚠️</span> Limites &amp; Cuidados
+                <span>⚠️</span> <span data-i18n="nav.limites">Limites &amp; Cuidados</span>
             </button>
 
-            <p class="nav-group-label mt-2">Ação</p>
+            <p class="nav-group-label mt-2" data-i18n="nav.group.acao">Ação</p>
             <button onclick="navigate('proximos')" id="nav-proximos" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📋</span> Próximos Passos
+                <span>📋</span> <span data-i18n="nav.proximos">Próximos Passos</span>
             </button>
         </nav>
 
@@ -172,8 +124,8 @@
             <!-- ============================================================ -->
             <section id="sec-conceito" class="block">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🎯 O que são Skills?</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🎯</span> <span data-i18n="sec.conceito.h2">O que são Skills?</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.conceito.intro">
                         Skills estendem o que o Claude consegue fazer. Você cria um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> com instruções e o Claude passa a ter essa ferramenta disponível. Você pode invocar diretamente com <code class="font-mono bg-stone-100 px-1 rounded text-xs">/nome-da-skill</code>, mas a parte poderosa é outra: <strong>o Claude pode decidir usar a skill sozinho</strong> quando percebe que ela é relevante para o que você pediu.
                     </p>
                 </div>
@@ -183,17 +135,17 @@
                     <div class="p-5 rounded-2xl border-2 border-stone-200 bg-stone-50">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="text-xl">🧑‍💻</span>
-                            <h3 class="font-bold text-stone-800">Você invoca</h3>
+                            <h3 class="font-bold text-stone-800" data-i18n="sec.conceito.card.invoke.title">Você invoca</h3>
                         </div>
-                        <p class="text-sm text-stone-600 leading-relaxed mb-3">Digita <code class="font-mono bg-white px-1 rounded text-xs">/deploy</code> quando quer executar o deploy. Você controla o timing — útil para workflows com efeitos colaterais.</p>
+                        <p class="text-sm text-stone-600 leading-relaxed mb-3" data-i18n-html="sec.conceito.card.invoke.desc">Digita <code class="font-mono bg-white px-1 rounded text-xs">/deploy</code> quando quer executar o deploy. Você controla o timing — útil para workflows com efeitos colaterais.</p>
                         <pre class="text-xs">$ /review-pr 142</pre>
                     </div>
                     <div class="p-5 rounded-2xl border-2 border-indigo-200 bg-indigo-50">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="text-xl">🤖</span>
-                            <h3 class="font-bold text-indigo-900">O Claude invoca</h3>
+                            <h3 class="font-bold text-indigo-900" data-i18n="sec.conceito.card.auto.title">O Claude invoca</h3>
                         </div>
-                        <p class="text-sm text-indigo-800 leading-relaxed mb-3">Você pede "como este código funciona?" e o Claude detecta que a skill <code class="font-mono bg-white px-1 rounded text-xs">explain-code</code> é relevante e a carrega automaticamente.</p>
+                        <p class="text-sm text-indigo-800 leading-relaxed mb-3" data-i18n-html="sec.conceito.card.auto.desc">Você pede "como este código funciona?" e o Claude detecta que a skill <code class="font-mono bg-white px-1 rounded text-xs">explain-code</code> é relevante e a carrega automaticamente.</p>
                         <pre class="text-xs"><span style="color:#a5b4fc"># A description da skill diz:</span>
 "Use quando o usuário perguntar
  como algo funciona."</pre>
@@ -204,48 +156,48 @@
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6 flex gap-3 items-start">
                     <span class="text-xl flex-shrink-0">🗂️</span>
                     <div>
-                        <h4 class="font-bold text-amber-900 text-sm mb-1">Já existe outro formato: <code class="font-mono bg-amber-100 px-1 rounded">.claude/commands/</code></h4>
-                        <p class="text-sm text-amber-800 leading-relaxed">Antes das Skills, o Claude Code usava <strong>Commands</strong> — arquivos <code class="font-mono bg-amber-100 px-1 rounded text-xs">.md</code> simples em <code class="font-mono bg-amber-100 px-1 rounded text-xs">.claude/commands/</code>. Ambos criam comandos slash e continuam funcionando. Skills são o formato evoluído: suportam frontmatter YAML, invocação automática pelo Claude, arquivos de suporte e execução em subagentes. Veja o comparativo completo na seção <button onclick="navigate('comparacao')" class="underline font-semibold">Commands vs Skills</button>.</p>
+                        <h4 class="font-bold text-amber-900 text-sm mb-1" data-i18n-html="sec.conceito.legacy.title">Já existe outro formato: <code class="font-mono bg-amber-100 px-1 rounded">.claude/commands/</code></h4>
+                        <p class="text-sm text-amber-800 leading-relaxed" data-i18n-html="sec.conceito.legacy.desc">Antes das Skills, o Claude Code usava <strong>Commands</strong> — arquivos <code class="font-mono bg-amber-100 px-1 rounded text-xs">.md</code> simples em <code class="font-mono bg-amber-100 px-1 rounded text-xs">.claude/commands/</code>. Ambos criam comandos slash e continuam funcionando. Skills são o formato evoluído: suportam frontmatter YAML, invocação automática pelo Claude, arquivos de suporte e execução em subagentes. Veja o comparativo completo na seção <button onclick="navigate('comparacao')" class="underline font-semibold">Commands vs Skills</button>.</p>
                     </div>
                 </div>
 
                 <!-- Where skills live -->
                 <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
-                    <h3 class="font-bold text-stone-800 mb-4 text-sm">📁 Onde as Skills vivem</h3>
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm"><span>📁</span> <span data-i18n="sec.conceito.where.title">Onde as Skills vivem</span></h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead>
                                 <tr class="border-b border-stone-200">
-                                    <th class="text-left py-2 pr-4 text-stone-500 font-semibold">Nível</th>
-                                    <th class="text-left py-2 pr-4 text-stone-500 font-semibold">Caminho</th>
-                                    <th class="text-left py-2 text-stone-500 font-semibold">Escopo</th>
+                                    <th class="text-left py-2 pr-4 text-stone-500 font-semibold" data-i18n="sec.conceito.where.th.level">Nível</th>
+                                    <th class="text-left py-2 pr-4 text-stone-500 font-semibold" data-i18n="sec.conceito.where.th.path">Caminho</th>
+                                    <th class="text-left py-2 text-stone-500 font-semibold" data-i18n="sec.conceito.where.th.scope">Escopo</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-stone-100">
                                 <tr class="invoke-row">
-                                    <td class="py-2 pr-4 font-medium text-stone-700">Enterprise</td>
-                                    <td class="py-2 pr-4 font-mono text-stone-500">managed settings</td>
-                                    <td class="py-2 text-stone-600">Todos os usuários da org</td>
+                                    <td class="py-2 pr-4 font-medium text-stone-700" data-i18n="sec.conceito.where.enterprise.level">Enterprise</td>
+                                    <td class="py-2 pr-4 font-mono text-stone-500" data-i18n="sec.conceito.where.enterprise.path">managed settings</td>
+                                    <td class="py-2 text-stone-600" data-i18n="sec.conceito.where.enterprise.scope">Todos os usuários da org</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2 pr-4 font-medium text-stone-700">Pessoal</td>
+                                    <td class="py-2 pr-4 font-medium text-stone-700" data-i18n="sec.conceito.where.personal.level">Pessoal</td>
                                     <td class="py-2 pr-4 font-mono text-stone-500">~/.claude/skills/&lt;nome&gt;/</td>
-                                    <td class="py-2 text-stone-600">Todos os seus projetos</td>
+                                    <td class="py-2 text-stone-600" data-i18n="sec.conceito.where.personal.scope">Todos os seus projetos</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2 pr-4 font-medium" style="color:#4f46e5">Projeto</td>
+                                    <td class="py-2 pr-4 font-medium" style="color:#4f46e5" data-i18n="sec.conceito.where.project.level">Projeto</td>
                                     <td class="py-2 pr-4 font-mono text-stone-500">.claude/skills/&lt;nome&gt;/</td>
-                                    <td class="py-2 text-stone-600">Apenas este projeto</td>
+                                    <td class="py-2 text-stone-600" data-i18n="sec.conceito.where.project.scope">Apenas este projeto</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2 pr-4 font-medium text-stone-700">Plugin</td>
+                                    <td class="py-2 pr-4 font-medium text-stone-700" data-i18n="sec.conceito.where.plugin.level">Plugin</td>
                                     <td class="py-2 pr-4 font-mono text-stone-500">&lt;plugin&gt;/skills/&lt;nome&gt;/</td>
-                                    <td class="py-2 text-stone-600">Onde o plugin está ativo</td>
+                                    <td class="py-2 text-stone-600" data-i18n="sec.conceito.where.plugin.scope">Onde o plugin está ativo</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <p class="text-xs text-stone-500 mt-3">Quando skills têm o mesmo nome em níveis diferentes, a prioridade é: enterprise &gt; pessoal &gt; projeto.</p>
+                    <p class="text-xs text-stone-500 mt-3" data-i18n="sec.conceito.where.priority">Quando skills têm o mesmo nome em níveis diferentes, a prioridade é: enterprise &gt; pessoal &gt; projeto.</p>
                 </div>
             </section>
 
@@ -254,8 +206,8 @@
             <!-- ============================================================ -->
             <section id="sec-comparacao" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚖️ Commands vs Skills</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚖️</span> <span data-i18n="sec.comparacao.h2">Commands vs Skills</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.comparacao.intro">
                         Ambos criam comandos slash invocáveis com <code class="font-mono bg-stone-100 px-1 rounded text-xs">/nome</code>. A diferença está em <strong>como são definidos</strong> e no que conseguem fazer. Skills são o formato recomendado — Commands continuam funcionando e seguem suportados.
                     </p>
                 </div>
@@ -265,7 +217,7 @@
                     <div>
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-base">📄</span>
-                            <p class="text-xs font-bold text-stone-500 uppercase">Command (legado)</p>
+                            <p class="text-xs font-bold text-stone-500 uppercase" data-i18n="sec.comparacao.label.command">Command (legado)</p>
                         </div>
                         <pre class="text-xs"><span style="color:#78716c"># .claude/commands/review-pr.md</span>
 <span style="color:#78716c"># (arquivo único, sem frontmatter obrigatório)</span>
@@ -281,7 +233,7 @@ Responda com Status + lista de Issues.</pre>
                     <div>
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-base">📁</span>
-                            <p class="text-xs font-bold text-stone-500 uppercase">Skill (recomendado)</p>
+                            <p class="text-xs font-bold text-stone-500 uppercase" data-i18n="sec.comparacao.label.skill">Skill (recomendado)</p>
                         </div>
                         <pre class="text-xs"><span style="color:#78716c"># .claude/skills/review-pr/SKILL.md</span>
 <span style="color:#78716c"># (diretório + frontmatter YAML)</span>
@@ -301,64 +253,64 @@ Revise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
 
                 <!-- Feature comparison table -->
                 <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
-                    <h3 class="font-bold text-stone-800 mb-4 text-sm">Comparativo de recursos</h3>
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm" data-i18n="sec.comparacao.table.title">Comparativo de recursos</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead>
                                 <tr class="border-b-2 border-stone-200">
-                                    <th class="text-left py-2 pr-6 text-stone-500 font-semibold">Recurso</th>
+                                    <th class="text-left py-2 pr-6 text-stone-500 font-semibold" data-i18n="sec.comparacao.table.th.feature">Recurso</th>
                                     <th class="text-center py-2 pr-6 text-stone-500 font-semibold">Command</th>
                                     <th class="text-center py-2 text-stone-500 font-semibold">Skill</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-stone-100">
                                 <tr class="invoke-row">
-                                    <td class="py-2.5 pr-6 text-stone-700">Cria comando <code class="font-mono bg-stone-100 px-1 rounded">/nome</code></td>
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.slash">Cria comando <code class="font-mono bg-stone-100 px-1 rounded">/nome</code></td>
                                     <td class="py-2.5 pr-6 text-center text-emerald-600 font-bold">✅</td>
                                     <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2.5 pr-6 text-stone-700">Suporte a <code class="font-mono bg-stone-100 px-1 rounded">$ARGUMENTS</code></td>
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.arguments">Suporte a <code class="font-mono bg-stone-100 px-1 rounded">$ARGUMENTS</code></td>
                                     <td class="py-2.5 pr-6 text-center text-emerald-600 font-bold">✅</td>
                                     <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2.5 pr-6 text-stone-700">Versionável no git</td>
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n="sec.comparacao.table.row.git">Versionável no git</td>
                                     <td class="py-2.5 pr-6 text-center text-emerald-600 font-bold">✅</td>
                                     <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2.5 pr-6 text-stone-700">Frontmatter YAML (controle de comportamento)</td>
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n="sec.comparacao.table.row.frontmatter">Frontmatter YAML (controle de comportamento)</td>
                                     <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
                                     <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2.5 pr-6 text-stone-700">Claude invoca automaticamente (por description)</td>
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n="sec.comparacao.table.row.autoinvoke">Claude invoca automaticamente (por description)</td>
                                     <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
                                     <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2.5 pr-6 text-stone-700">Controle de invocação (<code class="font-mono bg-stone-100 px-1 rounded">disable-model-invocation</code>)</td>
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.disable">Controle de invocação (<code class="font-mono bg-stone-100 px-1 rounded">disable-model-invocation</code>)</td>
                                     <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
                                     <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2.5 pr-6 text-stone-700">Arquivos de suporte no diretório</td>
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n="sec.comparacao.table.row.support">Arquivos de suporte no diretório</td>
                                     <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
                                     <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2.5 pr-6 text-stone-700">Execução em subagente (<code class="font-mono bg-stone-100 px-1 rounded">context: fork</code>)</td>
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.fork">Execução em subagente (<code class="font-mono bg-stone-100 px-1 rounded">context: fork</code>)</td>
                                     <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
                                     <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2.5 pr-6 text-stone-700">Restrição de ferramentas (<code class="font-mono bg-stone-100 px-1 rounded">allowed-tools</code>)</td>
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.tools">Restrição de ferramentas (<code class="font-mono bg-stone-100 px-1 rounded">allowed-tools</code>)</td>
                                     <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
                                     <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
                                 </tr>
                                 <tr class="invoke-row">
-                                    <td class="py-2.5 pr-6 text-stone-700">Injeção de contexto dinâmico (<code class="font-mono bg-stone-100 px-1 rounded">!`cmd`</code>)</td>
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.injection">Injeção de contexto dinâmico (<code class="font-mono bg-stone-100 px-1 rounded">!`cmd`</code>)</td>
                                     <td class="py-2.5 pr-6 text-center text-stone-400">—</td>
                                     <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
                                 </tr>
@@ -370,14 +322,14 @@ Revise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                 <!-- Migration tip -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="p-4 rounded-xl bg-stone-50 border border-stone-200">
-                        <h4 class="font-bold text-stone-700 text-sm mb-2">🔄 Migrar ou não migrar?</h4>
-                        <p class="text-xs text-stone-600 leading-relaxed">Commands existentes <strong>não precisam ser migrados</strong>. Continue usando-os se atendem à necessidade. Migre para Skills quando quiser auto-invocação, arquivos de suporte, ou controle de quando o Claude pode acionar.</p>
+                        <h4 class="font-bold text-stone-700 text-sm mb-2"><span>🔄</span> <span data-i18n="sec.comparacao.migrate.title">Migrar ou não migrar?</span></h4>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n-html="sec.comparacao.migrate.desc">Commands existentes <strong>não precisam ser migrados</strong>. Continue usando-os se atendem à necessidade. Migre para Skills quando quiser auto-invocação, arquivos de suporte, ou controle de quando o Claude pode acionar.</p>
                     </div>
                     <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
-                        <h4 class="font-bold text-indigo-800 text-sm mb-2">⚡ Quando usar cada um</h4>
+                        <h4 class="font-bold text-indigo-800 text-sm mb-2"><span>⚡</span> <span data-i18n="sec.comparacao.when.title">Quando usar cada um</span></h4>
                         <ul class="text-xs text-indigo-800 space-y-1 leading-relaxed">
-                            <li><strong>Command:</strong> instrução simples, sem controle de invocação necessário</li>
-                            <li><strong>Skill:</strong> quando você quer que o Claude saiba usar por conta própria, ou precisa de frontmatter, arquivos de suporte ou subagente isolado</li>
+                            <li data-i18n-html="sec.comparacao.when.li.1"><strong>Command:</strong> instrução simples, sem controle de invocação necessário</li>
+                            <li data-i18n-html="sec.comparacao.when.li.2"><strong>Skill:</strong> quando você quer que o Claude saiba usar por conta própria, ou precisa de frontmatter, arquivos de suporte ou subagente isolado</li>
                         </ul>
                     </div>
                 </div>
@@ -385,7 +337,8 @@ Revise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                 <!-- Precedence note -->
                 <div class="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 flex gap-3 items-start">
                     <span class="text-lg flex-shrink-0">⚠️</span>
-                    <p class="text-xs text-amber-800 leading-relaxed"><strong>Conflito de nomes:</strong> se existir um Command e uma Skill com o mesmo nome, a Skill tem precedência. Evite nomes duplicados entre <code class="font-mono bg-amber-100 px-1 rounded">.claude/commands/</code> e <code class="font-mono bg-amber-100 px-1 rounded">.claude/skills/</code>.</p>
+                    <p class="text-xs text-amber-800 leading-relaxed" data-i18n-html="sec.comparacao.precedence">
+                        <strong>Conflito de nomes:</strong> se existir um Command e uma Skill com o mesmo nome, a Skill tem precedência. Evite nomes duplicados entre <code class="font-mono bg-amber-100 px-1 rounded">.claude/commands/</code> e <code class="font-mono bg-amber-100 px-1 rounded">.claude/skills/</code>.</p>
                 </div>
             </section>
 
@@ -394,15 +347,15 @@ Revise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
             <!-- ============================================================ -->
             <section id="sec-anatomia" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🔬 Anatomia: SKILL.md</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔬</span> <span data-i18n="sec.anatomia.h2">Anatomia: SKILL.md</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.anatomia.intro">
                         Cada skill é um <strong>diretório</strong> com um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> obrigatório. O arquivo tem duas partes: frontmatter YAML entre <code class="font-mono bg-stone-100 px-1 rounded text-xs">---</code> que configura o comportamento, e o corpo Markdown com as instruções. Clique em cada campo para entender o que faz.
                     </p>
                 </div>
 
                 <!-- File structure -->
                 <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
-                    <p class="text-xs font-bold text-stone-400 uppercase mb-3">Estrutura do diretório</p>
+                    <p class="text-xs font-bold text-stone-400 uppercase mb-3" data-i18n="sec.anatomia.structure.label">Estrutura do diretório</p>
                     <pre class="text-xs">.claude/skills/
 └── <span style="color:#a5b4fc">review-pr/</span>
     ├── <span style="color:#6ee7b7">SKILL.md</span>          <span style="color:#78716c"># obrigatório — instruções e frontmatter</span>
@@ -416,7 +369,7 @@ Revise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <p class="text-xs font-bold text-stone-400 uppercase">.claude/skills/review-pr/SKILL.md</p>
-                            <button class="copy-btn" onclick="copyCode('skill-anatomy')">copiar</button>
+                            <button class="copy-btn" onclick="copyCode('skill-anatomy')" data-i18n="common.copy">copiar</button>
                         </div>
                         <pre id="skill-anatomy" class="text-xs leading-relaxed"><span style="color:#78716c">---</span>
 <span class="fm-line" id="fm-name" onclick="showFm('name')"><span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">review-pr</span></span>
@@ -446,7 +399,7 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                     <!-- Annotation panel -->
                     <div id="fm-panel" class="bg-stone-900 rounded-xl p-5 text-stone-200 flex flex-col justify-center min-h-56">
                         <div id="fm-default">
-                            <p class="text-stone-400 text-sm text-center">👆 Clique em qualquer linha do frontmatter para entender o que ela controla.</p>
+                            <p class="text-stone-400 text-sm text-center"><span>👆</span> <span data-i18n="sec.anatomia.panel.default">Clique em qualquer linha do frontmatter para entender o que ela controla.</span></p>
                         </div>
                         <div id="fm-content" class="hidden">
                             <div class="flex items-center gap-2 mb-3">
@@ -461,25 +414,25 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
 
                 <!-- $ARGUMENTS -->
                 <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
-                    <h3 class="font-bold text-stone-800 mb-3 text-sm">📥 Variáveis de Substituição</h3>
+                    <h3 class="font-bold text-stone-800 mb-3 text-sm"><span>📥</span> <span data-i18n="sec.anatomia.vars.title">Variáveis de Substituição</span></h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                         <div class="bg-white p-3 rounded-lg border border-stone-200">
                             <code class="font-mono text-indigo-600">$ARGUMENTS</code>
-                            <p class="text-stone-500 mt-1">Tudo que foi passado após o nome da skill.</p>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.anatomia.vars.arguments.desc">Tudo que foi passado após o nome da skill.</p>
                             <p class="text-stone-400 mt-1"><code>/fix-issue 123</code> → <code>$ARGUMENTS</code> = <code>123</code></p>
                         </div>
                         <div class="bg-white p-3 rounded-lg border border-stone-200">
                             <code class="font-mono text-indigo-600">$ARGUMENTS[0], $0</code>
-                            <p class="text-stone-500 mt-1">Argumento por posição (índice 0).</p>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.anatomia.vars.positional.desc">Argumento por posição (índice 0).</p>
                             <p class="text-stone-400 mt-1"><code>/migrate SearchBar React Vue</code> → <code>$0</code> = <code>SearchBar</code></p>
                         </div>
                         <div class="bg-white p-3 rounded-lg border border-stone-200">
                             <code class="font-mono text-indigo-600">${CLAUDE_SKILL_DIR}</code>
-                            <p class="text-stone-500 mt-1">Diretório da skill. Útil para referenciar scripts bundled.</p>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.anatomia.vars.skilldir.desc">Diretório da skill. Útil para referenciar scripts bundled.</p>
                         </div>
                         <div class="bg-white p-3 rounded-lg border border-stone-200">
                             <code class="font-mono text-indigo-600">${CLAUDE_SESSION_ID}</code>
-                            <p class="text-stone-500 mt-1">ID da sessão atual. Útil para logs por sessão.</p>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.anatomia.vars.sessionid.desc">ID da sessão atual. Útil para logs por sessão.</p>
                         </div>
                     </div>
                 </div>
@@ -490,8 +443,8 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
             <!-- ============================================================ -->
             <section id="sec-bundled" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📦 Skills Nativas do Claude Code</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📦</span> <span data-i18n="sec.bundled.h2">Skills Nativas do Claude Code</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.bundled.intro">
                         Skills nativas já vêm com o Claude Code e estão disponíveis em qualquer sessão. Diferente dos comandos built-in que executam lógica fixa, essas skills são <strong>orientadas por prompt</strong> — o Claude orquestra o trabalho usando suas ferramentas, podendo criar agentes paralelos e adaptar a execução ao seu projeto.
                     </p>
                 </div>
@@ -502,14 +455,14 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                         <div class="flex items-start justify-between gap-4">
                             <div class="flex items-center gap-3">
                                 <code class="font-mono text-sm font-bold" style="color:#4f46e5">/batch</code>
-                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Agente Paralelo</span>
+                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold" data-i18n="sec.bundled.batch.badge">Agente Paralelo</span>
                             </div>
                             <span id="toggle-batch" class="text-stone-400 text-sm">▼</span>
                         </div>
-                        <p class="text-sm text-stone-600 mt-2">Orquestra mudanças em larga escala no codebase em paralelo. Decompõe em 5–30 unidades independentes e abre um PR por unidade.</p>
+                        <p class="text-sm text-stone-600 mt-2" data-i18n="sec.bundled.batch.desc">Orquestra mudanças em larga escala no codebase em paralelo. Decompõe em 5–30 unidades independentes e abre um PR por unidade.</p>
                         <div id="detail-batch" class="hidden mt-4 pt-4 border-t border-stone-100">
                             <pre class="text-xs">/batch migrate src/ de Solid para React</pre>
-                            <p class="text-xs text-stone-500 mt-2">Pesquisa o codebase, apresenta o plano para aprovação, e só então spawna os agentes. Requer repositório git.</p>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n="sec.bundled.batch.detail">Pesquisa o codebase, apresenta o plano para aprovação, e só então spawna os agentes. Requer repositório git.</p>
                         </div>
                     </div>
 
@@ -518,14 +471,14 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                         <div class="flex items-start justify-between gap-4">
                             <div class="flex items-center gap-3">
                                 <code class="font-mono text-sm font-bold" style="color:#4f46e5">/simplify</code>
-                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">3 Agentes em Paralelo</span>
+                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold" data-i18n="sec.bundled.simplify.badge">3 Agentes em Paralelo</span>
                             </div>
                             <span id="toggle-simplify" class="text-stone-400 text-sm">▼</span>
                         </div>
-                        <p class="text-sm text-stone-600 mt-2">Revisa arquivos alterados recentemente em busca de problemas de reuso, qualidade e eficiência — e os corrige.</p>
+                        <p class="text-sm text-stone-600 mt-2" data-i18n="sec.bundled.simplify.desc">Revisa arquivos alterados recentemente em busca de problemas de reuso, qualidade e eficiência — e os corrige.</p>
                         <div id="detail-simplify" class="hidden mt-4 pt-4 border-t border-stone-100">
                             <pre class="text-xs">/simplify focus on memory efficiency</pre>
-                            <p class="text-xs text-stone-500 mt-2">Spawna 3 agentes de review em paralelo, agrega os achados e aplica as correções. Pode receber foco opcional.</p>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n="sec.bundled.simplify.detail">Spawna 3 agentes de review em paralelo, agrega os achados e aplica as correções. Pode receber foco opcional.</p>
                         </div>
                     </div>
 
@@ -538,10 +491,10 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                             </div>
                             <span id="toggle-loop" class="text-stone-400 text-sm">▼</span>
                         </div>
-                        <p class="text-sm text-stone-600 mt-2">Executa um prompt repetidamente em um intervalo enquanto a sessão estiver aberta.</p>
+                        <p class="text-sm text-stone-600 mt-2" data-i18n="sec.bundled.loop.desc">Executa um prompt repetidamente em um intervalo enquanto a sessão estiver aberta.</p>
                         <div id="detail-loop" class="hidden mt-4 pt-4 border-t border-stone-100">
                             <pre class="text-xs">/loop 5m verificar se o deploy terminou</pre>
-                            <p class="text-xs text-stone-500 mt-2">Útil para monitorar deploys, babysit de PRs, ou re-executar outra skill periodicamente.</p>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n="sec.bundled.loop.detail">Útil para monitorar deploys, babysit de PRs, ou re-executar outra skill periodicamente.</p>
                         </div>
                     </div>
 
@@ -550,14 +503,14 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                         <div class="flex items-start justify-between gap-4">
                             <div class="flex items-center gap-3">
                                 <code class="font-mono text-sm font-bold" style="color:#4f46e5">/debug</code>
-                                <span class="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-semibold">Diagnóstico</span>
+                                <span class="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-semibold" data-i18n="sec.bundled.debug.badge">Diagnóstico</span>
                             </div>
                             <span id="toggle-debug" class="text-stone-400 text-sm">▼</span>
                         </div>
-                        <p class="text-sm text-stone-600 mt-2">Ativa logging de debug para a sessão atual e analisa o log para diagnosticar problemas.</p>
+                        <p class="text-sm text-stone-600 mt-2" data-i18n="sec.bundled.debug.desc">Ativa logging de debug para a sessão atual e analisa o log para diagnosticar problemas.</p>
                         <div id="detail-debug" class="hidden mt-4 pt-4 border-t border-stone-100">
                             <pre class="text-xs">/debug o Claude parou de responder corretamente</pre>
-                            <p class="text-xs text-stone-500 mt-2">Debug está desligado por padrão. Executar <code>/debug</code> no meio de uma sessão começa a capturar logs a partir daquele ponto.</p>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n-html="sec.bundled.debug.detail">Debug está desligado por padrão. Executar <code>/debug</code> no meio de uma sessão começa a capturar logs a partir daquele ponto.</p>
                         </div>
                     </div>
 
@@ -566,13 +519,13 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                         <div class="flex items-start justify-between gap-4">
                             <div class="flex items-center gap-3">
                                 <code class="font-mono text-sm font-bold" style="color:#4f46e5">/claude-api</code>
-                                <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">Auto-invocada</span>
+                                <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold" data-i18n="sec.bundled.api.badge">Auto-invocada</span>
                             </div>
                             <span id="toggle-api" class="text-stone-400 text-sm">▼</span>
                         </div>
-                        <p class="text-sm text-stone-600 mt-2">Carrega referência da API Anthropic e Agent SDK. Ativa automaticamente quando o código importa <code class="font-mono bg-stone-100 px-1 rounded text-xs">anthropic</code> ou <code class="font-mono bg-stone-100 px-1 rounded text-xs">@anthropic-ai/sdk</code>.</p>
+                        <p class="text-sm text-stone-600 mt-2" data-i18n-html="sec.bundled.api.desc">Carrega referência da API Anthropic e Agent SDK. Ativa automaticamente quando o código importa <code class="font-mono bg-stone-100 px-1 rounded text-xs">anthropic</code> ou <code class="font-mono bg-stone-100 px-1 rounded text-xs">@anthropic-ai/sdk</code>.</p>
                         <div id="detail-api" class="hidden mt-4 pt-4 border-t border-stone-100">
-                            <p class="text-xs text-stone-500">Exemplo clássico de invocação automática: você abre um arquivo que importa o SDK Anthropic e o Claude já sabe a documentação da API sem você precisar pedir.</p>
+                            <p class="text-xs text-stone-500" data-i18n="sec.bundled.api.detail">Exemplo clássico de invocação automática: você abre um arquivo que importa o SDK Anthropic e o Claude já sabe a documentação da API sem você precisar pedir.</p>
                         </div>
                     </div>
                 </div>
@@ -583,43 +536,43 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
             <!-- ============================================================ -->
             <section id="sec-invocacao" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🕹️ Modos de Invocação</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🕹️</span> <span data-i18n="sec.invocacao.h2">Modos de Invocação</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.invocacao.intro">
                         Dois campos de frontmatter controlam quem pode acionar uma skill. Entendê-los é fundamental para criar skills que se comportam como você espera.
                     </p>
                 </div>
 
                 <!-- Invocation matrix -->
                 <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
-                    <h3 class="font-bold text-stone-800 mb-4 text-sm">Matriz de Invocação</h3>
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm" data-i18n="sec.invocacao.matrix.title">Matriz de Invocação</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead>
                                 <tr class="border-b-2 border-stone-200">
                                     <th class="text-left py-3 pr-4 text-stone-500 font-semibold">Frontmatter</th>
-                                    <th class="text-center py-3 pr-4 text-stone-500 font-semibold">Você invoca</th>
-                                    <th class="text-center py-3 pr-4 text-stone-500 font-semibold">Claude invoca</th>
-                                    <th class="text-left py-3 text-stone-500 font-semibold">Quando usar</th>
+                                    <th class="text-center py-3 pr-4 text-stone-500 font-semibold" data-i18n="sec.invocacao.matrix.th.you">Você invoca</th>
+                                    <th class="text-center py-3 pr-4 text-stone-500 font-semibold" data-i18n="sec.invocacao.matrix.th.claude">Claude invoca</th>
+                                    <th class="text-left py-3 text-stone-500 font-semibold" data-i18n="sec.invocacao.matrix.th.when">Quando usar</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-stone-100">
                                 <tr class="invoke-row">
-                                    <td class="py-3 pr-4 font-mono text-stone-600">(padrão)</td>
-                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold">✅ Sim</td>
-                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold">✅ Sim</td>
-                                    <td class="py-3 text-stone-600">Skills de referência ou conhecimento que Claude deve aplicar quando relevante.</td>
+                                    <td class="py-3 pr-4 font-mono text-stone-600" data-i18n="sec.invocacao.matrix.default.fm">(padrão)</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold" data-i18n="sec.invocacao.matrix.default.you">✅ Sim</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold" data-i18n="sec.invocacao.matrix.default.claude">✅ Sim</td>
+                                    <td class="py-3 text-stone-600" data-i18n="sec.invocacao.matrix.default.when">Skills de referência ou conhecimento que Claude deve aplicar quando relevante.</td>
                                 </tr>
                                 <tr class="invoke-row">
                                     <td class="py-3 pr-4 font-mono" style="color:#4f46e5">disable-model-invocation: true</td>
-                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold">✅ Sim</td>
-                                    <td class="py-3 pr-4 text-center text-red-500 font-bold">❌ Não</td>
-                                    <td class="py-3 text-stone-600">Workflows com efeitos colaterais: <code class="font-mono bg-stone-100 px-1 rounded">/deploy</code>, <code class="font-mono bg-stone-100 px-1 rounded">/commit</code>, <code class="font-mono bg-stone-100 px-1 rounded">/send-slack</code>. Você controla quando rodar.</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold" data-i18n="sec.invocacao.matrix.disable.you">✅ Sim</td>
+                                    <td class="py-3 pr-4 text-center text-red-500 font-bold" data-i18n="sec.invocacao.matrix.disable.claude">❌ Não</td>
+                                    <td class="py-3 text-stone-600" data-i18n-html="sec.invocacao.matrix.disable.when">Workflows com efeitos colaterais: <code class="font-mono bg-stone-100 px-1 rounded">/deploy</code>, <code class="font-mono bg-stone-100 px-1 rounded">/commit</code>, <code class="font-mono bg-stone-100 px-1 rounded">/send-slack</code>. Você controla quando rodar.</td>
                                 </tr>
                                 <tr class="invoke-row">
                                     <td class="py-3 pr-4 font-mono" style="color:#4f46e5">user-invocable: false</td>
-                                    <td class="py-3 pr-4 text-center text-red-500 font-bold">❌ Não</td>
-                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold">✅ Sim</td>
-                                    <td class="py-3 text-stone-600">Conhecimento de contexto que Claude usa internamente. Ex: <code class="font-mono bg-stone-100 px-1 rounded">legacy-system-context</code> — não faz sentido como ação para o dev.</td>
+                                    <td class="py-3 pr-4 text-center text-red-500 font-bold" data-i18n="sec.invocacao.matrix.userinv.you">❌ Não</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold" data-i18n="sec.invocacao.matrix.userinv.claude">✅ Sim</td>
+                                    <td class="py-3 text-stone-600" data-i18n-html="sec.invocacao.matrix.userinv.when">Conhecimento de contexto que Claude usa internamente. Ex: <code class="font-mono bg-stone-100 px-1 rounded">legacy-system-context</code> — não faz sentido como ação para o dev.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -629,7 +582,7 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                 <!-- Examples side by side -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <p class="text-xs font-bold text-stone-400 uppercase mb-2">Skill manual: apenas você aciona</p>
+                        <p class="text-xs font-bold text-stone-400 uppercase mb-2" data-i18n="sec.invocacao.example.manual.label">Skill manual: apenas você aciona</p>
                         <pre class="text-xs">---
 <span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">deploy</span>
 <span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Deploy para produção</span>
@@ -641,10 +594,10 @@ Deploy <span style="color:#fb923c">$ARGUMENTS</span> para produção:
 2. Build da aplicação
 3. Push para o target
 4. Verifique a saúde</pre>
-                        <p class="text-xs text-stone-500 mt-2">O Claude <strong>nunca decide fazer um deploy por conta</strong> mesmo que o código pareça pronto.</p>
+                        <p class="text-xs text-stone-500 mt-2" data-i18n-html="sec.invocacao.example.manual.note">O Claude <strong>nunca decide fazer um deploy por conta</strong> mesmo que o código pareça pronto.</p>
                     </div>
                     <div>
-                        <p class="text-xs font-bold text-stone-400 uppercase mb-2">Skill de contexto: apenas Claude usa</p>
+                        <p class="text-xs font-bold text-stone-400 uppercase mb-2" data-i18n="sec.invocacao.example.context.label">Skill de contexto: apenas Claude usa</p>
                         <pre class="text-xs">---
 <span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">legacy-context</span>
 <span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Contexto do sistema legado.</span>
@@ -657,7 +610,7 @@ O módulo de pagamento usa SOAP
 porque o banco parceiro não suporta
 REST. Não tente refatorar para HTTP
 sem falar com o time de integração.</pre>
-                        <p class="text-xs text-stone-500 mt-2">O Claude carrega esse contexto ao trabalhar em pagamentos. <code>/legacy-context</code> não aparece no menu.</p>
+                        <p class="text-xs text-stone-500 mt-2" data-i18n-html="sec.invocacao.example.context.note">O Claude carrega esse contexto ao trabalhar em pagamentos. <code>/legacy-context</code> não aparece no menu.</p>
                     </div>
                 </div>
             </section>
@@ -667,19 +620,19 @@ sem falar com o time de integração.</pre>
             <!-- ============================================================ -->
             <section id="sec-criando" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🛠️ Criando sua Skill</h2>
-                    <p class="text-stone-600">Do zero a uma skill funcional compartilhada com o time em 4 passos.</p>
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🛠️</span> <span data-i18n="sec.criando.h2">Criando sua Skill</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.criando.intro">Do zero a uma skill funcional compartilhada com o time em 4 passos.</p>
                 </div>
 
                 <div class="flex flex-col gap-4 mb-6">
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">1</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Crie o diretório da skill</h4>
-                            <p class="text-sm text-stone-600 mb-3">O nome do diretório vira o comando slash. <code class="font-mono bg-stone-100 px-1 rounded text-xs">review-pr/</code> → <code class="font-mono bg-stone-100 px-1 rounded text-xs">/review-pr</code>.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.criando.step.1.title">Crie o diretório da skill</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.criando.step.1.desc">O nome do diretório vira o comando slash. <code class="font-mono bg-stone-100 px-1 rounded text-xs">review-pr/</code> → <code class="font-mono bg-stone-100 px-1 rounded text-xs">/review-pr</code>.</p>
                             <div class="flex gap-2 items-center">
                                 <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">mkdir -p .claude/skills/review-pr</pre>
-                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('mkdir -p .claude/skills/review-pr')">copiar</button>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('mkdir -p .claude/skills/review-pr')" data-i18n="common.copy">copiar</button>
                             </div>
                         </div>
                     </div>
@@ -687,8 +640,8 @@ sem falar com o time de integração.</pre>
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">2</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Escreva o <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> com frontmatter</h4>
-                            <p class="text-sm text-stone-600 mb-3">A <code class="font-mono bg-stone-100 px-1 rounded text-xs">description</code> é o campo mais importante — é ela que diz ao Claude quando usar a skill automaticamente.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n-html="sec.criando.step.2.title">Escreva o <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> com frontmatter</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.criando.step.2.desc">A <code class="font-mono bg-stone-100 px-1 rounded text-xs">description</code> é o campo mais importante — é ela que diz ao Claude quando usar a skill automaticamente.</p>
                             <pre class="text-xs">---
 <span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">review-pr</span>
 <span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisa PRs com foco em segurança</span>
@@ -714,20 +667,20 @@ Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">3</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Teste e refine</h4>
-                            <p class="text-sm text-stone-600">Execute com um PR real do time. Avalie se o output é preciso e específico para o seu stack. Itere 2–3 vezes na description e nas instruções até o resultado ser confiável.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.criando.step.3.title">Teste e refine</h4>
+                            <p class="text-sm text-stone-600" data-i18n="sec.criando.step.3.desc">Execute com um PR real do time. Avalie se o output é preciso e específico para o seu stack. Itere 2–3 vezes na description e nas instruções até o resultado ser confiável.</p>
                         </div>
                     </div>
 
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">4</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Versione e compartilhe</h4>
-                            <p class="text-sm text-stone-600 mb-3">Comite o diretório <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/skills/</code>. Ao clonar o repositório, todo dev já tem a skill disponível. Trate skills como documentação executável — atualize junto com o código.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.criando.step.4.title">Versione e compartilhe</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.criando.step.4.desc">Comite o diretório <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/skills/</code>. Ao clonar o repositório, todo dev já tem a skill disponível. Trate skills como documentação executável — atualize junto com o código.</p>
                             <div class="flex gap-2 items-center">
                                 <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">git add .claude/skills/review-pr/
 git commit -m "feat: add /review-pr skill"</pre>
-                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('git add .claude/skills/review-pr/\ngit commit -m \"feat: add /review-pr skill\"')">copiar</button>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('git add .claude/skills/review-pr/\ngit commit -m \"feat: add /review-pr skill\"')" data-i18n="common.copy">copiar</button>
                             </div>
                         </div>
                     </div>
@@ -740,8 +693,8 @@ git commit -m "feat: add /review-pr skill"</pre>
             <!-- ============================================================ -->
             <section id="sec-subskills" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🗃️ Sub-Skills &amp; o Padrão Índice</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🗃️</span> <span data-i18n="sec.subskills.h2">Sub-Skills &amp; o Padrão Índice</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.subskills.intro">
                         Uma skill não precisa saber tudo de uma vez. Quando o domínio é grande — uma biblioteca UI, um sistema de design, uma API com dezenas de endpoints — carregar tudo no contexto seria desperdício. O <strong>Padrão Índice</strong> resolve isso: o <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> vira um mapa leve que aponta para arquivos detalhados. O Claude carrega apenas o que a tarefa requer.
                     </p>
                 </div>
@@ -749,7 +702,7 @@ git commit -m "feat: add /review-pr skill"</pre>
                 <!-- The problem -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     <div class="p-5 rounded-2xl border-2 border-red-100 bg-red-50">
-                        <h3 class="font-bold text-red-700 text-sm mb-3">❌ Sem o padrão índice</h3>
+                        <h3 class="font-bold text-red-700 text-sm mb-3"><span>❌</span> <span data-i18n="sec.subskills.without.title">Sem o padrão índice</span></h3>
                         <pre class="text-xs mb-3">.claude/skills/
 ├── button/SKILL.md      <span style="color:#f87171"># 300 linhas</span>
 ├── modal/SKILL.md       <span style="color:#f87171"># 280 linhas</span>
@@ -757,10 +710,10 @@ git commit -m "feat: add /review-pr skill"</pre>
 ├── data-grid/SKILL.md   <span style="color:#f87171"># 500 linhas</span>
 ├── form/SKILL.md        <span style="color:#f87171"># 350 linhas</span>
 └── tooltip/SKILL.md     <span style="color:#f87171"># 180 linhas</span></pre>
-                        <p class="text-xs text-red-800 leading-relaxed">Todas as descriptions são carregadas no contexto ao iniciar a sessão. Com 6 skills detalhadas, você consome centenas de tokens antes de digitar uma linha.</p>
+                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.subskills.without.desc">Todas as descriptions são carregadas no contexto ao iniciar a sessão. Com 6 skills detalhadas, você consome centenas de tokens antes de digitar uma linha.</p>
                     </div>
                     <div class="p-5 rounded-2xl border-2 border-emerald-200 bg-emerald-50">
-                        <h3 class="font-bold text-emerald-700 text-sm mb-3">✅ Com o padrão índice</h3>
+                        <h3 class="font-bold text-emerald-700 text-sm mb-3"><span>✅</span> <span data-i18n="sec.subskills.with.title">Com o padrão índice</span></h3>
                         <pre class="text-xs mb-3">.claude/skills/
 └── <span style="color:#6ee7b7">ui-library/</span>
     ├── <span style="color:#6ee7b7">SKILL.md</span>         <span style="color:#a7f3d0"># ~30 linhas — índice</span>
@@ -770,38 +723,38 @@ git commit -m "feat: add /review-pr skill"</pre>
     ├── data-grid.md     <span style="color:#a7f3d0"># carregado sob demanda</span>
     ├── form.md          <span style="color:#a7f3d0"># carregado sob demanda</span>
     └── tooltip.md       <span style="color:#a7f3d0"># carregado sob demanda</span></pre>
-                        <p class="text-xs text-emerald-800 leading-relaxed">Apenas a description da skill <code class="font-mono bg-emerald-100 px-1 rounded">ui-library</code> entra no contexto inicial. O conteúdo detalhado de cada componente só é lido quando o Claude precisa.</p>
+                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n-html="sec.subskills.with.desc">Apenas a description da skill <code class="font-mono bg-emerald-100 px-1 rounded">ui-library</code> entra no contexto inicial. O conteúdo detalhado de cada componente só é lido quando o Claude precisa.</p>
                     </div>
                 </div>
 
                 <!-- How it works: flow diagram -->
                 <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
-                    <h3 class="font-bold text-stone-800 mb-4 text-sm">Como funciona em runtime</h3>
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm" data-i18n="sec.subskills.flow.title">Como funciona em runtime</h3>
                     <div class="flex flex-col gap-3">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#4f46e5">1</div>
-                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200 text-xs text-stone-700">
+                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200 text-xs text-stone-700" data-i18n-html="sec.subskills.flow.step.1">
                                 <strong>Sessão inicia</strong> — apenas a description de <code class="font-mono bg-stone-100 px-1 rounded">ui-library</code> é carregada: <em>"Guia da biblioteca UI. Use ao trabalhar com Button, Modal, Table, DataGrid, Form, Tooltip."</em>
                             </div>
                         </div>
                         <div class="ml-4 border-l-2 border-dashed border-stone-300 h-4"></div>
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#4f46e5">2</div>
-                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200 text-xs text-stone-700">
+                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200 text-xs text-stone-700" data-i18n-html="sec.subskills.flow.step.2">
                                 <strong>Você pede:</strong> <em>"Cria um DataGrid com seleção múltipla e ordenação por coluna"</em>
                             </div>
                         </div>
                         <div class="ml-4 border-l-2 border-dashed border-stone-300 h-4"></div>
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#4f46e5">3</div>
-                            <div class="flex-1 p-3 bg-indigo-50 rounded-lg border border-indigo-100 text-xs text-indigo-800">
+                            <div class="flex-1 p-3 bg-indigo-50 rounded-lg border border-indigo-100 text-xs text-indigo-800" data-i18n-html="sec.subskills.flow.step.3">
                                 <strong>Claude invoca a skill</strong> e lê o <code class="font-mono bg-indigo-100 px-1 rounded">SKILL.md</code> (índice). Identifica que a tarefa é sobre DataGrid → lê apenas <code class="font-mono bg-indigo-100 px-1 rounded">data-grid.md</code>.
                             </div>
                         </div>
                         <div class="ml-4 border-l-2 border-dashed border-stone-300 h-4"></div>
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#059669">4</div>
-                            <div class="flex-1 p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-xs text-emerald-800">
+                            <div class="flex-1 p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-xs text-emerald-800" data-i18n-html="sec.subskills.flow.step.4">
                                 <strong>Executa a tarefa</strong> com conhecimento completo sobre DataGrid — sem ter carregado Button, Modal, Form ou qualquer outro componente.
                             </div>
                         </div>
@@ -812,7 +765,7 @@ git commit -m "feat: add /review-pr skill"</pre>
                 <div class="mb-6">
                     <div class="flex items-center justify-between mb-2">
                         <p class="text-xs font-bold text-stone-400 uppercase">.claude/skills/ui-library/SKILL.md — o índice</p>
-                        <button class="copy-btn" onclick="copyCode('subskill-index')">copiar</button>
+                        <button class="copy-btn" onclick="copyCode('subskill-index')" data-i18n="common.copy">copiar</button>
                     </div>
                     <pre id="subskill-index" class="text-xs leading-relaxed">---
 <span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">ui-library</span>
@@ -850,7 +803,7 @@ git commit -m "feat: add /review-pr skill"</pre>
                 <div class="mb-6">
                     <div class="flex items-center justify-between mb-2">
                         <p class="text-xs font-bold text-stone-400 uppercase">.claude/skills/ui-library/data-grid.md — sub-skill detalhada</p>
-                        <button class="copy-btn" onclick="copyCode('subskill-detail')">copiar</button>
+                        <button class="copy-btn" onclick="copyCode('subskill-detail')" data-i18n="common.copy">copiar</button>
                     </div>
                     <pre id="subskill-detail" class="text-xs leading-relaxed"><span style="color:#78716c"># DataGrid — Guia completo</span>
 
@@ -885,8 +838,8 @@ Nunca renderize DataGrid sem dados — use o esqueleto nativo.
                 <div class="p-5 rounded-xl border border-indigo-200 bg-indigo-50 flex gap-4 items-start">
                     <span class="text-2xl flex-shrink-0">💡</span>
                     <div>
-                        <h4 class="font-bold text-indigo-900 mb-1">O ganho não é só tokens — é qualidade</h4>
-                        <p class="text-sm text-indigo-800 leading-relaxed">Quando o Claude foca apenas no sub-skill relevante, ele lê o documento <em>inteiro e com atenção</em> — sem dividir atenção com 5 outros componentes que não têm nada a ver com a tarefa. O resultado é mais preciso, menos alucinação de props, e convenções seguidas corretamente.</p>
+                        <h4 class="font-bold text-indigo-900 mb-1" data-i18n="sec.subskills.insight.title">O ganho não é só tokens — é qualidade</h4>
+                        <p class="text-sm text-indigo-800 leading-relaxed" data-i18n-html="sec.subskills.insight.desc">Quando o Claude foca apenas no sub-skill relevante, ele lê o documento <em>inteiro e com atenção</em> — sem dividir atenção com 5 outros componentes que não têm nada a ver com a tarefa. O resultado é mais preciso, menos alucinação de props, e convenções seguidas corretamente.</p>
                     </div>
                 </div>
             </section>
@@ -895,20 +848,20 @@ Nunca renderize DataGrid sem dados — use o esqueleto nativo.
             <!-- ============================================================ -->
             <section id="sec-avancado" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🚀 Padrões Avançados</h2>
-                    <p class="text-stone-600">Recursos que ampliam o que skills conseguem fazer além de instruções simples.</p>
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.avancado.h2">Padrões Avançados</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.avancado.intro">Recursos que ampliam o que skills conseguem fazer além de instruções simples.</p>
                 </div>
 
                 <!-- Tabs -->
                 <div class="flex gap-2 mb-6">
-                    <button onclick="showAdvTab('injection')" id="tab-injection" class="tab-btn active text-sm px-4 py-2 rounded-lg border border-stone-200">Injeção de Contexto</button>
-                    <button onclick="showAdvTab('fork')" id="tab-fork" class="tab-btn text-sm px-4 py-2 rounded-lg border border-stone-200">Subagente Isolado</button>
-                    <button onclick="showAdvTab('files')" id="tab-files" class="tab-btn text-sm px-4 py-2 rounded-lg border border-stone-200">Arquivos de Suporte</button>
+                    <button onclick="showAdvTab('injection')" id="tab-injection" class="tab-btn active text-sm px-4 py-2 rounded-lg border border-stone-200" data-i18n="sec.avancado.tab.injection">Injeção de Contexto</button>
+                    <button onclick="showAdvTab('fork')" id="tab-fork" class="tab-btn text-sm px-4 py-2 rounded-lg border border-stone-200" data-i18n="sec.avancado.tab.fork">Subagente Isolado</button>
+                    <button onclick="showAdvTab('files')" id="tab-files" class="tab-btn text-sm px-4 py-2 rounded-lg border border-stone-200" data-i18n="sec.avancado.tab.files">Arquivos de Suporte</button>
                 </div>
 
                 <!-- Injection tab -->
                 <div id="adv-injection" class="block">
-                    <p class="text-sm text-stone-600 mb-4 leading-relaxed">
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n-html="sec.avancado.injection.intro">
                         A sintaxe <code class="font-mono bg-stone-100 px-1 rounded text-xs">!`comando`</code> executa um shell command <strong>antes</strong> do conteúdo ser enviado ao Claude. O output substitui o placeholder — o Claude recebe dados reais, não o comando em si.
                     </p>
                     <pre class="text-xs mb-4">---
@@ -927,14 +880,14 @@ Nunca renderize DataGrid sem dados — use o esqueleto nativo.
 ## Tarefa
 Resuma este PR: o que mudou, por que,
 e quais riscos existem.</pre>
-                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 text-xs text-stone-600">
+                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 text-xs text-stone-600" data-i18n-html="sec.avancado.injection.how">
                         <strong>Como funciona:</strong> Cada <code class="font-mono bg-white px-1 rounded">!`comando`</code> executa imediatamente (pré-processamento). O output é injetado no prompt. O Claude recebe o resultado final com dados reais — não vê os comandos em si.
                     </div>
                 </div>
 
                 <!-- Fork tab -->
                 <div id="adv-fork" class="hidden">
-                    <p class="text-sm text-stone-600 mb-4 leading-relaxed">
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n-html="sec.avancado.fork.intro">
                         <code class="font-mono bg-stone-100 px-1 rounded text-xs">context: fork</code> executa a skill em um <strong>subagente isolado</strong>. O conteúdo do <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> vira o prompt que direciona o subagente, sem acesso ao histórico da conversa principal.
                     </p>
                     <pre class="text-xs mb-4">---
@@ -951,23 +904,23 @@ Pesquise <span style="color:#fb923c">$ARGUMENTS</span> em profundidade:
 3. Resuma os achados com referências de arquivo</pre>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                         <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
-                            <strong class="text-indigo-700 block mb-1">1. Contexto isolado</strong>
-                            <p class="text-indigo-800">Subagente não tem acesso ao histórico da sessão principal.</p>
+                            <strong class="text-indigo-700 block mb-1" data-i18n="sec.avancado.fork.card.1.title">1. Contexto isolado</strong>
+                            <p class="text-indigo-800" data-i18n="sec.avancado.fork.card.1.desc">Subagente não tem acesso ao histórico da sessão principal.</p>
                         </div>
                         <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
-                            <strong class="text-indigo-700 block mb-1">2. Agent define ferramentas</strong>
-                            <p class="text-indigo-800"><code>agent: Explore</code> → ferramentas de leitura otimizadas para exploração.</p>
+                            <strong class="text-indigo-700 block mb-1" data-i18n="sec.avancado.fork.card.2.title">2. Agent define ferramentas</strong>
+                            <p class="text-indigo-800" data-i18n-html="sec.avancado.fork.card.2.desc"><code>agent: Explore</code> → ferramentas de leitura otimizadas para exploração.</p>
                         </div>
                         <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
-                            <strong class="text-indigo-700 block mb-1">3. Resultado retorna</strong>
-                            <p class="text-indigo-800">O output do subagente é resumido e devolvido para a conversa principal.</p>
+                            <strong class="text-indigo-700 block mb-1" data-i18n="sec.avancado.fork.card.3.title">3. Resultado retorna</strong>
+                            <p class="text-indigo-800" data-i18n="sec.avancado.fork.card.3.desc">O output do subagente é resumido e devolvido para a conversa principal.</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Files tab -->
                 <div id="adv-files" class="hidden">
-                    <p class="text-sm text-stone-600 mb-4 leading-relaxed">
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n-html="sec.avancado.files.intro">
                         O diretório da skill pode ter arquivos de suporte. O <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> referencia eles — o Claude os carrega <strong>somente quando necessário</strong>, mantendo o contexto enxuto.
                     </p>
                     <pre class="text-xs mb-4">.claude/skills/review-pr/
@@ -976,7 +929,7 @@ Pesquise <span style="color:#fb923c">$ARGUMENTS</span> em profundidade:
 ├── <span style="color:#fbbf24">examples.md</span>        <span style="color:#78716c"># exemplos de output esperado</span>
 └── scripts/
     └── <span style="color:#fbbf24">fetch-pr.sh</span>    <span style="color:#78716c"># script executável — não carregado, executado</span></pre>
-                    <p class="text-xs font-bold text-stone-400 uppercase mb-2">Referenciando em SKILL.md</p>
+                    <p class="text-xs font-bold text-stone-400 uppercase mb-2" data-i18n="sec.avancado.files.ref.label">Referenciando em SKILL.md</p>
                     <pre class="text-xs">## Recursos adicionais
 
 Para regras completas de segurança, veja
@@ -984,7 +937,7 @@ Para regras completas de segurança, veja
 
 Para exemplos de output esperado, veja
 [examples.md](examples.md).</pre>
-                    <p class="text-xs text-stone-500 mt-3">Documentação detalhada, specs de API, ou coleções de exemplos não precisam ser carregados toda vez que a skill roda. Isso evita consumo desnecessário de contexto.</p>
+                    <p class="text-xs text-stone-500 mt-3" data-i18n="sec.avancado.files.note">Documentação detalhada, specs de API, ou coleções de exemplos não precisam ser carregados toda vez que a skill roda. Isso evita consumo desnecessário de contexto.</p>
                 </div>
             </section>
 
@@ -993,39 +946,39 @@ Para exemplos de output esperado, veja
             <!-- ============================================================ -->
             <section id="sec-limites" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚠️ Limites &amp; Cuidados</h2>
-                    <p class="text-stone-600">Skills mal configuradas criam comportamentos inesperados — especialmente com invocação automática.</p>
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.limites.h2">Limites &amp; Cuidados</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.limites.intro">Skills mal configuradas criam comportamentos inesperados — especialmente com invocação automática.</p>
                 </div>
 
                 <div class="flex flex-col gap-4 mb-8">
                     <div class="antipattern-wrong p-4 bg-red-50 rounded-xl">
-                        <h4 class="font-bold text-red-700 text-sm mb-2">❌ Description vaga → Claude usa quando não deve</h4>
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.1.title">Description vaga → Claude usa quando não deve</span></h4>
                         <pre class="text-xs">description: Analisa código.</pre>
-                        <p class="text-xs text-red-800 mt-2">O Claude vai interpretar isso como relevante para qualquer coisa envolvendo código — a skill dispara em contextos que você não previa.</p>
+                        <p class="text-xs text-red-800 mt-2" data-i18n="sec.limites.anti.1.desc">O Claude vai interpretar isso como relevante para qualquer coisa envolvendo código — a skill dispara em contextos que você não previa.</p>
                     </div>
                     <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
-                        <h4 class="font-bold text-emerald-700 text-sm mb-2">✅ Description com gatilhos específicos</h4>
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.fix.1.title">Description com gatilhos específicos</span></h4>
                         <pre class="text-xs">description: Revisa PRs de APIs REST em busca de problemas de
   segurança e performance. Use ao revisar um pull request ou
   quando o usuário pedir para analisar um diff.</pre>
                     </div>
 
                     <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
-                        <h4 class="font-bold text-red-700 text-sm mb-2">❌ Skill de deploy sem <code class="font-mono bg-red-100 px-1 rounded">disable-model-invocation</code></h4>
-                        <p class="text-xs text-red-800">O Claude pode decidir executar um deploy por conta própria ao detectar que "o código parece pronto". Workflows com efeitos colaterais irreversíveis <strong>sempre</strong> precisam de <code class="font-mono bg-red-100 px-1 rounded text-xs">disable-model-invocation: true</code>.</p>
+                        <h4 class="font-bold text-red-700 text-sm mb-2" data-i18n-html="sec.limites.anti.2.title"><span>❌</span> Skill de deploy sem <code class="font-mono bg-red-100 px-1 rounded">disable-model-invocation</code></h4>
+                        <p class="text-xs text-red-800" data-i18n-html="sec.limites.anti.2.desc">O Claude pode decidir executar um deploy por conta própria ao detectar que "o código parece pronto". Workflows com efeitos colaterais irreversíveis <strong>sempre</strong> precisam de <code class="font-mono bg-red-100 px-1 rounded text-xs">disable-model-invocation: true</code>.</p>
                     </div>
                     <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
-                        <h4 class="font-bold text-emerald-700 text-sm mb-2">✅ Separar skills de conhecimento de skills de ação</h4>
-                        <p class="text-xs text-emerald-800">Skills que <em>informam</em> (convenções, contexto legado) → deixe o Claude invocar. Skills que <em>agem</em> (deploy, commit, enviar mensagem) → <code class="font-mono bg-emerald-100 px-1 rounded text-xs">disable-model-invocation: true</code>.</p>
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.fix.2.title">Separar skills de conhecimento de skills de ação</span></h4>
+                        <p class="text-xs text-emerald-800" data-i18n-html="sec.limites.fix.2.desc">Skills que <em>informam</em> (convenções, contexto legado) → deixe o Claude invocar. Skills que <em>agem</em> (deploy, commit, enviar mensagem) → <code class="font-mono bg-emerald-100 px-1 rounded text-xs">disable-model-invocation: true</code>.</p>
                     </div>
 
                     <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
-                        <h4 class="font-bold text-red-700 text-sm mb-2">❌ Skill com <code class="font-mono bg-red-100 px-1 rounded">context: fork</code> sem tarefa clara</h4>
-                        <p class="text-xs text-red-800">Um <code class="font-mono bg-red-100 px-1 rounded text-xs">context: fork</code> em uma skill de guias de estilo ("use estas convenções…") faz o subagente receber diretrizes mas nenhuma tarefa acionável — retorna sem fazer nada.</p>
+                        <h4 class="font-bold text-red-700 text-sm mb-2" data-i18n-html="sec.limites.anti.3.title"><span>❌</span> Skill com <code class="font-mono bg-red-100 px-1 rounded">context: fork</code> sem tarefa clara</h4>
+                        <p class="text-xs text-red-800" data-i18n-html="sec.limites.anti.3.desc">Um <code class="font-mono bg-red-100 px-1 rounded text-xs">context: fork</code> em uma skill de guias de estilo ("use estas convenções…") faz o subagente receber diretrizes mas nenhuma tarefa acionável — retorna sem fazer nada.</p>
                     </div>
                     <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
-                        <h4 class="font-bold text-emerald-700 text-sm mb-2">✅ <code class="font-mono bg-emerald-100 px-1 rounded">context: fork</code> apenas para tarefas com instruções explícitas</h4>
-                        <p class="text-xs text-emerald-800">Use fork para skills que têm uma tarefa clara: pesquisa, geração de relatório, execução de script. Para conhecimento de referência, use o modo padrão (inline).</p>
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2" data-i18n-html="sec.limites.fix.3.title"><span>✅</span> <code class="font-mono bg-emerald-100 px-1 rounded">context: fork</code> apenas para tarefas com instruções explícitas</h4>
+                        <p class="text-xs text-emerald-800" data-i18n="sec.limites.fix.3.desc">Use fork para skills que têm uma tarefa clara: pesquisa, geração de relatório, execução de script. Para conhecimento de referência, use o modo padrão (inline).</p>
                     </div>
                 </div>
 
@@ -1033,8 +986,8 @@ Para exemplos de output esperado, veja
                 <div class="p-5 rounded-xl border border-amber-200 bg-amber-50 flex gap-4 items-start">
                     <span class="text-2xl flex-shrink-0">🧠</span>
                     <div>
-                        <h4 class="font-bold text-amber-900 mb-1">Budget de contexto de skills</h4>
-                        <p class="text-sm text-amber-800 leading-relaxed">As descriptions das skills são carregadas no contexto para o Claude saber o que está disponível. Com muitas skills, elas podem exceder o budget (2% da janela de contexto, máx. ~16.000 chars). Execute <code class="font-mono bg-amber-100 px-1 rounded text-xs">/context</code> para verificar se há skills sendo excluídas.</p>
+                        <h4 class="font-bold text-amber-900 mb-1" data-i18n="sec.limites.budget.title">Budget de contexto de skills</h4>
+                        <p class="text-sm text-amber-800 leading-relaxed" data-i18n-html="sec.limites.budget.desc">As descriptions das skills são carregadas no contexto para o Claude saber o que está disponível. Com muitas skills, elas podem exceder o budget (2% da janela de contexto, máx. ~16.000 chars). Execute <code class="font-mono bg-amber-100 px-1 rounded text-xs">/context</code> para verificar se há skills sendo excluídas.</p>
                     </div>
                 </div>
             </section>
@@ -1044,19 +997,19 @@ Para exemplos de output esperado, veja
             <!-- ============================================================ -->
             <section id="sec-proximos" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📋 Próximos Passos</h2>
-                    <p class="text-stone-600">Uma skill simples esta semana. Um catálogo do time no próximo mês.</p>
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📋</span> <span data-i18n="sec.proximos.h2">Próximos Passos</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.proximos.intro">Uma skill simples esta semana. Um catálogo do time no próximo mês.</p>
                 </div>
 
                 <div class="flex flex-col gap-4 mb-8">
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">1</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Explore as skills nativas que já estão disponíveis</h4>
-                            <p class="text-sm text-stone-600 mb-2">Antes de criar qualquer coisa, teste <code class="font-mono bg-stone-100 px-1 rounded text-xs">/simplify</code> no seu projeto atual. Veja como o padrão de skill funciona na prática.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.1.title">Explore as skills nativas que já estão disponíveis</h4>
+                            <p class="text-sm text-stone-600 mb-2" data-i18n-html="sec.proximos.step.1.desc">Antes de criar qualquer coisa, teste <code class="font-mono bg-stone-100 px-1 rounded text-xs">/simplify</code> no seu projeto atual. Veja como o padrão de skill funciona na prática.</p>
                             <div class="flex gap-2 items-center">
                                 <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">/simplify</pre>
-                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('/simplify')">copiar</button>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('/simplify')" data-i18n="common.copy">copiar</button>
                             </div>
                         </div>
                     </div>
@@ -1064,12 +1017,12 @@ Para exemplos de output esperado, veja
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">2</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Crie sua primeira skill de conhecimento</h4>
-                            <p class="text-sm text-stone-600 mb-2">Comece com uma skill de contexto sem efeitos colaterais. Ex: convenções do seu projeto que o Claude deve sempre respeitar ao editar código.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.2.title">Crie sua primeira skill de conhecimento</h4>
+                            <p class="text-sm text-stone-600 mb-2" data-i18n="sec.proximos.step.2.desc">Comece com uma skill de contexto sem efeitos colaterais. Ex: convenções do seu projeto que o Claude deve sempre respeitar ao editar código.</p>
                             <div class="flex gap-2 items-center">
                                 <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">mkdir -p .claude/skills/project-conventions
 touch .claude/skills/project-conventions/SKILL.md</pre>
-                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('mkdir -p .claude/skills/project-conventions\ntouch .claude/skills/project-conventions/SKILL.md')">copiar</button>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('mkdir -p .claude/skills/project-conventions\ntouch .claude/skills/project-conventions/SKILL.md')" data-i18n="common.copy">copiar</button>
                             </div>
                         </div>
                     </div>
@@ -1077,38 +1030,44 @@ touch .claude/skills/project-conventions/SKILL.md</pre>
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">3</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Crie uma skill de ação com <code class="font-mono bg-stone-100 px-1 rounded text-xs">disable-model-invocation: true</code></h4>
-                            <p class="text-sm text-stone-600">Escolha uma tarefa que você repete manualmente: review de PR, mensagem de commit, checklist de deploy. Configure <code class="font-mono bg-stone-100 px-1 rounded text-xs">disable-model-invocation: true</code> para manter controle total.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n-html="sec.proximos.step.3.title">Crie uma skill de ação com <code class="font-mono bg-stone-100 px-1 rounded text-xs">disable-model-invocation: true</code></h4>
+                            <p class="text-sm text-stone-600" data-i18n-html="sec.proximos.step.3.desc">Escolha uma tarefa que você repete manualmente: review de PR, mensagem de commit, checklist de deploy. Configure <code class="font-mono bg-stone-100 px-1 rounded text-xs">disable-model-invocation: true</code> para manter controle total.</p>
                         </div>
                     </div>
 
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">4</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Construa o catálogo com o time</h4>
-                            <p class="text-sm text-stone-600">Faça uma sessão de 30 min: "Qual tarefa repetitiva você quer delegar?" Cada resposta é uma skill em potencial. Distribua a criação, faça commit de <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/skills/</code> e compartilhe via git.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.4.title">Construa o catálogo com o time</h4>
+                            <p class="text-sm text-stone-600" data-i18n-html="sec.proximos.step.4.desc">Faça uma sessão de 30 min: "Qual tarefa repetitiva você quer delegar?" Cada resposta é uma skill em potencial. Distribua a criação, faça commit de <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/skills/</code> e compartilhe via git.</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Closing mantra -->
                 <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl shadow-xl" style="border-left: 8px solid #4f46e5">
-                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#a5b4fc">Mantra da Parte 6:</h4>
-                    <p class="text-lg italic font-serif">"Uma skill bem descrita não é um atalho — é o Claude aprendendo quando e como ajudar, sem você precisar pedir."</p>
+                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#a5b4fc" data-i18n="sec.proximos.mantra.label">Mantra da Parte 6:</h4>
+                    <p class="text-lg italic font-serif" data-i18n="sec.proximos.mantra.text">"Uma skill bem descrita não é um atalho — é o Claude aprendendo quando e como ajudar, sem você precisar pedir."</p>
                 </div>
             </section>
 
         </main>
     </div>
 
+    <!-- Session Complete -->
+    <div id="session-complete" class="hidden border-t border-stone-200 bg-stone-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
+            <span class="text-3xl mb-3 block">🎉</span>
+            <h3 class="text-xl font-bold text-stone-800 mb-2" data-i18n="complete.title">Sessão concluída!</h3>
+            <p class="text-stone-500 mb-6 text-sm" data-i18n="complete.desc">Você completou esta sessão. Continue para a próxima ou volte ao índice.</p>
+            <div class="flex items-center justify-center gap-3">
+                <a href="index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-lg text-sm font-semibold hover:bg-stone-700 transition-colors" data-i18n="complete.home">← Voltar ao índice</a>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ── Navigation ────────────────────────────────────────────────────
-        function navigate(sectionId) {
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`nav-${sectionId}`).classList.add('active');
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
-        }
+        // Navigation handled by nav.js — no page-specific hook needed
 
         // ── Frontmatter annotation data ───────────────────────────────────
         const fmData = {
@@ -1188,13 +1147,24 @@ touch .claude/skills/project-conventions/SKILL.md</pre>
             document.getElementById(`tab-${tab}`).classList.add('active');
         }
 
-        // ── Copy helper ───────────────────────────────────────────────────
-        function copyCode(id) {
-            navigator.clipboard.writeText(document.getElementById(id).innerText);
-        }
+        // copyCode() provided by nav.js
 
-        // ── Init ──────────────────────────────────────────────────────────
-        window.onload = () => navigate('conceito');
+        // Init handled by nav.js (auto-navigates to hash or first section)
     </script>
+
+    <!-- Footer -->
+    <footer class="border-t border-stone-200 mt-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-sm text-stone-400">
+                <span class="text-base">🎓</span>
+                <span data-i18n-html="footer.brand">Engineering Hour · By <a href="https://github.com/griiettner/ai-engineering-hour" target="_blank" class="underline hover:text-stone-600">Paulo Griiettner</a></span>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-stone-400">
+                <span data-i18n="footer.stack">HTML · Tailwind CSS · Chart.js</span>
+                <span>·</span>
+                <span data-i18n="footer.tagline">Sem build. Abra e use.</span>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

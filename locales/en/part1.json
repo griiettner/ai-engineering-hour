@@ -1,0 +1,167 @@
+{
+  "header.subtitle": "Module 1: Setup & Golden Rules",
+
+  "nav.group.fundamentals": "Fundamentals",
+  "nav.group.guardrails": "Guardrails",
+  "nav.group.execution": "Execution",
+  "nav.tools": "Tools",
+  "nav.context": "Context Window",
+  "nav.guardrails": "Guardrails per Tool",
+  "nav.trio": "The Essential Trio",
+  "nav.antipatterns": "Anti-Patterns",
+  "nav.workflow": "Workflow",
+  "nav.nextsteps": "Next Steps",
+
+  "sec.tools.h2": "IDE vs. CLI vs. Web",
+  "sec.tools.intro": "The first step to boosting productivity with AI is to <strong>leave the browser chat</strong>. Each interface has a different purpose — using the wrong one creates unnecessary friction and ignores the guardrails you defined for your project.",
+
+  "sec.tools.card.ide.title": "IDE",
+  "sec.tools.card.ide.subtitle": "Cursor / VS Code + Copilot",
+  "sec.tools.card.ide.li.1": "Generated code already follows your standards",
+  "sec.tools.card.ide.li.2": "No copy/paste — edits directly in the file",
+  "sec.tools.card.ide.li.3": "Autocomplete aware of the entire codebase",
+  "sec.tools.card.ide.usewhen": "<strong class=\"text-accent-green\">Use when:</strong> day-to-day development, incremental features, quick edits.",
+
+  "sec.tools.card.cli.title": "Agent CLI",
+  "sec.tools.card.cli.subtitle": "Claude Code / Gemini CLI",
+  "sec.tools.card.cli.li.1": "Executes batch tasks autonomously",
+  "sec.tools.card.cli.li.2": "Runs commands, tests, and linters on its own",
+  "sec.tools.card.cli.li.3": "Ideal for large refactors and migrations",
+  "sec.tools.card.cli.usewhen": "<strong class=\"text-accent-blue\">Use when:</strong> heavy automation, monorepo refactoring, multi-file tasks.",
+
+  "sec.tools.card.web.title": "Web Chat",
+  "sec.tools.card.web.subtitle": "Claude.ai / ChatGPT",
+  "sec.tools.card.web.li.1": "Constant loss of project context",
+  "sec.tools.card.web.li.2": "Indentation errors from copy/paste",
+  "sec.tools.card.web.li.3": "Completely ignores your Guardrails",
+  "sec.tools.card.web.usewhen": "<strong class=\"text-accent-red\">Use when:</strong> conceptual exploration, non-code questions, initial architecture brainstorm.",
+
+  "sec.tools.rule3.title": "The Rule of 3 Environments",
+  "sec.tools.rule3.desc": "Experienced devs use all three. <strong class=\"text-white\">Web</strong> for thinking, <strong class=\"text-white\">IDE</strong> for building, <strong class=\"text-white\">CLI</strong> for automating. The most common mistake is trying to write production code in Web — no context, no guardrails, no traceability.",
+
+  "sec.context.h2": "AI Anatomy: Context Window",
+  "sec.context.intro": "Why does AI \"start talking nonsense\" in long conversations? Because it has a <strong>finite short-term memory</strong>, measured in tokens. When that space runs out, it discards the oldest information — including your guardrails.",
+
+  "sec.context.token.title": "What is a Token?",
+  "sec.context.token.desc": "Chunks of words processed by the model. On average, <strong>1,000 tokens ≈ 750 words</strong>. Claude has a <strong>200k token</strong> window — but selective attention matters more than raw size.",
+
+  "sec.context.memory.title": "The \"Short-Term Memory\"",
+  "sec.context.memory.desc": "When the project + conversation history exceeds the window, the AI starts <strong>discarding instructions from the beginning</strong> — exactly where your guardrails and project rules live.",
+
+  "sec.context.warning": "<strong>The Distraction Risk:</strong> Sending <code>node_modules</code>, <code>dist</code>, or huge logs consumes valuable tokens and \"distracts\" the AI's attention from what actually matters.",
+  "sec.context.solution": "<strong>The Solution:</strong> Create a <code class=\"bg-emerald-100 font-mono px-1 rounded text-xs\">.claudeignore</code> (Claude Code) or <code class=\"bg-emerald-100 font-mono px-1 rounded text-xs\">.cursorignore</code> (Cursor) file to automatically exclude noisy folders from context.",
+
+  "sec.context.btn.dirty": "Polluted Context",
+  "sec.context.btn.clean": "Clean Context",
+  "sec.context.caption.dirty": "65% of tokens wasted on noise — the AI can barely \"see\" the code that matters.",
+  "sec.context.caption.clean": "With .claudeignore configured: 90% of tokens focused on what matters.",
+
+  "sec.context.chart.dirty.useful": "Useful Code (15%)",
+  "sec.context.chart.dirty.relevant": "Relevant History (20%)",
+  "sec.context.chart.dirty.noise": "Noise — logs/dist/node_modules (65%)",
+  "sec.context.chart.clean.useful": "Useful Code (55%)",
+  "sec.context.chart.clean.relevant": "Relevant History (35%)",
+  "sec.context.chart.clean.noise": "Residual noise (10%)",
+  "sec.context.chart.tooltip": "% of Context Window",
+
+  "sec.guardrails.h2": "Guardrails per Tool",
+  "sec.guardrails.intro": "Each tool reads project rules from a different file — but the goal is always the same: give the AI a <strong>compass</strong> so that generated code already comes aligned with your team's standards.",
+  "sec.guardrails.copy": "Copy",
+  "sec.guardrails.claude.note": "Automatically read by Claude Code at every session. Place it at the project root and version it with the team.",
+  "sec.guardrails.cursor.note": "Cursor also supports per-folder rules in <code class=\"font-mono bg-stone-100 px-1 rounded text-xs\">.cursor/rules/*.mdc</code> — useful for domain-specific rules.",
+  "sec.guardrails.copilot.note": "Works with Copilot Chat and autocompletion. Must be at <code class=\"font-mono bg-stone-100 px-1 rounded text-xs\">.github/copilot-instructions.md</code> in the repository root.",
+  "sec.guardrails.principle": "<strong>The principle is the same for all:</strong> define <em>who</em> the AI is in your project and <em>how</em> it should behave. The tool changes, the concept doesn't. Always version these files alongside your code.",
+
+  "sec.trio.h2": "Basic Planning: The Essential Trio",
+  "sec.trio.intro": "Before asking the AI to write the first line of code, make sure it knows the terrain. Three simple files serve as a <strong>context anchor</strong> — preventing off-pattern suggestions, wrong library versions, and structures incompatible with the project.",
+  "sec.trio.advanced": "Advanced",
+
+  "sec.trio.tech.desc": "Exact list of libraries, frameworks, and versions used.",
+  "sec.trio.tech.goal": "<strong>Goal:</strong> Prevents the AI from suggesting React 17 when you use 19, or installing <code>axios</code> when the project already uses <code>ky</code>.",
+
+  "sec.trio.arch.desc": "Explains the structural organization and communication patterns.",
+  "sec.trio.arch.goal": "<strong>Goal:</strong> If it says \"Feature Folders\", the AI won't create loose files in giant <code>/controllers</code> or <code>/views</code> directories.",
+
+  "sec.trio.req.desc": "Describes the core business rule, use cases, and edge cases.",
+  "sec.trio.req.goal": "<strong>Goal:</strong> Keeps the AI focused on \"what\" we're building. Prevents it from ignoring critical edge cases or proposing solutions that don't serve the real user.",
+
+  "sec.antipatterns.h2": "Most Common Anti-Patterns",
+  "sec.antipatterns.intro": "Knowing what <em>not</em> to do accelerates more than any productivity tip. These are the 4 behaviors that drain AI's potential the most in daily work.",
+
+  "sec.antipatterns.label.1": "Anti-pattern #1",
+  "sec.antipatterns.1.wrong.title": "The Kitchen-Sink Prompt",
+  "sec.antipatterns.1.wrong.desc": "Dumping all requirements at once expecting the AI to deliver everything perfectly.",
+  "sec.antipatterns.1.wrong.example": "\"Build a complete authentication system with JWT, refresh token, rate limit, audit logs, 2FA, and Google OAuth integration.\"",
+  "sec.antipatterns.1.right.title": "The Surgical Prompt",
+  "sec.antipatterns.1.right.desc": "One task at a time, validating and building incrementally on what was approved.",
+  "sec.antipatterns.1.right.example": "\"Based on REQUIREMENTS.md, implement the POST /auth/login endpoint. Just email and password login for now.\"",
+
+  "sec.antipatterns.label.2": "Anti-pattern #2",
+  "sec.antipatterns.2.wrong.title": "Fix Only in Chat",
+  "sec.antipatterns.2.wrong.desc": "When the AI uses <code>axios</code> and you want <code>ky</code>, you tell it in chat — and in the next session it uses <code>axios</code> again.",
+  "sec.antipatterns.2.wrong.example": "\"No, use ky instead of axios\" <span class=\"block mt-1 text-red-500 font-semibold\">→ Correct only for this message.</span>",
+  "sec.antipatterns.2.right.title": "Fix at the Root",
+  "sec.antipatterns.2.right.desc": "Go to <code>CLAUDE.md</code> and add the rule. The behavior changes permanently for the entire team.",
+  "sec.antipatterns.2.right.example": "<span class=\"text-emerald-600\"># In CLAUDE.md:</span><br>- HTTP: always use `ky`, never `axios` or `fetch` directly.<span class=\"block mt-1 text-emerald-600 font-sans font-semibold\">→ Correct forever.</span>",
+
+  "sec.antipatterns.label.3": "Anti-pattern #3",
+  "sec.antipatterns.3.wrong.title": "Dragging the Conversation",
+  "sec.antipatterns.3.wrong.desc": "Continuing a long session even after noticing the AI is forgetting context, generating inconsistencies, or repeating errors.",
+  "sec.antipatterns.3.wrong.example": "Conversation with 80 messages, AI ignores early rules, suggests patterns that were already corrected before.",
+  "sec.antipatterns.3.right.title": "Start a New Session",
+  "sec.antipatterns.3.right.desc": "Detect the drift signal and end it. Open a new session with a \"handoff\" prompt summarizing what was done.",
+  "sec.antipatterns.3.right.example": "\"Context: we implemented login and refresh token. Tests pass. Next task: implement rate limiting per IP.\"",
+
+  "sec.antipatterns.label.4": "Anti-pattern #4",
+  "sec.antipatterns.4.wrong.title": "Accept Without Reading",
+  "sec.antipatterns.4.wrong.desc": "Approving generated code without understanding the intent — creating hidden tech debt nobody can maintain later.",
+  "sec.antipatterns.4.wrong.example": "\"Looks right, accept all.\" → 3 weeks later nobody knows why that code exists.",
+  "sec.antipatterns.4.right.title": "Intent Review",
+  "sec.antipatterns.4.right.desc": "You don't need to check every comma (the hook does that). But you need to understand <em>why</em> that solution was chosen.",
+  "sec.antipatterns.4.right.example": "\"Explain why you used a Map here instead of an array with find().\"",
+
+  "sec.workflow.h2": "The Workflow (Hands On)",
+  "sec.workflow.intro": "With tools and base files ready, this is the ritual to start any task. Following this flow transforms the dynamic from \"code dictator\" to <strong>orchestrator</strong>.",
+
+  "sec.workflow.step.1.title": "IDE Indexing",
+  "sec.workflow.step.1.desc": "When opening the project, wait for (or force) the IDE to index the repository. The AI can only query what it knows exists. Without indexing, it operates in the dark.",
+
+  "sec.workflow.step.2.title": "The \"Check-in\" — First Prompt",
+  "sec.workflow.step.2.desc": "Always contextualize the AI with the anchor files <em>before</em> asking for the task. Don't assume it remembers the previous session.",
+  "sec.workflow.step.2.example": "\"Read the files TECH_STACK.md, ARCHITECTURE.md, and CLAUDE.md at the root. Confirm that you understood the patterns before we proceed.\"",
+
+  "sec.workflow.step.3.title": "Structural Validation",
+  "sec.workflow.step.3.desc": "Evaluate the response. If it suggests something that violates your pattern (e.g., used <code class=\"bg-stone-100 rounded px-1 font-mono text-xs\">axios</code> when you use <code class=\"bg-stone-100 rounded px-1 font-mono text-xs\">ky</code>), don't just correct it in chat.",
+  "sec.workflow.step.3.tip": "💡 <strong>The Secret:</strong> Go to <code>CLAUDE.md</code>, add the restrictive rule there, and ask the AI to re-read it. <strong>You fix the \"root\" of the behavior, not just a temporary line.</strong>",
+
+  "sec.workflow.step.4.title": "The Iteration Loop",
+  "sec.workflow.step.4.desc": "After the first approved response, build incrementally. Each subsequent prompt should reference what was already done.",
+  "sec.workflow.step.4.example": "\"The login endpoint is working and tests pass. Now add the refresh token mechanism as per REQUIREMENTS.md.\"",
+
+  "sec.workflow.step.5.title": "Closing the Session",
+  "sec.workflow.step.5.desc": "Long sessions degrade. Detect the signs — AI repeating already-corrected errors, ignoring rules, generating inconsistent code — and end it. Open a new session with a <strong>handoff prompt</strong>:",
+  "sec.workflow.step.5.example": "\"Resuming context: we implemented login + refresh token. Tests pass. Next task: rate limit per IP (see REQUIREMENTS.md, Edge Cases section).\"",
+
+  "sec.nextsteps.h2": "How to start today",
+  "sec.nextsteps.intro": "You don't need to set everything up at once. Four concrete actions you can take today to go from zero setup to a functional environment.",
+
+  "sec.nextsteps.step.1.title": "Choose and install your main tool",
+  "sec.nextsteps.step.1.desc": "For day-to-day development, choose an IDE. For heavy automation, install Claude Code.",
+
+  "sec.nextsteps.step.2.title": "Create the guardrails file with at least 3 rules",
+  "sec.nextsteps.step.2.desc": "Don't wait for the file to be perfect. Start with the minimum and evolve as you find behaviors that need correcting.",
+
+  "sec.nextsteps.step.3.title": "Create TECH_STACK.md and ARCHITECTURE.md (minimum viable)",
+  "sec.nextsteps.step.3.desc": "10 lines each is enough to start. The goal is that the AI doesn't \"guess\" your stack.",
+
+  "sec.nextsteps.step.4.title": "Run the \"Check-in\" on your next real task",
+  "sec.nextsteps.step.4.desc": "Use the template from Step 2 of the Workflow on the next feature you implement. Observe the quality difference in the first response.",
+  "sec.nextsteps.step.4.example": "Template: \"Read TECH_STACK.md, ARCHITECTURE.md, and CLAUDE.md. Confirm that you understood the patterns. Then, [describe the task].\"",
+
+  "sec.nextsteps.refs.title": "References",
+  "sec.nextsteps.refs.claude": "Claude Code Documentation",
+  "sec.nextsteps.refs.cursor": "Cursor Rules (Docs)",
+  "sec.nextsteps.refs.copilot": "GitHub Copilot Instructions",
+  "sec.nextsteps.refs.next": "Next module: Prompts & Advanced Context",
+  "sec.nextsteps.refs.next.sub": "Engineering Hour — Part 2"
+}

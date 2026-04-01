@@ -1,0 +1,68 @@
+{
+  "header.title": "Engineering Hour",
+  "header.subtitle": "AI-Augmented Developer Series",
+
+  "hero.series": "Open-Source Series",
+  "hero.h2": "Use AI like<br class=\"hidden md:block\"> a senior engineer",
+  "hero.desc": "14 hands-on sessions on integrating AI tools into your development workflow — from basic setup to agents and advanced automations.",
+  "hero.available": "7 sessions available",
+  "hero.upcoming": "7 coming soon",
+
+  "card.p1.badge": "Module 1",
+  "card.p1.status": "Available",
+  "card.p1.title": "Setup & Golden Rules",
+  "card.p1.desc": "IDE vs CLI, context management, guardrails, and the key anti-patterns to avoid.",
+  "card.p1.cta": "Open session",
+
+  "card.p2.badge": "Module 2",
+  "card.p2.status": "Available",
+  "card.p2.title": "Advanced Planning",
+  "card.p2.desc": "Prompt structuring, efficient context management, and how to guide the model's reasoning.",
+  "card.p2.cta": "Open session",
+
+  "card.p3.badge": "Module 3",
+  "card.p3.status": "Available",
+  "card.p3.title": "Claude Hooks &amp; Automated Trust",
+  "card.p3.desc": "PostToolUse, PreToolUse, and how to create automatic validation loops without giving up human judgment.",
+  "card.p3.cta": "Open session",
+
+  "card.p4.badge": "Module 4",
+  "card.p4.status": "Available",
+  "card.p4.title": "Data-Driven Decisions with MCP",
+  "card.p4.desc": "Model Context Protocol — how to connect Claude to external tools and make decisions with real data.",
+  "card.p4.cta": "Open session",
+
+  "card.p5.badge": "Module 5",
+  "card.p5.status": "Available",
+  "card.p5.title": "Secure Workspace &amp; Guardrails",
+  "card.p5.desc": "CLAUDE.md, CONSTITUTION.md, and how to create guardrails that protect the project without killing productivity.",
+  "card.p5.cta": "Open session",
+
+  "card.p6.badge": "Module 6",
+  "card.p6.status": "Available",
+  "card.p6.title": "Skills &amp; Slash Commands",
+  "card.p6.desc": "How to create reusable skills, YAML frontmatter, auto-invocation by Claude, and the index pattern with sub-skills.",
+  "card.p6.cta": "Open session",
+
+  "card.p7.badge": "Module 7",
+  "card.p7.status": "Available",
+  "card.p7.title": "Agents, Sub-Agents &amp; Agent Teams",
+  "card.p7.desc": "Single agent vs multi-agent, isolated sub-agents, Agent Teams with peer-to-peer, and how to justify token costs.",
+  "card.p7.cta": "Open session",
+
+  "card.p8.badge": "Module 8",
+  "card.p8.status": "Coming soon",
+  "card.upcoming.title": "Coming Soon",
+  "card.upcoming.desc": "Next session in the series. Content to be defined.",
+
+  "card.p9.badge": "Module 9",
+  "card.p9.status": "Coming soon",
+
+  "card.p10_14.badge": "Modules 10–14",
+  "card.p10_14.status": "Coming soon",
+  "card.p10_14.desc": "5 final sessions in the series. Content to be defined.",
+
+  "footer.brand": "Engineering Hour · By <a href=\"https://github.com/griiettner/ai-engineering-hour\" target=\"_blank\" class=\"underline hover:text-stone-600\">Paulo Griiettner</a>",
+  "footer.stack": "HTML · Tailwind CSS · Chart.js",
+  "footer.tagline": "No build. Open and use."
+}

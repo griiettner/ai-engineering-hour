@@ -7,6 +7,8 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="nav.js" defer></script>
+    <script src="i18n.js" defer></script>
 
     <script>
         tailwind.config = {
@@ -32,38 +34,10 @@
         }
     </script>
 
+    <link rel="stylesheet" href="shared.css">
     <style>
-        body { background-color: #fafaf9; color: #292524; }
-        .nav-item.active {
-            background-color: #e7e5e4;
-            border-left: 4px solid #0d9488;
-            font-weight: 600;
-        }
-        .nav-group-label {
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #a8a29e;
-            padding: 0.5rem 0.25rem 0.25rem;
-        }
-        .step-number {
-            width: 2rem; height: 2rem;
-            border-radius: 9999px;
-            background: #0d9488;
-            color: white;
-            font-weight: 700;
-            font-size: 0.875rem;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 560px;
-            margin: auto;
-            height: 280px;
-        }
+        :root { --accent: #0d9488; }
+        .chart-container { max-width: 560px; height: 280px; }
         .mcp-node { transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .mcp-node:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
         .pulse-teal {
@@ -75,28 +49,6 @@
             70%  { box-shadow: 0 0 0 10px rgba(13, 148, 136, 0); }
             100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
         }
-        .antipattern-wrong { border-left: 4px solid #e11d48; }
-        .antipattern-right { border-left: 4px solid #059669; }
-        pre {
-            background-color: #1c1917;
-            color: #d6d3d1;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.825rem;
-            overflow-x: auto;
-            line-height: 1.6;
-        }
-        .copy-btn {
-            font-size: 0.65rem;
-            background: #374151;
-            color: #9ca3af;
-            border: none;
-            padding: 0.2rem 0.6rem;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-family: 'Fira Code', monospace;
-        }
-        .copy-btn:hover { background: #4b5563; color: white; }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
@@ -110,7 +62,7 @@
                     Engineering Hour <span class="text-mcp-teal">P4</span>
                 </h1>
             </div>
-            <div class="text-sm font-medium text-stone-500 hidden sm:block">
+            <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
                 Módulo 4: MCP (Model Context Protocol) & Fontes da Verdade
             </div>
         </div>
@@ -121,36 +73,36 @@
         <!-- Sidebar Navigation -->
         <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
 
-            <div class="nav-group-label">O Problema</div>
+            <div class="nav-group-label" data-i18n="nav.group.problem">O Problema</div>
             <button onclick="navigate('hallucination')" id="nav-hallucination"
                 class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📉</span> Fim das Alucinações
+                <span>📉</span> <span data-i18n="nav.hallucination">Fim das Alucinações</span>
             </button>
 
-            <div class="nav-group-label mt-2">A Solução</div>
+            <div class="nav-group-label mt-2" data-i18n="nav.group.solution">A Solução</div>
             <button onclick="navigate('ecosystem')" id="nav-ecosystem"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🧩</span> Ecossistema MCP
+                <span>🧩</span> <span data-i18n="nav.ecosystem">Ecossistema MCP</span>
             </button>
             <button onclick="navigate('architecture')" id="nav-architecture"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🏗️</span> Arquitetura da Verdade
+                <span>🏗️</span> <span data-i18n="nav.architecture">Arquitetura da Verdade</span>
             </button>
             <button onclick="navigate('scenario')" id="nav-scenario"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚡</span> Debugging em Tempo Real
+                <span>⚡</span> <span data-i18n="nav.scenario">Debugging em Tempo Real</span>
             </button>
 
-            <div class="nav-group-label mt-2">Cuidados</div>
+            <div class="nav-group-label mt-2" data-i18n="nav.group.caution">Cuidados</div>
             <button onclick="navigate('limits')" id="nav-limits"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚠️</span> Limites & Cuidados
+                <span>⚠️</span> <span data-i18n="nav.limits">Limites & Cuidados</span>
             </button>
 
-            <div class="nav-group-label mt-2">Ação</div>
+            <div class="nav-group-label mt-2" data-i18n="nav.group.action">Ação</div>
             <button onclick="navigate('nextsteps')" id="nav-nextsteps"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🚀</span> Próximos Passos
+                <span>🚀</span> <span data-i18n="nav.nextsteps">Próximos Passos</span>
             </button>
         </nav>
 
@@ -160,8 +112,8 @@
             <!-- SECTION 1: Hallucination Gap -->
             <section id="sec-hallucination" class="block">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📉 A Ponte entre "Achar" e "Saber"</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📉</span> <span data-i18n="sec.hallucination.h2">A Ponte entre "Achar" e "Saber"</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.hallucination.intro">
                         O maior medo de um dev é a IA alucinar um nome de tabela ou um endpoint que não existe.
                         O <strong>MCP (Model Context Protocol)</strong> reduz drasticamente isso ao dar "olhos" para a IA
                         acessar seus sistemas internos em tempo real em vez de depender apenas do treinamento estático.
@@ -174,16 +126,16 @@
                     </div>
                     <div class="space-y-4">
                         <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
-                            <h4 class="font-bold text-sm text-red-700 uppercase">Sem MCP, Conhecimento Estático</h4>
-                            <p class="text-sm text-stone-600 mt-1">A IA usa apenas o que aprendeu no treinamento (com data de corte). Se seu banco mudou ontem, ela vai sugerir código baseado em um schema que não existe mais.</p>
+                            <h4 class="font-bold text-sm text-red-700 uppercase" data-i18n="sec.hallucination.card.1.title">Sem MCP, Conhecimento Estático</h4>
+                            <p class="text-sm text-stone-600 mt-1" data-i18n="sec.hallucination.card.1.desc">A IA usa apenas o que aprendeu no treinamento (com data de corte). Se seu banco mudou ontem, ela vai sugerir código baseado em um schema que não existe mais.</p>
                         </div>
                         <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-mcp-teal">
-                            <h4 class="font-bold text-sm text-mcp-teal uppercase">Com MCP, Contexto ao Vivo</h4>
-                            <p class="text-sm text-stone-600 mt-1">A IA consulta a Fonte da Verdade (banco real, logs ao vivo, tickets abertos) antes de responder. O erro de contexto cai para próximo de zero nos dados conectados.</p>
+                            <h4 class="font-bold text-sm text-mcp-teal uppercase" data-i18n="sec.hallucination.card.2.title">Com MCP, Contexto ao Vivo</h4>
+                            <p class="text-sm text-stone-600 mt-1" data-i18n="sec.hallucination.card.2.desc">A IA consulta a Fonte da Verdade (banco real, logs ao vivo, tickets abertos) antes de responder. O erro de contexto cai para próximo de zero nos dados conectados.</p>
                         </div>
                         <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-stone-300">
-                            <h4 class="font-bold text-sm text-stone-500 uppercase">Importante</h4>
-                            <p class="text-sm text-stone-500 mt-1">MCP não elimina alucinações em raciocínio, ele elimina erros de <em>contexto factual</em> sobre os seus sistemas.</p>
+                            <h4 class="font-bold text-sm text-stone-500 uppercase" data-i18n="sec.hallucination.card.3.title">Importante</h4>
+                            <p class="text-sm text-stone-500 mt-1" data-i18n-html="sec.hallucination.card.3.desc">MCP não elimina alucinações em raciocínio, ele elimina erros de <em>contexto factual</em> sobre os seus sistemas.</p>
                         </div>
                     </div>
                 </div>
@@ -192,8 +144,8 @@
             <!-- SECTION 2: MCP Ecosystem -->
             <section id="sec-ecosystem" class="hidden">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🧩 Ferramentas Conectadas</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🧩</span> <span data-i18n="sec.ecosystem.h2">Ferramentas Conectadas</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.ecosystem.intro">
                         O MCP funciona através de "servidores". Cada servidor conecta a IA a uma ferramenta específica.
                         Clique nas categorias para ver o que a IA passa a "enxergar" no seu projeto.
                     </p>
@@ -205,11 +157,11 @@
                         <div class="flex items-center gap-4 mb-3">
                             <span class="text-3xl p-3 bg-white rounded-xl shadow-sm group-hover:bg-teal-50 transition-colors">🗄️</span>
                             <div>
-                                <h3 class="font-bold text-stone-800">Bancos de Dados</h3>
+                                <h3 class="font-bold text-stone-800" data-i18n="sec.ecosystem.card.db.title">Bancos de Dados</h3>
                                 <p class="text-xs text-stone-500">PostgreSQL, MySQL, Redis</p>
                             </div>
                         </div>
-                        <p class="text-sm text-stone-600">A IA lê o schema real, analisa índices e valida queries antes de sugerir código SQL.</p>
+                        <p class="text-sm text-stone-600" data-i18n="sec.ecosystem.card.db.desc">A IA lê o schema real, analisa índices e valida queries antes de sugerir código SQL.</p>
                     </div>
 
                     <!-- Jira Card -->
@@ -217,11 +169,11 @@
                         <div class="flex items-center gap-4 mb-3">
                             <span class="text-3xl p-3 bg-white rounded-xl shadow-sm group-hover:bg-cyan-50 transition-colors">📋</span>
                             <div>
-                                <h3 class="font-bold text-stone-800">Gestão & Documentação</h3>
+                                <h3 class="font-bold text-stone-800" data-i18n="sec.ecosystem.card.mgmt.title">Gestão & Documentação</h3>
                                 <p class="text-xs text-stone-500">Jira, Linear, Confluence, Notion</p>
                             </div>
                         </div>
-                        <p class="text-sm text-stone-600">A IA entende o contexto do ticket atual e consulta documentações internas sem você precisar copiar nada.</p>
+                        <p class="text-sm text-stone-600" data-i18n="sec.ecosystem.card.mgmt.desc">A IA entende o contexto do ticket atual e consulta documentações internas sem você precisar copiar nada.</p>
                     </div>
 
                     <!-- Monitoring Card -->
@@ -229,11 +181,11 @@
                         <div class="flex items-center gap-4 mb-3">
                             <span class="text-3xl p-3 bg-white rounded-xl shadow-sm group-hover:bg-teal-50 transition-colors">📊</span>
                             <div>
-                                <h3 class="font-bold text-stone-800">Observabilidade</h3>
+                                <h3 class="font-bold text-stone-800" data-i18n="sec.ecosystem.card.logs.title">Observabilidade</h3>
                                 <p class="text-xs text-stone-500">Sentry, CloudWatch, Datadog</p>
                             </div>
                         </div>
-                        <p class="text-sm text-stone-600">Investigue bugs em tempo real. A IA correlaciona o erro do log com a linha exata do código.</p>
+                        <p class="text-sm text-stone-600" data-i18n="sec.ecosystem.card.logs.desc">Investigue bugs em tempo real. A IA correlaciona o erro do log com a linha exata do código.</p>
                     </div>
 
                     <!-- Web/Docs Card -->
@@ -241,11 +193,11 @@
                         <div class="flex items-center gap-4 mb-3">
                             <span class="text-3xl p-3 bg-white rounded-xl shadow-sm group-hover:bg-cyan-50 transition-colors">🌐</span>
                             <div>
-                                <h3 class="font-bold text-stone-800">Documentação Viva</h3>
+                                <h3 class="font-bold text-stone-800" data-i18n="sec.ecosystem.card.web.title">Documentação Viva</h3>
                                 <p class="text-xs text-stone-500">Fetch, MDN, docs oficiais</p>
                             </div>
                         </div>
-                        <p class="text-sm text-stone-600">A IA consulta documentação atualizada e detecta breaking changes que não estavam no seu treinamento original.</p>
+                        <p class="text-sm text-stone-600" data-i18n="sec.ecosystem.card.web.desc">A IA consulta documentação atualizada e detecta breaking changes que não estavam no seu treinamento original.</p>
                     </div>
                 </div>
 
@@ -263,8 +215,8 @@
             <!-- SECTION 3: Architecture -->
             <section id="sec-architecture" class="hidden">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🏗️ Como o MCP Conecta?</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🏗️</span> <span data-i18n="sec.architecture.h2">Como o MCP Conecta?</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.architecture.intro">
                         O MCP usa um modelo <strong>Cliente-Servidor</strong>. O Claude Code (cliente) se comunica com
                         servidores locais ou remotos que "falam a língua" das suas ferramentas via JSON-RPC.
                     </p>
@@ -276,7 +228,7 @@
                     <div class="w-full max-w-sm p-4 bg-white border-2 border-stone-200 rounded-xl flex items-center justify-center gap-4 shadow-sm">
                         <span class="text-2xl">💻</span>
                         <div class="text-sm">
-                            <p class="font-bold text-stone-800">Cliente MCP</p>
+                            <p class="font-bold text-stone-800" data-i18n="sec.architecture.client.title">Cliente MCP</p>
                             <p class="text-xs text-stone-500">Claude Code / Cursor / Claude Desktop</p>
                         </div>
                     </div>
@@ -288,7 +240,7 @@
                     <!-- Protocol layer -->
                     <div class="w-full max-w-md p-4 bg-mcp-teal text-white rounded-2xl text-center pulse-teal">
                         <h4 class="font-bold font-mono text-sm">Model Context Protocol (JSON-RPC 2.0)</h4>
-                        <p class="text-xs opacity-90 mt-1">Transporte via stdio (local) ou HTTP+SSE (remoto)</p>
+                        <p class="text-xs opacity-90 mt-1" data-i18n="sec.architecture.transport.label">Transporte via stdio (local) ou HTTP+SSE (remoto)</p>
                     </div>
 
                     <div class="h-8 w-0.5 bg-stone-300 relative flex items-end justify-center">
@@ -308,7 +260,7 @@
                 <div class="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden">
                     <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex items-center justify-between">
                         <span class="font-mono text-xs font-bold text-stone-700">📄 .claude/settings.json</span>
-                        <button class="copy-btn" onclick="copyCode('mcp-config')">copiar</button>
+                        <button class="copy-btn" onclick="copyCode('mcp-config')" data-i18n="common.copy">copiar</button>
                     </div>
                     <pre id="mcp-config" class="m-0 rounded-none border-0 text-xs"><span class="text-stone-400">{</span>
   <span class="text-violet-400">"mcpServers"</span><span class="text-stone-400">: {</span>
@@ -334,12 +286,12 @@
                 <!-- Transport types explanation -->
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
-                        <h4 class="font-bold text-stone-800 text-sm mb-2 flex items-center gap-2"><span>📦</span> Transporte stdio (local)</h4>
-                        <p class="text-sm text-stone-600">O Claude Code inicia o servidor como um processo filho. Comunicação via stdin/stdout. Mais simples, sem rede, ideal para ferramentas locais como banco de dados de desenvolvimento.</p>
+                        <h4 class="font-bold text-stone-800 text-sm mb-2 flex items-center gap-2"><span>📦</span> <span data-i18n="sec.architecture.stdio.title">Transporte stdio (local)</span></h4>
+                        <p class="text-sm text-stone-600" data-i18n="sec.architecture.stdio.desc">O Claude Code inicia o servidor como um processo filho. Comunicação via stdin/stdout. Mais simples, sem rede, ideal para ferramentas locais como banco de dados de desenvolvimento.</p>
                     </div>
                     <div class="bg-stone-50 border border-stone-200 rounded-xl p-4">
-                        <h4 class="font-bold text-stone-800 text-sm mb-2 flex items-center gap-2"><span>🌐</span> Transporte HTTP + SSE (remoto)</h4>
-                        <p class="text-sm text-stone-600">Servidor roda de forma independente (pode ser na nuvem). A IA se conecta via URL. Ideal para serviços compartilhados como Jira corporativo ou APIs internas de equipe.</p>
+                        <h4 class="font-bold text-stone-800 text-sm mb-2 flex items-center gap-2"><span>🌐</span> <span data-i18n="sec.architecture.http.title">Transporte HTTP + SSE (remoto)</span></h4>
+                        <p class="text-sm text-stone-600" data-i18n="sec.architecture.http.desc">Servidor roda de forma independente (pode ser na nuvem). A IA se conecta via URL. Ideal para serviços compartilhados como Jira corporativo ou APIs internas de equipe.</p>
                     </div>
                 </div>
             </section>
@@ -347,8 +299,8 @@
             <!-- SECTION 4: Scenario Simulation -->
             <section id="sec-scenario" class="hidden">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚡ Debugging em Tempo Real</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚡</span> <span data-i18n="sec.scenario.h2">Debugging em Tempo Real</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.scenario.intro">
                         Veja como a IA resolve um problema complexo quando tem acesso ao MCP de Logs e Banco de Dados simultaneamente.
                         Clique em "Próximo Passo" para avançar a investigação.
                     </p>
@@ -370,7 +322,7 @@
                             <span class="text-lg">👤</span>
                             <div class="text-sm text-stone-300">
                                 <p class="font-bold text-white mb-1">Dev:</p>
-                                <p>"Tivemos um erro 500 no checkout há 10 minutos. Investigue usando o Sentry e o banco."</p>
+                                <p data-i18n="sec.scenario.prompt">"Tivemos um erro 500 no checkout há 10 minutos. Investigue usando o Sentry e o banco."</p>
                             </div>
                         </div>
 
@@ -378,11 +330,11 @@
                         <div id="sim-step-1" class="flex gap-3 opacity-0 transition-opacity duration-500">
                             <span class="text-lg">🤖</span>
                             <div class="text-sm text-stone-300 flex-1">
-                                <p class="font-bold text-mcp-teal mb-2">Claude (via MCP Sentry):</p>
+                                <p class="font-bold text-mcp-teal mb-2" data-i18n="sec.scenario.step1.label">Claude (via MCP Sentry):</p>
                                 <div class="bg-stone-800 p-2 rounded mb-2 font-mono text-[10px] text-cyan-300">
                                     › sentry.get_issues(project="checkout", last_minutes=15)
                                 </div>
-                                <p>Encontrei <strong class="text-white">3 ocorrências</strong> de <code class="bg-stone-700 text-red-300 px-1 rounded text-xs">DatabaseError: Unique constraint failed on orders.idempotency_key</code> entre 14:22 e 14:31. Todos no endpoint <code class="bg-stone-700 text-yellow-300 px-1 rounded text-xs">POST /v2/checkout</code>.</p>
+                                <p data-i18n-html="sec.scenario.step1.text">Encontrei <strong class="text-white">3 ocorrências</strong> de <code class="bg-stone-700 text-red-300 px-1 rounded text-xs">DatabaseError: Unique constraint failed on orders.idempotency_key</code> entre 14:22 e 14:31. Todos no endpoint <code class="bg-stone-700 text-yellow-300 px-1 rounded text-xs">POST /v2/checkout</code>.</p>
                             </div>
                         </div>
 
@@ -390,11 +342,11 @@
                         <div id="sim-step-2" class="flex gap-3 opacity-0 transition-opacity duration-500">
                             <span class="text-lg">🤖</span>
                             <div class="text-sm text-stone-300 flex-1">
-                                <p class="font-bold text-mcp-teal mb-2">Claude (via MCP PostgreSQL):</p>
+                                <p class="font-bold text-mcp-teal mb-2" data-i18n="sec.scenario.step2.label">Claude (via MCP PostgreSQL):</p>
                                 <div class="bg-stone-800 p-2 rounded mb-2 font-mono text-[10px] text-cyan-300">
                                     › postgres.query("SELECT constraint_name FROM information_schema.table_constraints WHERE table_name='orders'")
                                 </div>
-                                <p>O campo <code class="bg-stone-700 text-yellow-300 px-1 rounded text-xs">idempotency_key</code> tem constraint UNIQUE mas o código não faz upsert, ele tenta <code class="bg-stone-700 text-orange-300 px-1 rounded text-xs">INSERT</code> direto. Isso falha em retentativas do cliente.</p>
+                                <p data-i18n-html="sec.scenario.step2.text">O campo <code class="bg-stone-700 text-yellow-300 px-1 rounded text-xs">idempotency_key</code> tem constraint UNIQUE mas o código não faz upsert, ele tenta <code class="bg-stone-700 text-orange-300 px-1 rounded text-xs">INSERT</code> direto. Isso falha em retentativas do cliente.</p>
                             </div>
                         </div>
 
@@ -402,8 +354,8 @@
                         <div id="sim-step-3" class="flex gap-3 opacity-0 transition-opacity duration-500">
                             <span class="text-lg">🤖</span>
                             <div class="text-sm text-stone-300 flex-1">
-                                <p class="font-bold text-mcp-teal mb-2">Claude (diagnóstico + fix):</p>
-                                <p class="mb-2">Root cause: a migration da semana passada adicionou a constraint mas o service não foi atualizado. Solução: usar <code class="bg-stone-700 text-emerald-300 px-1 rounded text-xs">INSERT ... ON CONFLICT DO NOTHING</code>. Quero gerar o patch agora?</p>
+                                <p class="font-bold text-mcp-teal mb-2" data-i18n="sec.scenario.step3.label">Claude (diagnóstico + fix):</p>
+                                <p class="mb-2" data-i18n-html="sec.scenario.step3.text">Root cause: a migration da semana passada adicionou a constraint mas o service não foi atualizado. Solução: usar <code class="bg-stone-700 text-emerald-300 px-1 rounded text-xs">INSERT ... ON CONFLICT DO NOTHING</code>. Quero gerar o patch agora?</p>
                                 <div class="bg-emerald-900/30 border border-emerald-700/40 rounded p-2 text-emerald-300 text-xs font-mono">
                                     + INSERT INTO orders (...) VALUES (...)<br>
                                     + ON CONFLICT (idempotency_key) DO NOTHING;
@@ -416,9 +368,9 @@
                     <div class="mt-6 flex items-center justify-between border-t border-stone-800 pt-4">
                         <span id="sim-progress" class="text-xs text-stone-500 font-mono">passo 0 de 3</span>
                         <div class="flex gap-3">
-                            <button id="sim-reset" onclick="resetSimulation()" class="text-xs text-stone-500 hover:text-white transition-colors hidden">↺ reiniciar</button>
+                            <button id="sim-reset" onclick="resetSimulation()" class="text-xs text-stone-500 hover:text-white transition-colors hidden" data-i18n="sec.scenario.reset">↺ reiniciar</button>
                             <button id="sim-btn" onclick="runSimulation()"
-                                class="bg-mcp-teal hover:bg-teal-600 text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-lg shadow-teal-900/40">
+                                class="bg-mcp-teal hover:bg-teal-600 text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-lg shadow-teal-900/40" data-i18n="sec.scenario.nextStep">
                                 Próximo Passo ➔
                             </button>
                         </div>
@@ -427,37 +379,37 @@
 
                 <!-- Mantra -->
                 <div class="mt-8 p-6 bg-stone-900 text-stone-100 rounded-2xl border-l-8 border-mcp-teal shadow-xl">
-                    <h4 class="font-bold mb-2 text-stone-400 text-xs uppercase tracking-widest">O Mantra da Parte 4:</h4>
-                    <p class="text-lg italic font-serif">"O MCP transforma a IA de uma enciclopédia estática em um membro do time que acessa os seus sistemas com os seus dados, em tempo real."</p>
+                    <h4 class="font-bold mb-2 text-stone-400 text-xs uppercase tracking-widest" data-i18n="sec.scenario.mantra.label">O Mantra da Parte 4:</h4>
+                    <p class="text-lg italic font-serif" data-i18n="sec.scenario.mantra.text">"O MCP transforma a IA de uma enciclopédia estática em um membro do time que acessa os seus sistemas com os seus dados, em tempo real."</p>
                 </div>
             </section>
 
             <!-- SECTION 5: Limites & Cuidados -->
             <section id="sec-limits" class="hidden">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚠️ Limites & Cuidados</h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.limits.h2">Limites & Cuidados</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.limits.intro">
                         MCP é poderoso e isso também significa que os riscos são reais. Antes de conectar a IA aos seus sistemas, entenda os limites.
                     </p>
                 </div>
 
                 <div class="space-y-4 mb-8">
-                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider">🔴 Riscos críticos</h3>
+                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider"><span>🔴</span> <span data-i18n="sec.limits.critical.h3">Riscos críticos</span></h3>
 
                     <div class="bg-red-50 rounded-xl p-5 border-l-4 border-red-500">
                         <div class="flex items-start gap-3">
                             <span class="text-xl">🔓</span>
                             <div>
-                                <h4 class="font-bold text-red-800 mb-1">Acesso direto a produção</h4>
-                                <p class="text-sm text-red-700 leading-relaxed">
+                                <h4 class="font-bold text-red-800 mb-1" data-i18n="sec.limits.card.1.title">Acesso direto a produção</h4>
+                                <p class="text-sm text-red-700 leading-relaxed" data-i18n-html="sec.limits.card.1.desc">
                                     Se você conectar um MCP server com credenciais de produção, a IA <strong>pode executar queries destrutivas</strong>
                                     se instruída ou se um hook mal configurado disparar um comando errado.
                                 </p>
                                 <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <div class="antipattern-wrong bg-red-100 rounded-lg p-2 text-xs text-red-800">
+                                    <div class="antipattern-wrong bg-red-100 rounded-lg p-2 text-xs text-red-800" data-i18n="sec.limits.card.1.wrong">
                                         ❌ Credenciais de produção no MCP local
                                     </div>
-                                    <div class="antipattern-right bg-green-50 rounded-lg p-2 text-xs text-gov-emerald" style="border-left: 4px solid #059669;">
+                                    <div class="antipattern-right bg-green-50 rounded-lg p-2 text-xs text-gov-emerald" style="border-left: 4px solid #059669;" data-i18n="sec.limits.card.1.right">
                                         ✅ Credenciais de staging/read-only para desenvolvimento
                                     </div>
                                 </div>
@@ -469,14 +421,14 @@
                         <div class="flex items-start gap-3">
                             <span class="text-xl">🧩</span>
                             <div>
-                                <h4 class="font-bold text-red-800 mb-1">Qualidade dos servidores da comunidade</h4>
-                                <p class="text-sm text-red-700 leading-relaxed">
+                                <h4 class="font-bold text-red-800 mb-1" data-i18n="sec.limits.card.2.title">Qualidade dos servidores da comunidade</h4>
+                                <p class="text-sm text-red-700 leading-relaxed" data-i18n="sec.limits.card.2.desc">
                                     A maioria dos servidores MCP disponíveis são projetos open source em estágio inicial.
                                     Alguns podem ter bugs, comportamento imprevisível ou expor mais dados do que o necessário.
                                     Sempre revise o código antes de usar em contexto corporativo.
                                 </p>
                                 <div class="mt-2 bg-red-100 rounded-lg p-2">
-                                    <p class="text-[11px] text-red-800">✓ Prefira servidores oficiais (<code class="font-mono">@modelcontextprotocol/*</code>) ou auditados pelo time.</p>
+                                    <p class="text-[11px] text-red-800" data-i18n-html="sec.limits.card.2.tip">✓ Prefira servidores oficiais (<code class="font-mono">@modelcontextprotocol/*</code>) ou auditados pelo time.</p>
                                 </div>
                             </div>
                         </div>
@@ -484,19 +436,19 @@
                 </div>
 
                 <div class="space-y-4 mb-8">
-                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider">🟡 Pontos de atenção</h3>
+                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider"><span>🟡</span> <span data-i18n="sec.limits.attention.h3">Pontos de atenção</span></h3>
 
                     <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
                         <div class="flex items-start gap-3">
                             <span class="text-xl">💸</span>
                             <div>
-                                <h4 class="font-bold text-amber-800 mb-1">Custo de tokens explode com ferramentas</h4>
-                                <p class="text-sm text-amber-700 leading-relaxed">
+                                <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.card.3.title">Custo de tokens explode com ferramentas</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed" data-i18n="sec.limits.card.3.desc">
                                     Cada chamada de ferramenta MCP consome tokens tanto para o input (resultados do servidor) quanto para o raciocínio.
                                     Um schema de banco com 80 tabelas injetado no contexto pode custar caro em longas sessões.
                                 </p>
                                 <div class="mt-2 bg-amber-100 rounded-lg p-2">
-                                    <p class="text-[11px] text-amber-800">✓ Prefira servidores que retornam resultados filtrados/paginados, não dumps completos.</p>
+                                    <p class="text-[11px] text-amber-800" data-i18n="sec.limits.card.3.tip">✓ Prefira servidores que retornam resultados filtrados/paginados, não dumps completos.</p>
                                 </div>
                             </div>
                         </div>
@@ -506,8 +458,8 @@
                         <div class="flex items-start gap-3">
                             <span class="text-xl">🤖</span>
                             <div>
-                                <h4 class="font-bold text-amber-800 mb-1">MCP não resolve problemas de raciocínio</h4>
-                                <p class="text-sm text-amber-700 leading-relaxed">
+                                <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.card.4.title">MCP não resolve problemas de raciocínio</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed" data-i18n-html="sec.limits.card.4.desc">
                                     MCP fornece contexto factual o que existe no sistema. Mas a IA ainda pode interpretar esse contexto errado
                                     ou tomar uma decisão arquitetural ruim com base em dados corretos. O julgamento de <em>o que fazer</em> com a informação ainda é humano.
                                 </p>
@@ -519,13 +471,13 @@
                         <div class="flex items-start gap-3">
                             <span class="text-xl">🔒</span>
                             <div>
-                                <h4 class="font-bold text-amber-800 mb-1">Dados sensíveis no contexto da IA</h4>
-                                <p class="text-sm text-amber-700 leading-relaxed">
+                                <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.card.5.title">Dados sensíveis no contexto da IA</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed" data-i18n="sec.limits.card.5.desc">
                                     Ao conectar o Sentry ou banco, dados de usuários reais podem entrar no contexto da conversa.
                                     Verifique a política de privacidade do provedor de IA e as regulamentações (LGPD) antes de conectar dados PII.
                                 </p>
                                 <div class="mt-2 bg-amber-100 rounded-lg p-2">
-                                    <p class="text-[11px] text-amber-800">✓ Use dados anonimizados no ambiente de desenvolvimento. Nunca conecte PII em prod sem revisão legal.</p>
+                                    <p class="text-[11px] text-amber-800" data-i18n="sec.limits.card.5.tip">✓ Use dados anonimizados no ambiente de desenvolvimento. Nunca conecte PII em prod sem revisão legal.</p>
                                 </div>
                             </div>
                         </div>
@@ -536,8 +488,8 @@
             <!-- SECTION 6: Próximos Passos -->
             <section id="sec-nextsteps" class="hidden">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🚀 Como começar com MCP hoje</h2>
-                    <p class="text-stone-600">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.nextsteps.h2">Como começar com MCP hoje</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.nextsteps.intro">
                         Quatro passos para sair do zero e ter sua primeira ferramenta conectada funcionando em uma tarde.
                     </p>
                 </div>
@@ -547,8 +499,8 @@
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">1</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Comece com o MCP de Fetch (zero risco)</h4>
-                            <p class="text-sm text-stone-600 mb-3">O servidor <code class="bg-stone-100 font-mono px-1 rounded text-xs">@modelcontextprotocol/server-fetch</code> não acessa sistemas internos, apenas faz requisições HTTP. Perfeito para começar sem risco.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.card.1.title">Comece com o MCP de Fetch (zero risco)</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.nextsteps.card.1.desc">O servidor <code class="bg-stone-100 font-mono px-1 rounded text-xs">@modelcontextprotocol/server-fetch</code> não acessa sistemas internos, apenas faz requisições HTTP. Perfeito para começar sem risco.</p>
                             <pre class="text-xs !p-3"><span class="text-emerald-400"># Adicionar em .claude/settings.json</span>
 <span class="text-violet-400">"mcpServers"</span>: {
   <span class="text-violet-400">"fetch"</span>: {
@@ -562,11 +514,11 @@
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">2</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Conecte o banco de dados de staging (read-only)</h4>
-                            <p class="text-sm text-stone-600 mb-3">Use o PostgreSQL MCP apontando para staging com um usuário de leitura. Teste pedindo para a IA listar as tabelas e descrever o schema.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.card.2.title">Conecte o banco de dados de staging (read-only)</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.card.2.desc">Use o PostgreSQL MCP apontando para staging com um usuário de leitura. Teste pedindo para a IA listar as tabelas e descrever o schema.</p>
                             <div class="bg-stone-50 border border-stone-200 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
                                 <span class="text-lg flex-shrink-0">💬</span>
-                                "Use o MCP do banco para me descrever o schema da tabela de orders e identificar possíveis problemas de performance."
+                                <span data-i18n="sec.nextsteps.card.2.quote">"Use o MCP do banco para me descrever o schema da tabela de orders e identificar possíveis problemas de performance."</span>
                             </div>
                         </div>
                     </div>
@@ -574,11 +526,11 @@
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">3</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Combine MCP + Plan.md para uma feature real</h4>
-                            <p class="text-sm text-stone-600 mb-3">Peça para a IA criar um Plan.md <em>consultando o banco real</em> antes de propor mudanças. O plano agora inclui nomes de tabelas e campos reais, não supostos.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.card.3.title">Combine MCP + Plan.md para uma feature real</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.nextsteps.card.3.desc">Peça para a IA criar um Plan.md <em>consultando o banco real</em> antes de propor mudanças. O plano agora inclui nomes de tabelas e campos reais, não supostos.</p>
                             <div class="bg-mcp-teal/10 border border-mcp-teal/20 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
                                 <span class="text-lg flex-shrink-0">💬</span>
-                                "Antes de criar o plan.md, consulte o schema via MCP e liste os campos exatos que precisarão ser alterados na tabela de usuários."
+                                <span data-i18n="sec.nextsteps.card.3.quote">"Antes de criar o plan.md, consulte o schema via MCP e liste os campos exatos que precisarão ser alterados na tabela de usuários."</span>
                             </div>
                         </div>
                     </div>
@@ -586,8 +538,8 @@
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">4</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Defina uma política de MCP para o time</h4>
-                            <p class="text-sm text-stone-600 mb-3">Documente no <code class="bg-stone-100 font-mono px-1 rounded text-xs">CLAUDE.md</code> quais MCP servers estão disponíveis, quais são read-only e em quais contextos cada um deve ser usado.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.card.4.title">Defina uma política de MCP para o time</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.nextsteps.card.4.desc">Documente no <code class="bg-stone-100 font-mono px-1 rounded text-xs">CLAUDE.md</code> quais MCP servers estão disponíveis, quais são read-only e em quais contextos cada um deve ser usado.</p>
                             <pre class="text-xs !p-3"><span class="text-emerald-400"># Adicionar no CLAUDE.md</span>
 
 <span class="text-blue-400">## MCP Servers disponíveis</span>
@@ -602,34 +554,34 @@
 
                 <!-- References -->
                 <div class="bg-stone-50 border border-stone-200 rounded-2xl p-6">
-                    <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>📚</span> Referências</h3>
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>📚</span> <span data-i18n="sec.nextsteps.refs.h3">Referências</span></h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">📖</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700">Especificação oficial MCP</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.1.title">Especificação oficial MCP</p>
                                 <p class="text-xs text-stone-500 font-mono">modelcontextprotocol.io/docs</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">🧩</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700">Servidores MCP oficiais</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.2.title">Servidores MCP oficiais</p>
                                 <p class="text-xs text-stone-500 font-mono">github.com/modelcontextprotocol/servers</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">⚙️</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700">Claude Code MCP config</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.3.title">Claude Code MCP config</p>
                                 <p class="text-xs text-stone-500 font-mono">docs.anthropic.com/claude-code/mcp</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">⬅️</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700">Módulo anterior: Claude Hooks</p>
-                                <p class="text-xs text-stone-500">Engineering Hour: Parte 3</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.4.title">Módulo anterior: Claude Hooks</p>
+                                <p class="text-xs text-stone-500" data-i18n="sec.nextsteps.refs.4.desc">Engineering Hour: Parte 3</p>
                             </div>
                         </div>
                     </div>
@@ -637,6 +589,18 @@
             </section>
 
         </main>
+    </div>
+
+    <!-- Session Complete -->
+    <div id="session-complete" class="hidden border-t border-stone-200 bg-stone-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
+            <span class="text-3xl mb-3 block">🎉</span>
+            <h3 class="text-xl font-bold text-stone-800 mb-2" data-i18n="complete.title">Sessão concluída!</h3>
+            <p class="text-stone-500 mb-6 text-sm" data-i18n="complete.desc">Você completou esta sessão. Continue para a próxima ou volte ao índice.</p>
+            <div class="flex items-center justify-center gap-3">
+                <a href="index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-lg text-sm font-semibold hover:bg-stone-700 transition-colors" data-i18n="complete.home">← Voltar ao índice</a>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -670,14 +634,11 @@
             }
         };
 
-        function navigate(sectionId) {
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`nav-${sectionId}`).classList.add('active');
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
-            if (sectionId === 'hallucination' && !currentState.chart) initChart();
+        // ── Navigation hook (nav.js handles core logic) ─────────────
+        window.onNavigate = function(sectionId) {
+            if (!currentState.chart) initChart();
             currentState.activeSection = sectionId;
-        }
+        };
 
         function showEcosystemDetail(key) {
             const data = ecosystemData[key];
@@ -754,17 +715,52 @@
             document.getElementById('sim-reset').classList.add('hidden');
         }
 
-        function copyCode(id) {
-            const el = document.getElementById(id);
-            navigator.clipboard.writeText(el.innerText).then(() => {
-                const btn = el.previousElementSibling?.querySelector('.copy-btn') || event.target;
-                const original = btn.textContent;
-                btn.textContent = 'copiado!';
-                setTimeout(() => btn.textContent = original, 1500);
-            });
-        }
+        // copyCode() provided by nav.js
 
-        window.onload = () => initChart();
+        // i18n: update chart labels and ecosystem data when translations are applied
+        document.addEventListener('i18n:applied', () => {
+            if (currentState.chart) {
+                const t = window.i18n?.t || ((k) => k);
+                currentState.chart.data.labels = [
+                    t('chart.label.sqlAccuracy'),
+                    t('chart.label.businessRules'),
+                    t('chart.label.prodDebug'),
+                    t('chart.label.infraConfig')
+                ];
+                currentState.chart.data.datasets[0].label = t('chart.dataset.withoutMcp');
+                currentState.chart.data.datasets[1].label = t('chart.dataset.withMcp');
+                currentState.chart.options.scales.y.title.text = t('chart.yAxis');
+                currentState.chart.update();
+            }
+
+            // Update ecosystem detail data
+            const t = window.i18n?.t || ((k) => k);
+            ecosystemData.db.title = t('eco.db.title');
+            ecosystemData.db.desc = t('eco.db.desc');
+            ecosystemData.mgmt.title = t('eco.mgmt.title');
+            ecosystemData.mgmt.desc = t('eco.mgmt.desc');
+            ecosystemData.logs.title = t('eco.logs.title');
+            ecosystemData.logs.desc = t('eco.logs.desc');
+            ecosystemData.web.title = t('eco.web.title');
+            ecosystemData.web.desc = t('eco.web.desc');
+        });
+
+        // Chart is initialized via onNavigate on first load
     </script>
+
+    <!-- Footer -->
+    <footer class="border-t border-stone-200 mt-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-sm text-stone-400">
+                <span class="text-base">🎓</span>
+                <span data-i18n-html="footer.brand">Engineering Hour · By <a href="https://github.com/griiettner/ai-engineering-hour" target="_blank" class="underline hover:text-stone-600">Paulo Griiettner</a></span>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-stone-400">
+                <span data-i18n="footer.stack">HTML · Tailwind CSS · Chart.js</span>
+                <span>·</span>
+                <span data-i18n="footer.tagline">Sem build. Abra e use.</span>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

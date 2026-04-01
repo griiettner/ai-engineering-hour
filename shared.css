@@ -1,0 +1,107 @@
+/**
+ * shared.css — Common styles for Engineering Hour
+ *
+ * Each partN.html sets its accent color via CSS variable:
+ *   :root { --accent: #0284c7; }
+ *
+ * This file provides all structural styles shared across parts.
+ * Part-specific overrides go in the part's own <style> block.
+ */
+
+/* ── Base ───────────────────────────────────────────────────────── */
+body {
+    background-color: #fafaf9;
+    color: #292524;
+}
+
+/* ── Navigation ─────────────────────────────────────────────────── */
+.nav-item.active {
+    background-color: #e7e5e4;
+    border-left: 4px solid var(--accent);
+    font-weight: 600;
+}
+
+.nav-group-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #a8a29e;
+    padding: 0.5rem 0.25rem 0.25rem;
+}
+
+/* ── Step numbers ───────────────────────────────────────────────── */
+.step-number {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── Code blocks ────────────────────────────────────────────────── */
+pre {
+    background-color: #1c1917;
+    color: #d6d3d1;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    line-height: 1.65;
+}
+
+/* ── Copy button ────────────────────────────────────────────────── */
+.copy-btn {
+    font-size: 0.65rem;
+    background: #374151;
+    color: #9ca3af;
+    border: none;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-family: 'Fira Code', monospace;
+}
+.copy-btn:hover {
+    background: #4b5563;
+    color: white;
+}
+
+/* ── Anti-pattern cards ─────────────────────────────────────────── */
+.antipattern-wrong {
+    border-left: 4px solid #e11d48;
+}
+.antipattern-right {
+    border-left: 4px solid #059669;
+}
+
+/* ── Badges ──────────────────────────────────────────────────────── */
+.tag-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+}
+
+/* ── Flow arrows ─────────────────────────────────────────────────── */
+.flow-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a8a29e;
+    font-size: 1.25rem;
+}
+
+/* ── Chart container ─────────────────────────────────────────────── */
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    margin: auto;
+    height: 320px;
+}

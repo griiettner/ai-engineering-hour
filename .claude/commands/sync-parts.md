@@ -29,6 +29,27 @@ Read all existing part files and identify inconsistencies in:
 - Every part should end with a "Próximos Passos" section
 - Every part should have a closing mantra/quote in dark card style
 
+**7. Footer**
+- Every part must have the standard footer before `</body>`
+- Footer includes "By Paulo Griiettner" with link to GitHub repo
+- Footer uses `data-i18n-html="footer.brand"`, `data-i18n="footer.stack"`, `data-i18n="footer.tagline"`
+
+**8. Session Complete CTA**
+- Every part must have `<div id="session-complete">` between layout `</div>` and `<script>`
+- `navigate()` must toggle its visibility on the last section
+- Uses `data-i18n` keys: `complete.title`, `complete.desc`, `complete.home`
+
+**9. i18n consistency**
+- `<script src="i18n.js" defer>` present in every `<head>`
+- All visible text has `data-i18n` or `data-i18n-html` attributes
+- No `data-i18n` inside `<pre>` blocks
+- Matching `locales/en/part{N}.json` exists for every `part{N}.html`
+- Chart.js pages have `i18n:applied` event listener
+- No shared keys (footer, complete, header) duplicated in per-page JSON
+
+**10. No Ubivis references**
+- No mention of "Ubivis" in any content — this is a personal project
+
 ## Output
 A table listing each part file, what's consistent ✅, and what needs fixing ⚠️.
 Then a prioritized fix list for the most impactful inconsistencies to address first.

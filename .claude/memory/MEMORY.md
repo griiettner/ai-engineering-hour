@@ -1,7 +1,7 @@
 # Engineering Hour — Memória do Projeto
 
 ## O que é
-Série de apresentações SPA (HTML + Tailwind + Chart.js) para developers da Ubivis.
+Série de apresentações SPA (HTML + Tailwind + Chart.js) por Paulo Griiettner.
 Cada `partN.html` é independente. Sem build system. Aberto direto no browser.
 
 ---

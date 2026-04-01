@@ -6,6 +6,7 @@
     <title>Engineering Hour — AI-Augmented Developer Series</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="i18n.js" defer></script>
 
     <script>
         tailwind.config = {
@@ -71,27 +72,26 @@
             <div class="flex items-center gap-3">
                 <span class="text-2xl">🎓</span>
                 <div>
-                    <h1 class="text-base font-bold text-stone-800 leading-tight tracking-tight">Engineering Hour</h1>
-                    <p class="text-xs text-stone-400 leading-tight">AI-Augmented Developer Series</p>
+                    <h1 class="text-base font-bold text-stone-800 leading-tight tracking-tight" data-i18n="header.title">Engineering Hour</h1>
+                    <p class="text-xs text-stone-400 leading-tight" data-i18n="header.subtitle">AI-Augmented Developer Series</p>
                 </div>
             </div>
-            <span class="text-xs font-medium text-stone-400 hidden sm:block">Ubivis Engineering</span>
         </div>
     </header>
 
     <!-- Hero -->
     <section class="hero-grid border-b border-stone-200">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
-            <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-4">Ubivis · Série Interna</p>
-            <h2 class="text-4xl md:text-5xl font-extrabold text-stone-800 leading-tight mb-5">
+            <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-4" data-i18n="hero.series">Série Open-Source</p>
+            <h2 class="text-4xl md:text-5xl font-extrabold text-stone-800 leading-tight mb-5" data-i18n-html="hero.h2">
                 Use IA como<br class="hidden md:block"> um engenheiro sênior
             </h2>
-            <p class="text-lg text-stone-500 max-w-xl mx-auto leading-relaxed">
+            <p class="text-lg text-stone-500 max-w-xl mx-auto leading-relaxed" data-i18n="hero.desc">
                 14 sessões práticas sobre como integrar ferramentas de IA no workflow de desenvolvimento — do setup básico até agentes e automações avançadas.
             </p>
             <div class="flex items-center justify-center gap-6 mt-8 text-sm text-stone-400">
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> 7 sessões disponíveis</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-stone-300 inline-block"></span> 7 em breve</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> <span data-i18n="hero.available">8 sessões disponíveis</span></span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-stone-300 inline-block"></span> <span data-i18n="hero.upcoming">6 em breve</span></span>
             </div>
         </div>
     </section>
@@ -106,13 +106,13 @@
                 <div class="card-accent-bar" style="background:#0284c7"></div>
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
-                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#e0f2fe; color:#0284c7">Módulo 1</span>
-                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#e0f2fe; color:#0284c7" data-i18n="card.p1.badge">Módulo 1</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span><span data-i18n="card.p1.status">Disponível</span></span>
                     </div>
-                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Setup &amp; Regras de Ouro</h3>
-                    <p class="text-sm text-stone-500 leading-relaxed">IDE vs CLI, gerenciamento de contexto, guardrails e os principais anti-patterns a evitar.</p>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug" data-i18n="card.p1.title">Setup &amp; Regras de Ouro</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed" data-i18n="card.p1.desc">IDE vs CLI, gerenciamento de contexto, guardrails e os principais anti-patterns a evitar.</p>
                     <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#0284c7">
-                        Abrir sessão <span>→</span>
+                        <span data-i18n="card.p1.cta">Abrir sessão</span> <span>→</span>
                     </div>
                 </div>
             </a>
@@ -122,13 +122,13 @@
                 <div class="card-accent-bar" style="background:#64748b"></div>
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
-                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">Módulo 2</span>
-                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-600" data-i18n="card.p2.badge">Módulo 2</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span><span data-i18n="card.p2.status">Disponível</span></span>
                     </div>
-                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Planejamento Avançado</h3>
-                    <p class="text-sm text-stone-500 leading-relaxed">Estruturação de prompts, gerenciamento de contexto eficiente e como guiar o raciocínio do modelo.</p>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug" data-i18n="card.p2.title">Planejamento Avançado</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed" data-i18n="card.p2.desc">Estruturação de prompts, gerenciamento de contexto eficiente e como guiar o raciocínio do modelo.</p>
                     <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold text-stone-500">
-                        Abrir sessão <span>→</span>
+                        <span data-i18n="card.p2.cta">Abrir sessão</span> <span>→</span>
                     </div>
                 </div>
             </a>
@@ -138,13 +138,13 @@
                 <div class="card-accent-bar" style="background:#6d28d9"></div>
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
-                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#f3e8ff; color:#6d28d9">Módulo 3</span>
-                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#f3e8ff; color:#6d28d9" data-i18n="card.p3.badge">Módulo 3</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span><span data-i18n="card.p3.status">Disponível</span></span>
                     </div>
-                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Claude Hooks &amp; Confiança Automatizada</h3>
-                    <p class="text-sm text-stone-500 leading-relaxed">PostToolUse, PreToolUse e como criar ciclos de validação automática sem abrir mão do julgamento humano.</p>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug" data-i18n-html="card.p3.title">Claude Hooks &amp; Confiança Automatizada</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed" data-i18n="card.p3.desc">PostToolUse, PreToolUse e como criar ciclos de validação automática sem abrir mão do julgamento humano.</p>
                     <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#6d28d9">
-                        Abrir sessão <span>→</span>
+                        <span data-i18n="card.p3.cta">Abrir sessão</span> <span>→</span>
                     </div>
                 </div>
             </a>
@@ -154,13 +154,13 @@
                 <div class="card-accent-bar" style="background:#0d9488"></div>
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
-                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#f0fdfa; color:#0d9488">Módulo 4</span>
-                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#f0fdfa; color:#0d9488" data-i18n="card.p4.badge">Módulo 4</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span><span data-i18n="card.p4.status">Disponível</span></span>
                     </div>
-                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Decisões Embasadas com MCP</h3>
-                    <p class="text-sm text-stone-500 leading-relaxed">Model Context Protocol — como conectar o Claude a ferramentas externas e tomar decisões com dados reais.</p>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug" data-i18n="card.p4.title">Decisões Embasadas com MCP</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed" data-i18n="card.p4.desc">Model Context Protocol — como conectar o Claude a ferramentas externas e tomar decisões com dados reais.</p>
                     <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#0d9488">
-                        Abrir sessão <span>→</span>
+                        <span data-i18n="card.p4.cta">Abrir sessão</span> <span>→</span>
                     </div>
                 </div>
             </a>
@@ -170,13 +170,13 @@
                 <div class="card-accent-bar" style="background:#ea580c"></div>
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
-                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#fff7ed; color:#ea580c">Módulo 5</span>
-                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#fff7ed; color:#ea580c" data-i18n="card.p5.badge">Módulo 5</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span><span data-i18n="card.p5.status">Disponível</span></span>
                     </div>
-                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Workspace Seguro &amp; Guardrails</h3>
-                    <p class="text-sm text-stone-500 leading-relaxed">CLAUDE.md, CONSTITUTION.md e como criar guardrails que protegem o projeto sem travar a produtividade.</p>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug" data-i18n-html="card.p5.title">Workspace Seguro &amp; Guardrails</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed" data-i18n="card.p5.desc">CLAUDE.md, CONSTITUTION.md e como criar guardrails que protegem o projeto sem travar a produtividade.</p>
                     <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#ea580c">
-                        Abrir sessão <span>→</span>
+                        <span data-i18n="card.p5.cta">Abrir sessão</span> <span>→</span>
                     </div>
                 </div>
             </a>
@@ -186,13 +186,13 @@
                 <div class="card-accent-bar" style="background:#4f46e5"></div>
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
-                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#eef2ff; color:#4f46e5">Módulo 6</span>
-                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#eef2ff; color:#4f46e5" data-i18n="card.p6.badge">Módulo 6</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span><span data-i18n="card.p6.status">Disponível</span></span>
                     </div>
-                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Skills &amp; Comandos Slash</h3>
-                    <p class="text-sm text-stone-500 leading-relaxed">Como criar skills reutilizáveis, frontmatter YAML, invocação automática pelo Claude e o padrão de índice com sub-skills.</p>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug" data-i18n-html="card.p6.title">Skills &amp; Comandos Slash</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed" data-i18n="card.p6.desc">Como criar skills reutilizáveis, frontmatter YAML, invocação automática pelo Claude e o padrão de índice com sub-skills.</p>
                     <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#4f46e5">
-                        Abrir sessão <span>→</span>
+                        <span data-i18n="card.p6.cta">Abrir sessão</span> <span>→</span>
                     </div>
                 </div>
             </a>
@@ -202,27 +202,42 @@
                 <div class="card-accent-bar" style="background:#c026d3"></div>
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
-                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#fdf4ff; color:#c026d3">Módulo 7</span>
-                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Disponível</span>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#fdf4ff; color:#c026d3" data-i18n="card.p7.badge">Módulo 7</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span><span data-i18n="card.p7.status">Disponível</span></span>
                     </div>
-                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug">Agentes, Sub-Agentes &amp; Agent Teams</h3>
-                    <p class="text-sm text-stone-500 leading-relaxed">Single agent vs multi-agente, subagentes isolados, Agent Teams com peer-to-peer e como justificar o custo de tokens.</p>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug" data-i18n-html="card.p7.title">Agentes, Sub-Agentes &amp; Agent Teams</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed" data-i18n="card.p7.desc">Single agent vs multi-agente, subagentes isolados, Agent Teams com peer-to-peer e como justificar o custo de tokens.</p>
                     <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#c026d3">
-                        Abrir sessão <span>→</span>
+                        <span data-i18n="card.p7.cta">Abrir sessão</span> <span>→</span>
                     </div>
                 </div>
             </a>
 
-            <!-- P8–P14: upcoming -->
+            <!-- P8 -->
+            <a href="part8.html" class="session-card fade-up fade-up-1 bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                <div class="card-accent-bar" style="background:#d97706"></div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background:#fffbeb; color:#d97706" data-i18n="card.p8.badge">Módulo 8</span>
+                        <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span><span data-i18n="card.p8.status">Disponível</span></span>
+                    </div>
+                    <h3 class="text-base font-bold text-stone-800 mb-2 leading-snug" data-i18n="card.p8.title">O Sistema Integrado</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed" data-i18n="card.p8.desc">Hooks + Memory + Agents + Skills + Plans + MCP trabalhando juntos — cenários reais de integração e receitas avançadas.</p>
+                    <div class="mt-5 flex items-center gap-1.5 text-xs font-semibold" style="color:#d97706">
+                        <span data-i18n="card.p8.cta">Abrir sessão</span> <span>→</span>
+                    </div>
+                </div>
+            </a>
+
             <div class="session-card upcoming bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
                 <div class="card-accent-bar bg-stone-200"></div>
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
-                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-400">Módulo 8</span>
-                        <span class="text-xs text-stone-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-stone-300 inline-block"></span>Em breve</span>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-400" data-i18n="card.p9.badge">Módulo 9</span>
+                        <span class="text-xs text-stone-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-stone-300 inline-block"></span><span data-i18n="card.p9.status">Em breve</span></span>
                     </div>
-                    <h3 class="text-base font-bold text-stone-400 mb-2 leading-snug">Em breve</h3>
-                    <p class="text-sm text-stone-300 leading-relaxed">Próxima sessão da série. Conteúdo a ser definido.</p>
+                    <h3 class="text-base font-bold text-stone-400 mb-2 leading-snug" data-i18n="card.upcoming.title">Em breve</h3>
+                    <p class="text-sm text-stone-300 leading-relaxed" data-i18n="card.upcoming.desc">Próxima sessão da série. Conteúdo a ser definido.</p>
                 </div>
             </div>
 
@@ -230,23 +245,11 @@
                 <div class="card-accent-bar bg-stone-200"></div>
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
-                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-400">Módulo 9</span>
-                        <span class="text-xs text-stone-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-stone-300 inline-block"></span>Em breve</span>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-400" data-i18n="card.p10_14.badge">Módulos 10–14</span>
+                        <span class="text-xs text-stone-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-stone-300 inline-block"></span><span data-i18n="card.p10_14.status">Em breve</span></span>
                     </div>
-                    <h3 class="text-base font-bold text-stone-400 mb-2 leading-snug">Em breve</h3>
-                    <p class="text-sm text-stone-300 leading-relaxed">Próxima sessão da série. Conteúdo a ser definido.</p>
-                </div>
-            </div>
-
-            <div class="session-card upcoming bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
-                <div class="card-accent-bar bg-stone-200"></div>
-                <div class="p-6">
-                    <div class="flex items-start justify-between mb-4">
-                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-400">Módulos 10–14</span>
-                        <span class="text-xs text-stone-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-stone-300 inline-block"></span>Em breve</span>
-                    </div>
-                    <h3 class="text-base font-bold text-stone-400 mb-2 leading-snug">Em breve</h3>
-                    <p class="text-sm text-stone-300 leading-relaxed">5 sessões finais da série. Conteúdo a ser definido.</p>
+                    <h3 class="text-base font-bold text-stone-400 mb-2 leading-snug" data-i18n="card.upcoming.title">Em breve</h3>
+                    <p class="text-sm text-stone-300 leading-relaxed" data-i18n="card.p10_14.desc">5 sessões finais da série. Conteúdo a ser definido.</p>
                 </div>
             </div>
 
@@ -258,12 +261,12 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2 text-sm text-stone-400">
                 <span class="text-base">🎓</span>
-                <span>Engineering Hour · Ubivis</span>
+                <span data-i18n-html="footer.brand">Engineering Hour · By <a href="https://github.com/griiettner/ai-engineering-hour" target="_blank" class="underline hover:text-stone-600">Paulo Griiettner</a></span>
             </div>
             <div class="flex items-center gap-4 text-xs text-stone-400">
-                <span>HTML · Tailwind CSS · Chart.js</span>
+                <span data-i18n="footer.stack">HTML · Tailwind CSS · Chart.js</span>
                 <span>·</span>
-                <span>Sem build. Abra e use.</span>
+                <span data-i18n="footer.tagline">Sem build. Abra e use.</span>
             </div>
         </div>
     </footer>

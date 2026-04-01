@@ -1,6 +1,6 @@
 # Engineering Hour — AI-Augmented Developer Series
 
-Série de apresentações interativas para o time de engenharia da Ubivis sobre o uso prático de IA no desenvolvimento de software. Cada sessão é uma SPA standalone em HTML aberta direto no browser — sem build, sem dependências, sem servidor.
+Série de apresentações interativas sobre o uso prático de IA no desenvolvimento de software. Cada sessão é uma SPA standalone em HTML aberta direto no browser — sem build, sem dependências, sem servidor.
 
 ## Como abrir
 
@@ -164,4 +164,4 @@ Novas partes devem escolher uma cor distinta ainda não utilizada e documentá-l
 
 ---
 
-*Série desenvolvida para o time de engenharia da [Ubivis](https://ubivis.com).*
+*By [Paulo Griiettner](https://github.com/griiettner/ai-engineering-hour)*

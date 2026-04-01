@@ -7,6 +7,8 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="nav.js" defer></script>
+    <script src="i18n.js" defer></script>
 
     <script>
         tailwind.config = {
@@ -32,56 +34,16 @@
         }
     </script>
 
+    <link rel="stylesheet" href="shared.css">
     <style>
-        body { background-color: #fafaf9; color: #292524; }
-
-        .nav-item.active {
-            background-color: #e7e5e4;
-            border-left: 4px solid #0284c7;
-            font-weight: 600;
-        }
-        .nav-group-label {
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #a8a29e;
-            padding: 0.5rem 0.25rem 0.25rem;
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 320px;
-            margin: auto;
-            height: 280px;
-        }
-        pre {
-            background-color: #1c1917;
-            color: #d6d3d1;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            overflow-x: auto;
-            font-size: 0.825rem;
-            line-height: 1.6;
-        }
-        .step-number {
-            width: 2rem; height: 2rem;
-            border-radius: 9999px;
-            background: #0284c7;
-            color: white;
-            font-weight: 700;
-            font-size: 0.875rem;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
+        :root { --accent: #0284c7; }
+        .chart-container { max-width: 320px; height: 280px; }
         .guardrail-tab.active {
             background: white;
             border-bottom-color: white;
             font-weight: 700;
             color: #1c1917;
         }
-        .antipattern-wrong { border-left: 4px solid #e11d48; }
-        .antipattern-right { border-left: 4px solid #059669; }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
@@ -95,7 +57,7 @@
                     Engineering Hour <span class="text-accent-blue">P1</span>
                 </h1>
             </div>
-            <div class="text-sm font-medium text-stone-500 hidden sm:block">
+            <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
                 Módulo 1: Setup & Regras de Ouro
             </div>
         </div>
@@ -106,38 +68,38 @@
         <!-- Sidebar Navigation -->
         <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
 
-            <div class="nav-group-label">Fundamentos</div>
+            <div class="nav-group-label" data-i18n="nav.group.fundamentals">Fundamentos</div>
             <button onclick="navigate('tools')" id="nav-tools"
                 class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚔️</span> Ferramentas
+                <span>⚔️</span> <span data-i18n="nav.tools">Ferramentas</span>
             </button>
             <button onclick="navigate('context')" id="nav-context"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🧠</span> Janela de Contexto
+                <span>🧠</span> <span data-i18n="nav.context">Janela de Contexto</span>
             </button>
 
-            <div class="nav-group-label mt-2">Guardrails</div>
+            <div class="nav-group-label mt-2" data-i18n="nav.group.guardrails">Guardrails</div>
             <button onclick="navigate('guardrails')" id="nav-guardrails"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🛡️</span> Guardrails por Ferramenta
+                <span>🛡️</span> <span data-i18n="nav.guardrails">Guardrails por Ferramenta</span>
             </button>
             <button onclick="navigate('trio')" id="nav-trio"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📂</span> O Trio Essencial
+                <span>📂</span> <span data-i18n="nav.trio">O Trio Essencial</span>
             </button>
             <button onclick="navigate('antipatterns')" id="nav-antipatterns"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🚫</span> Anti-Patterns
+                <span>🚫</span> <span data-i18n="nav.antipatterns">Anti-Patterns</span>
             </button>
 
-            <div class="nav-group-label mt-2">Execução</div>
+            <div class="nav-group-label mt-2" data-i18n="nav.group.execution">Execução</div>
             <button onclick="navigate('workflow')" id="nav-workflow"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚙️</span> Fluxo de Trabalho
+                <span>⚙️</span> <span data-i18n="nav.workflow">Fluxo de Trabalho</span>
             </button>
             <button onclick="navigate('nextsteps')" id="nav-nextsteps"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🚀</span> Próximos Passos
+                <span>🚀</span> <span data-i18n="nav.nextsteps">Próximos Passos</span>
             </button>
         </nav>
 
@@ -148,9 +110,9 @@
             <section id="sec-tools" class="block">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                        <span>⚔️</span> IDE vs. CLI vs. Web
+                        <span>⚔️</span> <span data-i18n="sec.tools.h2">IDE vs. CLI vs. Web</span>
                     </h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.tools.intro">
                         O primeiro passo para aumentar a produtividade com IA é <strong>sair do chat do navegador</strong>.
                         Cada interface tem um propósito diferente — usar a errada cria fricção desnecessária e ignora os
                         guardrails que você definiu para o projeto.
@@ -162,14 +124,14 @@
                     <div class="border border-stone-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-stone-50 relative overflow-hidden flex flex-col">
                         <div class="absolute top-0 left-0 w-full h-1 bg-accent-green"></div>
                         <div class="text-3xl mb-3">💻</div>
-                        <h3 class="font-bold text-lg mb-2 text-stone-800">IDE</h3>
-                        <p class="text-xs text-stone-500 font-mono mb-3">Cursor / VS Code + Copilot</p>
+                        <h3 class="font-bold text-lg mb-2 text-stone-800" data-i18n="sec.tools.card.ide.title">IDE</h3>
+                        <p class="text-xs text-stone-500 font-mono mb-3" data-i18n="sec.tools.card.ide.subtitle">Cursor / VS Code + Copilot</p>
                         <ul class="text-sm text-stone-700 space-y-2 flex-1">
-                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> Código gerado já respeita seu padrão</li>
-                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> Sem copiar/colar — edita direto no arquivo</li>
-                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> Autocomplete ciente de todo o codebase</li>
+                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> <span data-i18n="sec.tools.card.ide.li.1">Código gerado já respeita seu padrão</span></li>
+                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> <span data-i18n="sec.tools.card.ide.li.2">Sem copiar/colar — edita direto no arquivo</span></li>
+                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> <span data-i18n="sec.tools.card.ide.li.3">Autocomplete ciente de todo o codebase</span></li>
                         </ul>
-                        <div class="mt-4 pt-3 border-t border-stone-200 text-[11px] text-stone-500">
+                        <div class="mt-4 pt-3 border-t border-stone-200 text-[11px] text-stone-500" data-i18n-html="sec.tools.card.ide.usewhen">
                             <strong class="text-accent-green">Use quando:</strong> desenvolvimento do dia a dia, features incrementais, edições pontuais.
                         </div>
                     </div>
@@ -178,14 +140,14 @@
                     <div class="border border-stone-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-stone-50 relative overflow-hidden flex flex-col">
                         <div class="absolute top-0 left-0 w-full h-1 bg-accent-blue"></div>
                         <div class="text-3xl mb-3">⌨️</div>
-                        <h3 class="font-bold text-lg mb-2 text-stone-800">CLI Agente</h3>
-                        <p class="text-xs text-stone-500 font-mono mb-3">Claude Code / Gemini CLI</p>
+                        <h3 class="font-bold text-lg mb-2 text-stone-800" data-i18n="sec.tools.card.cli.title">CLI Agente</h3>
+                        <p class="text-xs text-stone-500 font-mono mb-3" data-i18n="sec.tools.card.cli.subtitle">Claude Code / Gemini CLI</p>
                         <ul class="text-sm text-stone-700 space-y-2 flex-1">
-                            <li class="flex items-start gap-2"><span class="text-accent-blue">✅</span> Executa tarefas em lote autonomamente</li>
-                            <li class="flex items-start gap-2"><span class="text-accent-blue">✅</span> Roda comandos, testes e linter sozinho</li>
-                            <li class="flex items-start gap-2"><span class="text-accent-blue">✅</span> Ideal para refatorações e migrações grandes</li>
+                            <li class="flex items-start gap-2"><span class="text-accent-blue">✅</span> <span data-i18n="sec.tools.card.cli.li.1">Executa tarefas em lote autonomamente</span></li>
+                            <li class="flex items-start gap-2"><span class="text-accent-blue">✅</span> <span data-i18n="sec.tools.card.cli.li.2">Roda comandos, testes e linter sozinho</span></li>
+                            <li class="flex items-start gap-2"><span class="text-accent-blue">✅</span> <span data-i18n="sec.tools.card.cli.li.3">Ideal para refatorações e migrações grandes</span></li>
                         </ul>
-                        <div class="mt-4 pt-3 border-t border-stone-200 text-[11px] text-stone-500">
+                        <div class="mt-4 pt-3 border-t border-stone-200 text-[11px] text-stone-500" data-i18n-html="sec.tools.card.cli.usewhen">
                             <strong class="text-accent-blue">Use quando:</strong> automação pesada, refatoração de monorepos, tarefas multi-arquivo.
                         </div>
                     </div>
@@ -194,14 +156,14 @@
                     <div class="border border-stone-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-stone-50 relative overflow-hidden flex flex-col">
                         <div class="absolute top-0 left-0 w-full h-1 bg-accent-red"></div>
                         <div class="text-3xl mb-3">🌐</div>
-                        <h3 class="font-bold text-lg mb-2 text-stone-800">Chat Web</h3>
-                        <p class="text-xs text-stone-500 font-mono mb-3">Claude.ai / ChatGPT</p>
+                        <h3 class="font-bold text-lg mb-2 text-stone-800" data-i18n="sec.tools.card.web.title">Chat Web</h3>
+                        <p class="text-xs text-stone-500 font-mono mb-3" data-i18n="sec.tools.card.web.subtitle">Claude.ai / ChatGPT</p>
                         <ul class="text-sm text-stone-700 space-y-2 flex-1">
-                            <li class="flex items-start gap-2"><span class="text-stone-400">❌</span> <span class="text-stone-500">Perda constante de contexto do projeto</span></li>
-                            <li class="flex items-start gap-2"><span class="text-stone-400">❌</span> <span class="text-stone-500">Erros de indentação por copiar/colar</span></li>
-                            <li class="flex items-start gap-2 font-semibold"><span class="text-accent-red">❌</span> <span class="text-accent-red">Ignora completamente seus Guardrails</span></li>
+                            <li class="flex items-start gap-2"><span class="text-stone-400">❌</span> <span class="text-stone-500" data-i18n="sec.tools.card.web.li.1">Perda constante de contexto do projeto</span></li>
+                            <li class="flex items-start gap-2"><span class="text-stone-400">❌</span> <span class="text-stone-500" data-i18n="sec.tools.card.web.li.2">Erros de indentação por copiar/colar</span></li>
+                            <li class="flex items-start gap-2 font-semibold"><span class="text-accent-red">❌</span> <span class="text-accent-red" data-i18n="sec.tools.card.web.li.3">Ignora completamente seus Guardrails</span></li>
                         </ul>
-                        <div class="mt-4 pt-3 border-t border-stone-200 text-[11px] text-stone-500">
+                        <div class="mt-4 pt-3 border-t border-stone-200 text-[11px] text-stone-500" data-i18n-html="sec.tools.card.web.usewhen">
                             <strong class="text-accent-red">Use quando:</strong> exploração conceitual, perguntas sem código, brainstorm inicial de arquitetura.
                         </div>
                     </div>
@@ -211,8 +173,8 @@
                 <div class="bg-stone-900 text-stone-100 rounded-2xl p-5 flex items-start gap-4">
                     <span class="text-2xl flex-shrink-0">💡</span>
                     <div>
-                        <h4 class="font-bold mb-1">A Regra dos 3 Ambientes</h4>
-                        <p class="text-sm text-stone-300 leading-relaxed">
+                        <h4 class="font-bold mb-1" data-i18n="sec.tools.rule3.title">A Regra dos 3 Ambientes</h4>
+                        <p class="text-sm text-stone-300 leading-relaxed" data-i18n-html="sec.tools.rule3.desc">
                             Devs experientes usam os três. <strong class="text-white">Web</strong> para pensar,
                             <strong class="text-white">IDE</strong> para construir,
                             <strong class="text-white">CLI</strong> para automatizar.
@@ -226,9 +188,9 @@
             <section id="sec-context" class="hidden">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                        <span>🧠</span> Anatomia da IA: Janela de Contexto
+                        <span>🧠</span> <span data-i18n="sec.context.h2">Anatomia da IA: Janela de Contexto</span>
                     </h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.context.intro">
                         Por que a IA "começa a falar bobagem" em conversas longas? Porque ela tem uma
                         <strong>memória de curto prazo finita</strong>, medida em tokens. Quando esse espaço se esgota,
                         ela descarta as informações mais antigas — incluindo seus guardrails.
@@ -238,22 +200,22 @@
                 <div class="bg-stone-50 rounded-xl p-6 border border-stone-200 mb-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <h3 class="font-bold text-lg mb-3 text-stone-800">O que é um Token?</h3>
-                            <p class="text-sm text-stone-600 mb-4">
+                            <h3 class="font-bold text-lg mb-3 text-stone-800" data-i18n="sec.context.token.title">O que é um Token?</h3>
+                            <p class="text-sm text-stone-600 mb-4" data-i18n-html="sec.context.token.desc">
                                 Pedaços de palavras processados pelo modelo. Em média,
                                 <strong>1.000 tokens ≈ 750 palavras</strong>.
                                 Claude tem uma janela de <strong>200k tokens</strong> — mas atenção seletiva importa mais do que tamanho bruto.
                             </p>
 
-                            <h3 class="font-bold text-lg mb-2 text-stone-800">A "Memória de Curto Prazo"</h3>
-                            <p class="text-sm text-stone-600 mb-4">
+                            <h3 class="font-bold text-lg mb-2 text-stone-800" data-i18n="sec.context.memory.title">A "Memória de Curto Prazo"</h3>
+                            <p class="text-sm text-stone-600 mb-4" data-i18n-html="sec.context.memory.desc">
                                 Quando projeto + histórico de conversa excedem a janela, a IA começa a
                                 <strong>descartar as instruções do início</strong> — exatamente onde ficam seus guardrails e regras de projeto.
                             </p>
 
                             <div class="bg-red-50 text-accent-red p-3 rounded-lg text-sm border border-red-100 flex gap-2 mb-4">
                                 <span class="flex-shrink-0">⚠️</span>
-                                <div>
+                                <div data-i18n-html="sec.context.warning">
                                     <strong>O Risco da Distração:</strong> Enviar <code>node_modules</code>, <code>dist</code>
                                     ou logs gigantes consome tokens valiosos e "distrai" a atenção da IA do que realmente importa.
                                 </div>
@@ -261,7 +223,7 @@
 
                             <div class="bg-emerald-50 text-emerald-800 p-3 rounded-lg text-sm border border-emerald-100 flex gap-2">
                                 <span class="flex-shrink-0">✅</span>
-                                <div>
+                                <div data-i18n-html="sec.context.solution">
                                     <strong>A Solução:</strong> Crie um arquivo
                                     <code class="bg-emerald-100 font-mono px-1 rounded text-xs">.claudeignore</code> (Claude Code) ou
                                     <code class="bg-emerald-100 font-mono px-1 rounded text-xs">.cursorignore</code> (Cursor)
@@ -275,17 +237,17 @@
                             <div class="flex rounded-lg border border-stone-300 overflow-hidden text-sm font-medium">
                                 <button id="btn-context-dirty" onclick="toggleContext('dirty')"
                                     class="px-4 py-2 bg-red-50 text-accent-red border-r border-stone-300 transition-colors">
-                                    😵 Contexto Poluído
+                                    😵 <span data-i18n="sec.context.btn.dirty">Contexto Poluído</span>
                                 </button>
                                 <button id="btn-context-clean" onclick="toggleContext('clean')"
                                     class="px-4 py-2 bg-white text-stone-500 transition-colors hover:bg-stone-50">
-                                    ✨ Contexto Limpo
+                                    ✨ <span data-i18n="sec.context.btn.clean">Contexto Limpo</span>
                                 </button>
                             </div>
                             <div class="chart-container">
                                 <canvas id="contextChart"></canvas>
                             </div>
-                            <p id="context-caption" class="text-xs text-center text-stone-500 italic">
+                            <p id="context-caption" class="text-xs text-center text-stone-500 italic" data-i18n="sec.context.caption.dirty">
                                 65% dos tokens gastos com ruído — a IA "vê" mal o código que importa.
                             </p>
                         </div>
@@ -297,9 +259,9 @@
             <section id="sec-guardrails" class="hidden">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                        <span>🛡️</span> Guardrails por Ferramenta
+                        <span>🛡️</span> <span data-i18n="sec.guardrails.h2">Guardrails por Ferramenta</span>
                     </h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.guardrails.intro">
                         Cada ferramenta lê as regras do projeto de um arquivo diferente — mas o objetivo é sempre o mesmo:
                         dar uma <strong>bússola</strong> à IA para que o código gerado já saia alinhado com os padrões do time.
                     </p>
@@ -328,7 +290,7 @@
                             <span class="font-mono text-xs font-bold text-stone-700">📄 CLAUDE.md — Claude Code</span>
                             <button onclick="copyGuardrail('claude')" id="copybtn-claude"
                                 class="text-xs bg-white border border-stone-300 px-2 py-1 rounded hover:bg-stone-50 transition-colors flex items-center gap-1">
-                                <span>📋</span> Copiar
+                                <span>📋</span> <span data-i18n="sec.guardrails.copy">Copiar</span>
                             </button>
                         </div>
                         <pre id="code-claude" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-emerald-400"># Regras do Engenheiro Sênior — Projeto X</span>
@@ -347,7 +309,7 @@
 - Frontend: React 19 + Vite + TailwindCSS
 - Backend: Node.js + Fastify + Prisma
 - Testes: Vitest + Testing Library</pre>
-                        <div class="p-4 bg-white text-sm text-stone-600 border-t border-stone-200">
+                        <div class="p-4 bg-white text-sm text-stone-600 border-t border-stone-200" data-i18n="sec.guardrails.claude.note">
                             Lido automaticamente pelo Claude Code em cada sessão. Coloque na raiz do projeto e versione com o time.
                         </div>
                     </div>
@@ -358,7 +320,7 @@
                             <span class="font-mono text-xs font-bold text-stone-700">📄 .cursorrules — Cursor IDE</span>
                             <button onclick="copyGuardrail('cursor')" id="copybtn-cursor"
                                 class="text-xs bg-white border border-stone-300 px-2 py-1 rounded hover:bg-stone-50 transition-colors flex items-center gap-1">
-                                <span>📋</span> Copiar
+                                <span>📋</span> <span data-i18n="sec.guardrails.copy">Copiar</span>
                             </button>
                         </div>
                         <pre id="code-cursor" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-stone-400"># Cursor Rules — Projeto X</span>
@@ -377,7 +339,7 @@
 <span class="text-blue-400">## Testing</span>
 - Always suggest a Vitest skeleton for new functionality.
 - Mocks must use `vi.fn()`, never manual class overrides.</pre>
-                        <div class="p-4 bg-white text-sm text-stone-600 border-t border-stone-200">
+                        <div class="p-4 bg-white text-sm text-stone-600 border-t border-stone-200" data-i18n-html="sec.guardrails.cursor.note">
                             O Cursor também suporta regras por pasta em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.cursor/rules/*.mdc</code> — útil para regras específicas por domínio.
                         </div>
                     </div>
@@ -388,7 +350,7 @@
                             <span class="font-mono text-xs font-bold text-stone-700">📄 .github/copilot-instructions.md — GitHub Copilot</span>
                             <button onclick="copyGuardrail('copilot')" id="copybtn-copilot"
                                 class="text-xs bg-white border border-stone-300 px-2 py-1 rounded hover:bg-stone-50 transition-colors flex items-center gap-1">
-                                <span>📋</span> Copiar
+                                <span>📋</span> <span data-i18n="sec.guardrails.copy">Copiar</span>
                             </button>
                         </div>
                         <pre id="code-copilot" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-stone-400"># GitHub Copilot Instructions — Projeto X</span>
@@ -406,13 +368,13 @@
 <span class="text-blue-400">## Testing</span>
 - Framework: Vitest + @testing-library/react.
 - Test files live alongside source: `Button.test.tsx` next to `Button.tsx`.</pre>
-                        <div class="p-4 bg-white text-sm text-stone-600 border-t border-stone-200">
+                        <div class="p-4 bg-white text-sm text-stone-600 border-t border-stone-200" data-i18n-html="sec.guardrails.copilot.note">
                             Funciona com Copilot Chat e autocompletion. Deve estar em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.github/copilot-instructions.md</code> na raiz do repositório.
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-900">
+                <div class="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-900" data-i18n-html="sec.guardrails.principle">
                     <strong>O princípio é o mesmo para todos:</strong> definir <em>quem</em> a IA é no seu projeto e <em>como</em> ela deve se comportar.
                     A ferramenta muda, o conceito não. Versione sempre esses arquivos junto com o código.
                 </div>
@@ -422,9 +384,9 @@
             <section id="sec-trio" class="hidden">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                        <span>📂</span> Planejamento Básico: O Trio Essencial
+                        <span>📂</span> <span data-i18n="sec.trio.h2">Planejamento Básico: O Trio Essencial</span>
                     </h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.trio.intro">
                         Antes de pedir à IA para escrever a primeira linha de código, garanta que ela conheça o terreno.
                         Três arquivos simples servem de <strong>âncora de contexto</strong> — evitando sugestões fora do padrão,
                         versões erradas de libs, e estruturas incompatíveis com o projeto.
@@ -448,7 +410,7 @@
                         </button>
                         <div class="px-4 py-3 rounded-xl border-2 border-dashed border-stone-200 font-mono text-xs text-stone-400 flex justify-between items-center">
                             <span>DECISIONS.md</span>
-                            <span class="bg-stone-100 text-stone-400 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Avançado</span>
+                            <span class="bg-stone-100 text-stone-400 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase" data-i18n="sec.trio.advanced">Avançado</span>
                         </div>
                     </div>
 
@@ -458,8 +420,8 @@
                         <div id="trio-content-tech" class="trio-content block">
                             <div class="p-6 border-b border-stone-200">
                                 <h3 class="text-xl font-bold text-accent-blue mb-2 font-mono">TECH_STACK.md</h3>
-                                <p class="text-stone-700 mb-3">Lista exata das bibliotecas, frameworks e versões utilizadas.</p>
-                                <div class="bg-white p-3 rounded-lg border border-stone-200 text-sm border-l-4 border-l-accent-blue">
+                                <p class="text-stone-700 mb-3" data-i18n="sec.trio.tech.desc">Lista exata das bibliotecas, frameworks e versões utilizadas.</p>
+                                <div class="bg-white p-3 rounded-lg border border-stone-200 text-sm border-l-4 border-l-accent-blue" data-i18n-html="sec.trio.tech.goal">
                                     <strong>Objetivo:</strong> Evita que a IA sugira React 17 quando você usa 19, ou instale <code>axios</code> quando o projeto já usa <code>ky</code>.
                                 </div>
                             </div>
@@ -481,8 +443,8 @@
                         <div id="trio-content-arch" class="trio-content hidden">
                             <div class="p-6 border-b border-stone-200">
                                 <h3 class="text-xl font-bold text-accent-green mb-2 font-mono">ARCHITECTURE.md</h3>
-                                <p class="text-stone-700 mb-3">Explica a organização estrutural e os padrões de comunicação.</p>
-                                <div class="bg-white p-3 rounded-lg border border-stone-200 text-sm border-l-4 border-l-accent-green">
+                                <p class="text-stone-700 mb-3" data-i18n="sec.trio.arch.desc">Explica a organização estrutural e os padrões de comunicação.</p>
+                                <div class="bg-white p-3 rounded-lg border border-stone-200 text-sm border-l-4 border-l-accent-green" data-i18n-html="sec.trio.arch.goal">
                                     <strong>Objetivo:</strong> Se diz "Feature Folders", a IA não criará arquivos soltos em <code>/controllers</code> ou <code>/views</code> gigantes.
                                 </div>
                             </div>
@@ -509,8 +471,8 @@ src/
                         <div id="trio-content-req" class="trio-content hidden">
                             <div class="p-6 border-b border-stone-200">
                                 <h3 class="text-xl font-bold text-accent-red mb-2 font-mono">REQUIREMENTS.md</h3>
-                                <p class="text-stone-700 mb-3">Descreve a regra de negócio central, casos de uso e edge cases.</p>
-                                <div class="bg-white p-3 rounded-lg border border-stone-200 text-sm border-l-4 border-l-accent-red">
+                                <p class="text-stone-700 mb-3" data-i18n="sec.trio.req.desc">Descreve a regra de negócio central, casos de uso e edge cases.</p>
+                                <div class="bg-white p-3 rounded-lg border border-stone-200 text-sm border-l-4 border-l-accent-red" data-i18n-html="sec.trio.req.goal">
                                     <strong>Objetivo:</strong> Mantém a IA focada no "o que" estamos construindo. Impede que ignore casos de borda cruciais ou proponha soluções que não atendem o usuário real.
                                 </div>
                             </div>
@@ -538,9 +500,9 @@ src/
             <section id="sec-antipatterns" class="hidden">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                        <span>🚫</span> Anti-Patterns Mais Comuns
+                        <span>🚫</span> <span data-i18n="sec.antipatterns.h2">Anti-Patterns Mais Comuns</span>
                     </h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.antipatterns.intro">
                         Saber o que <em>não</em> fazer acelera mais do que qualquer dica de produtividade.
                         Estes são os 4 comportamentos que mais drenam o potencial da IA no dia a dia.
                     </p>
@@ -550,19 +512,19 @@ src/
 
                     <!-- Anti-pattern 1 -->
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3">Anti-pattern #1</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3" data-i18n="sec.antipatterns.label.1">Anti-pattern #1</p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
-                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> O Prompt Obra</h4>
-                                <p class="text-sm text-red-700 mb-3">Jogar todos os requisitos de uma vez esperando que a IA entregue tudo perfeito.</p>
-                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-600 italic">
+                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> <span data-i18n="sec.antipatterns.1.wrong.title">O Prompt Obra</span></h4>
+                                <p class="text-sm text-red-700 mb-3" data-i18n="sec.antipatterns.1.wrong.desc">Jogar todos os requisitos de uma vez esperando que a IA entregue tudo perfeito.</p>
+                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-600 italic" data-i18n="sec.antipatterns.1.wrong.example">
                                     "Crie um sistema de autenticação completo com JWT, refresh token, rate limit, logs de auditoria, 2FA e integração com OAuth do Google."
                                 </div>
                             </div>
                             <div class="antipattern-right bg-emerald-50 rounded-xl p-5">
-                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> O Prompt Cirúrgico</h4>
-                                <p class="text-sm text-emerald-700 mb-3">Uma tarefa por vez, validando e construindo incrementalmente sobre o que foi aprovado.</p>
-                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 italic">
+                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> <span data-i18n="sec.antipatterns.1.right.title">O Prompt Cirúrgico</span></h4>
+                                <p class="text-sm text-emerald-700 mb-3" data-i18n="sec.antipatterns.1.right.desc">Uma tarefa por vez, validando e construindo incrementalmente sobre o que foi aprovado.</p>
+                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 italic" data-i18n="sec.antipatterns.1.right.example">
                                     "Baseando-se no REQUIREMENTS.md, implemente o endpoint POST /auth/login. Apenas login por email e senha por agora."
                                 </div>
                             </div>
@@ -571,20 +533,20 @@ src/
 
                     <!-- Anti-pattern 2 -->
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3">Anti-pattern #2</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3" data-i18n="sec.antipatterns.label.2">Anti-pattern #2</p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
-                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> Corrigir Só no Chat</h4>
-                                <p class="text-sm text-red-700 mb-3">Quando a IA usa <code>axios</code> e você quer <code>ky</code>, você fala no chat — e na próxima sessão ela usa <code>axios</code> de novo.</p>
-                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-600 italic">
+                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> <span data-i18n="sec.antipatterns.2.wrong.title">Corrigir Só no Chat</span></h4>
+                                <p class="text-sm text-red-700 mb-3" data-i18n-html="sec.antipatterns.2.wrong.desc">Quando a IA usa <code>axios</code> e você quer <code>ky</code>, você fala no chat — e na próxima sessão ela usa <code>axios</code> de novo.</p>
+                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-600 italic" data-i18n-html="sec.antipatterns.2.wrong.example">
                                     "Não, use ky ao invés de axios"
                                     <span class="block mt-1 text-red-500 font-semibold">→ Correto apenas nesta mensagem.</span>
                                 </div>
                             </div>
                             <div class="antipattern-right bg-emerald-50 rounded-xl p-5">
-                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> Corrigir na Raiz</h4>
-                                <p class="text-sm text-emerald-700 mb-3">Vá no <code>CLAUDE.md</code> e adicione a regra. O comportamento muda permanentemente para todo o time.</p>
-                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 font-mono">
+                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> <span data-i18n="sec.antipatterns.2.right.title">Corrigir na Raiz</span></h4>
+                                <p class="text-sm text-emerald-700 mb-3" data-i18n-html="sec.antipatterns.2.right.desc">Vá no <code>CLAUDE.md</code> e adicione a regra. O comportamento muda permanentemente para todo o time.</p>
+                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 font-mono" data-i18n-html="sec.antipatterns.2.right.example">
                                     <span class="text-emerald-600"># Em CLAUDE.md:</span><br>
                                     - HTTP: use sempre `ky`, nunca `axios` ou `fetch` diretamente.
                                     <span class="block mt-1 text-emerald-600 font-sans font-semibold">→ Correto para sempre.</span>
@@ -595,19 +557,19 @@ src/
 
                     <!-- Anti-pattern 3 -->
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3">Anti-pattern #3</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3" data-i18n="sec.antipatterns.label.3">Anti-pattern #3</p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
-                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> Arrastar a Conversa</h4>
-                                <p class="text-sm text-red-700 mb-3">Continuar uma sessão longa mesmo depois de notar que a IA está esquecendo contexto, gerando inconsistências ou repetindo erros.</p>
-                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-500 italic">
+                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> <span data-i18n="sec.antipatterns.3.wrong.title">Arrastar a Conversa</span></h4>
+                                <p class="text-sm text-red-700 mb-3" data-i18n="sec.antipatterns.3.wrong.desc">Continuar uma sessão longa mesmo depois de notar que a IA está esquecendo contexto, gerando inconsistências ou repetindo erros.</p>
+                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-500 italic" data-i18n="sec.antipatterns.3.wrong.example">
                                     Conversa com 80 mensagens, IA ignora as regras do início, sugere padrões que já foram corrigidos antes.
                                 </div>
                             </div>
                             <div class="antipattern-right bg-emerald-50 rounded-xl p-5">
-                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> Abrir Nova Sessão</h4>
-                                <p class="text-sm text-emerald-700 mb-3">Detecte o sinal de deriva e encerre. Abra uma nova sessão com um prompt de "handoff" resumindo o que foi feito.</p>
-                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 italic">
+                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> <span data-i18n="sec.antipatterns.3.right.title">Abrir Nova Sessão</span></h4>
+                                <p class="text-sm text-emerald-700 mb-3" data-i18n="sec.antipatterns.3.right.desc">Detecte o sinal de deriva e encerre. Abra uma nova sessão com um prompt de "handoff" resumindo o que foi feito.</p>
+                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 italic" data-i18n="sec.antipatterns.3.right.example">
                                     "Contexto: implementamos o login e o refresh token. Os testes passam. Próxima tarefa: implementar o rate limit por IP."
                                 </div>
                             </div>
@@ -616,19 +578,19 @@ src/
 
                     <!-- Anti-pattern 4 -->
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3">Anti-pattern #4</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-400 mb-3" data-i18n="sec.antipatterns.label.4">Anti-pattern #4</p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
-                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> Aceitar Sem Ler</h4>
-                                <p class="text-sm text-red-700 mb-3">Aprovar o código gerado sem entender a intenção — criando dívida técnica oculta que ninguém consegue manter depois.</p>
-                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-500 italic">
+                                <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> <span data-i18n="sec.antipatterns.4.wrong.title">Aceitar Sem Ler</span></h4>
+                                <p class="text-sm text-red-700 mb-3" data-i18n="sec.antipatterns.4.wrong.desc">Aprovar o código gerado sem entender a intenção — criando dívida técnica oculta que ninguém consegue manter depois.</p>
+                                <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-500 italic" data-i18n="sec.antipatterns.4.wrong.example">
                                     "Parece certo, aceitar tudo." → 3 semanas depois ninguém sabe por que aquele código existe.
                                 </div>
                             </div>
                             <div class="antipattern-right bg-emerald-50 rounded-xl p-5">
-                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> Revisão de Intenção</h4>
-                                <p class="text-sm text-emerald-700 mb-3">Você não precisa verificar cada vírgula (o hook faz isso). Mas precisa entender <em>por que</em> essa solução foi escolhida.</p>
-                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 italic">
+                                <h4 class="font-bold text-emerald-800 mb-2 flex items-center gap-2"><span>✅</span> <span data-i18n="sec.antipatterns.4.right.title">Revisão de Intenção</span></h4>
+                                <p class="text-sm text-emerald-700 mb-3" data-i18n-html="sec.antipatterns.4.right.desc">Você não precisa verificar cada vírgula (o hook faz isso). Mas precisa entender <em>por que</em> essa solução foi escolhida.</p>
+                                <div class="bg-white rounded-lg p-3 border border-emerald-100 text-xs text-stone-600 italic" data-i18n="sec.antipatterns.4.right.example">
                                     "Explica por que usaste um Map aqui ao invés de um array com find()."
                                 </div>
                             </div>
@@ -642,9 +604,9 @@ src/
             <section id="sec-workflow" class="hidden">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                        <span>⚙️</span> O Fluxo de Trabalho (Mão na Massa)
+                        <span>⚙️</span> <span data-i18n="sec.workflow.h2">O Fluxo de Trabalho (Mão na Massa)</span>
                     </h2>
-                    <p class="text-stone-600 leading-relaxed">
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.workflow.intro">
                         Com ferramentas e arquivos base prontos, este é o ritual para iniciar qualquer tarefa.
                         Seguir este fluxo transforma a dinâmica de "ditador de código" para <strong>orquestrador</strong>.
                     </p>
@@ -655,8 +617,8 @@ src/
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">1</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Indexação da IDE</h4>
-                            <p class="text-sm text-stone-600">Ao abrir o projeto, aguarde (ou force) a IDE indexar o repositório.
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.workflow.step.1.title">Indexação da IDE</h4>
+                            <p class="text-sm text-stone-600" data-i18n="sec.workflow.step.1.desc">Ao abrir o projeto, aguarde (ou force) a IDE indexar o repositório.
                             A IA só pode consultar o que ela sabe que existe. Sem indexação, ela opera no escuro.</p>
                         </div>
                     </div>
@@ -664,11 +626,11 @@ src/
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">2</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">O "Check-in" — Primeiro Prompt</h4>
-                            <p class="text-sm text-stone-600 mb-3">Sempre contextualize a IA com os arquivos âncora <em>antes</em> de pedir a tarefa. Não presuma que ela lembrou da sessão anterior.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.workflow.step.2.title">O "Check-in" — Primeiro Prompt</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.workflow.step.2.desc">Sempre contextualize a IA com os arquivos âncora <em>antes</em> de pedir a tarefa. Não presuma que ela lembrou da sessão anterior.</p>
                             <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
                                 <span class="text-lg flex-shrink-0">💬</span>
-                                "Leia os arquivos TECH_STACK.md, ARCHITECTURE.md e CLAUDE.md na raiz. Confirme que entendeu os padrões antes de prosseguirmos."
+                                <span data-i18n="sec.workflow.step.2.example">"Leia os arquivos TECH_STACK.md, ARCHITECTURE.md e CLAUDE.md na raiz. Confirme que entendeu os padrões antes de prosseguirmos."</span>
                             </div>
                         </div>
                     </div>
@@ -676,9 +638,9 @@ src/
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">3</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Validação Estrutural</h4>
-                            <p class="text-sm text-stone-600 mb-3">Avalie a resposta. Se ela sugerir algo que viola seu padrão (ex: usou <code class="bg-stone-100 rounded px-1 font-mono text-xs">axios</code> quando você usa <code class="bg-stone-100 rounded px-1 font-mono text-xs">ky</code>), não corrija apenas no chat.</p>
-                            <div class="bg-stone-800 text-stone-100 p-4 rounded-lg text-sm border-l-4 border-accent-blue">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.workflow.step.3.title">Validação Estrutural</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.workflow.step.3.desc">Avalie a resposta. Se ela sugerir algo que viola seu padrão (ex: usou <code class="bg-stone-100 rounded px-1 font-mono text-xs">axios</code> quando você usa <code class="bg-stone-100 rounded px-1 font-mono text-xs">ky</code>), não corrija apenas no chat.</p>
+                            <div class="bg-stone-800 text-stone-100 p-4 rounded-lg text-sm border-l-4 border-accent-blue" data-i18n-html="sec.workflow.step.3.tip">
                                 💡 <strong>O Segredo:</strong> Vá no <code>CLAUDE.md</code>, adicione a regra restritiva lá, e peça para a IA reler.
                                 <strong>Você corrige a "raiz" do comportamento, não apenas uma linha temporária.</strong>
                             </div>
@@ -688,11 +650,11 @@ src/
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">4</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">O Loop de Iteração</h4>
-                            <p class="text-sm text-stone-600 mb-3">Após a primeira resposta aprovada, construa incrementalmente. Cada prompt subsequente deve referenciar o que já foi feito.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.workflow.step.4.title">O Loop de Iteração</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.workflow.step.4.desc">Após a primeira resposta aprovada, construa incrementalmente. Cada prompt subsequente deve referenciar o que já foi feito.</p>
                             <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
                                 <span class="text-lg flex-shrink-0">💬</span>
-                                "O endpoint de login está funcionando e os testes passam. Agora adicione o mecanismo de refresh token conforme o REQUIREMENTS.md."
+                                <span data-i18n="sec.workflow.step.4.example">"O endpoint de login está funcionando e os testes passam. Agora adicione o mecanismo de refresh token conforme o REQUIREMENTS.md."</span>
                             </div>
                         </div>
                     </div>
@@ -700,14 +662,14 @@ src/
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">5</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Fechando a Sessão</h4>
-                            <p class="text-sm text-stone-600 mb-3">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.workflow.step.5.title">Fechando a Sessão</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.workflow.step.5.desc">
                                 Sessões longas degradam. Detecte os sinais — IA repetindo erros já corrigidos, ignorando regras, gerando código inconsistente — e encerre.
                                 Abra uma nova sessão com um <strong>prompt de handoff</strong>:
                             </p>
                             <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
                                 <span class="text-lg flex-shrink-0">💬</span>
-                                "Retomando contexto: implementamos login + refresh token. Testes passam. Próxima tarefa: rate limit por IP (ver REQUIREMENTS.md, seção Edge Cases)."
+                                <span data-i18n="sec.workflow.step.5.example">"Retomando contexto: implementamos login + refresh token. Testes passam. Próxima tarefa: rate limit por IP (ver REQUIREMENTS.md, seção Edge Cases)."</span>
                             </div>
                         </div>
                     </div>
@@ -719,9 +681,9 @@ src/
             <section id="sec-nextsteps" class="hidden">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                        <span>🚀</span> Como começar hoje
+                        <span>🚀</span> <span data-i18n="sec.nextsteps.h2">Como começar hoje</span>
                     </h2>
-                    <p class="text-stone-600">
+                    <p class="text-stone-600" data-i18n="sec.nextsteps.intro">
                         Não precisa configurar tudo de uma vez. Quatro ações concretas que você pode fazer ainda hoje para
                         sair do setup zero para um ambiente funcional.
                     </p>
@@ -732,8 +694,8 @@ src/
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">1</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Escolha e instale sua ferramenta principal</h4>
-                            <p class="text-sm text-stone-600 mb-3">Para desenvolvimento do dia a dia, escolha uma IDE. Para automações pesadas, instale o Claude Code.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.1.title">Escolha e instale sua ferramenta principal</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.1.desc">Para desenvolvimento do dia a dia, escolha uma IDE. Para automações pesadas, instale o Claude Code.</p>
                             <pre class="text-xs !p-3"># Instalar Claude Code (CLI agente)
 npm install -g @anthropic-ai/claude-code
 
@@ -745,8 +707,8 @@ claude --version</pre>
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">2</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Crie o arquivo de guardrails com pelo menos 3 regras</h4>
-                            <p class="text-sm text-stone-600 mb-3">Não espere o arquivo estar perfeito. Comece com o mínimo e evolua conforme encontra comportamentos que precisa corrigir.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.2.title">Crie o arquivo de guardrails com pelo menos 3 regras</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.2.desc">Não espere o arquivo estar perfeito. Comece com o mínimo e evolua conforme encontra comportamentos que precisa corrigir.</p>
                             <pre class="text-xs !p-3"># Para Claude Code:
 touch CLAUDE.md
 
@@ -761,8 +723,8 @@ mkdir -p .github && touch .github/copilot-instructions.md</pre>
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">3</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Crie TECH_STACK.md e ARCHITECTURE.md (mínimo viável)</h4>
-                            <p class="text-sm text-stone-600 mb-3">10 linhas cada é suficiente para começar. O objetivo é que a IA não "adivinhe" sua stack.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.3.title">Crie TECH_STACK.md e ARCHITECTURE.md (mínimo viável)</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.3.desc">10 linhas cada é suficiente para começar. O objetivo é que a IA não "adivinhe" sua stack.</p>
                             <pre class="text-xs !p-3">git add CLAUDE.md TECH_STACK.md ARCHITECTURE.md .claudeignore
 git commit -m "feat: add AI context files for Claude Code"</pre>
                         </div>
@@ -771,11 +733,11 @@ git commit -m "feat: add AI context files for Claude Code"</pre>
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">4</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1">Execute o "Check-in" na sua próxima tarefa real</h4>
-                            <p class="text-sm text-stone-600 mb-3">Use o template do Passo 2 do Fluxo de Trabalho na próxima feature que você for implementar. Observe a diferença de qualidade na primeira resposta.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.4.title">Execute o "Check-in" na sua próxima tarefa real</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.4.desc">Use o template do Passo 2 do Fluxo de Trabalho na próxima feature que você for implementar. Observe a diferença de qualidade na primeira resposta.</p>
                             <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
                                 <span class="text-lg flex-shrink-0">💬</span>
-                                Template: "Leia TECH_STACK.md, ARCHITECTURE.md e CLAUDE.md. Confirme que entendeu os padrões. Depois, [descreva a tarefa]."
+                                <span data-i18n="sec.nextsteps.step.4.example">Template: "Leia TECH_STACK.md, ARCHITECTURE.md e CLAUDE.md. Confirme que entendeu os padrões. Depois, [descreva a tarefa]."</span>
                             </div>
                         </div>
                     </div>
@@ -783,34 +745,34 @@ git commit -m "feat: add AI context files for Claude Code"</pre>
 
                 <!-- References -->
                 <div class="bg-stone-50 border border-stone-200 rounded-2xl p-6">
-                    <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>📚</span> Referências</h3>
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>📚</span> <span data-i18n="sec.nextsteps.refs.title">Referências</span></h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">📖</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700">Documentação Claude Code</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.claude">Documentação Claude Code</p>
                                 <p class="text-xs text-stone-500 font-mono">docs.anthropic.com/claude-code</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">⚙️</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700">Cursor Rules (Docs)</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.cursor">Cursor Rules (Docs)</p>
                                 <p class="text-xs text-stone-500 font-mono">docs.cursor.com/context/rules</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">🤖</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700">GitHub Copilot Instructions</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.copilot">GitHub Copilot Instructions</p>
                                 <p class="text-xs text-stone-500 font-mono">docs.github.com/copilot/customizing</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">🎓</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700">Próximo módulo: Prompts & Contexto Avançado</p>
-                                <p class="text-xs text-stone-500">Engineering Hour — Parte 2</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.next">Próximo módulo: Prompts & Contexto Avançado</p>
+                                <p class="text-xs text-stone-500" data-i18n="sec.nextsteps.refs.next.sub">Engineering Hour — Parte 2</p>
                             </div>
                         </div>
                     </div>
@@ -820,20 +782,26 @@ git commit -m "feat: add AI context files for Claude Code"</pre>
         </main>
     </div>
 
+    <!-- Session Complete -->
+    <div id="session-complete" class="hidden border-t border-stone-200 bg-stone-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
+            <span class="text-3xl mb-3 block">🎉</span>
+            <h3 class="text-xl font-bold text-stone-800 mb-2" data-i18n="complete.title">Sessão concluída!</h3>
+            <p class="text-stone-500 mb-6 text-sm" data-i18n="complete.desc">Você completou esta sessão. Continue para a próxima ou volte ao índice.</p>
+            <div class="flex items-center justify-center gap-3">
+                <a href="index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-lg text-sm font-semibold hover:bg-stone-700 transition-colors" data-i18n="complete.home">← Voltar ao índice</a>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentState = { activeSection: 'tools', chartInstance: null, contextMode: 'dirty' };
 
-        // ── Navigation ──────────────────────────────────────────────
-        function navigate(sectionId) {
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`nav-${sectionId}`).classList.add('active');
-
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
-
+        // ── Navigation hook (nav.js handles core logic) ─────────────
+        window.onNavigate = function(sectionId) {
             if (sectionId === 'context' && !currentState.chartInstance) initChart();
             currentState.activeSection = sectionId;
-        }
+        };
 
         // ── Trio ────────────────────────────────────────────────────
         function showTrioInfo(type) {
@@ -938,6 +906,50 @@ git commit -m "feat: add AI context files for Claude Code"</pre>
                 dirtyBtn.className = 'px-4 py-2 bg-white text-stone-500 border-r border-stone-300 transition-colors hover:bg-stone-50';
             }
         }
+        window.addEventListener('i18n:applied', ({ detail: { t } }) => {
+            // Update chart labels if they exist
+            if (currentState.chartInstance) {
+                const mode = currentState.contextMode;
+                const dirtyLabels = [
+                    t('sec.context.chart.dirty.useful') || 'Código Útil (15%)',
+                    t('sec.context.chart.dirty.relevant') || 'Histórico Relevante (20%)',
+                    t('sec.context.chart.dirty.noise') || 'Ruído — logs/dist/node_modules (65%)'
+                ];
+                const cleanLabels = [
+                    t('sec.context.chart.clean.useful') || 'Código Útil (55%)',
+                    t('sec.context.chart.clean.relevant') || 'Histórico Relevante (35%)',
+                    t('sec.context.chart.clean.noise') || 'Ruído residual (10%)'
+                ];
+                contextData.dirty.labels = dirtyLabels;
+                contextData.clean.labels = cleanLabels;
+                contextData.dirty.caption = t('sec.context.caption.dirty') || contextData.dirty.caption;
+                contextData.clean.caption = t('sec.context.caption.clean') || contextData.clean.caption;
+                currentState.chartInstance.data.labels = contextData[mode].labels;
+                currentState.chartInstance.update();
+                document.getElementById('context-caption').textContent = contextData[mode].caption;
+            }
+            // Update tooltip callback text
+            if (currentState.chartInstance) {
+                const tooltipText = t('sec.context.chart.tooltip') || '% da Janela de Contexto';
+                currentState.chartInstance.options.plugins.tooltip.callbacks.label = ctx => ` ${ctx.parsed}${tooltipText}`;
+                currentState.chartInstance.update();
+            }
+        });
     </script>
+
+    <!-- Footer -->
+    <footer class="border-t border-stone-200 mt-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-sm text-stone-400">
+                <span class="text-base">🎓</span>
+                <span data-i18n-html="footer.brand">Engineering Hour · By <a href="https://github.com/griiettner/ai-engineering-hour" target="_blank" class="underline hover:text-stone-600">Paulo Griiettner</a></span>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-stone-400">
+                <span data-i18n="footer.stack">HTML · Tailwind CSS · Chart.js</span>
+                <span>·</span>
+                <span data-i18n="footer.tagline">Sem build. Abra e use.</span>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

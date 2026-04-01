@@ -1,0 +1,9 @@
+{
+  "header.subtitle": "AI-Augmented Developer Series",
+  "footer.brand": "Engineering Hour · By <a href=\"https://github.com/griiettner/ai-engineering-hour\" target=\"_blank\" class=\"underline hover:text-stone-600\">Paulo Griiettner</a>",
+  "footer.stack": "HTML · Tailwind CSS · Chart.js",
+  "footer.tagline": "No build. Open and use.",
+  "complete.title": "Session complete!",
+  "complete.desc": "You've completed this session. Continue to the next one or go back to the index.",
+  "complete.home": "← Back to index"
+}
