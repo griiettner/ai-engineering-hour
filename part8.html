@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour P8: O Sistema Integrado</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="nav.js" defer></script>
+    <script src="i18n.js" defer></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+                            300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
+                        },
+                        accent: {
+                            amber: '#d97706',
+                            light: '#fffbeb',
+                            border: '#fbbf24',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        :root { --accent: #d97706; }
+        .scenario-tab { transition: all 0.15s; cursor: pointer; }
+        .scenario-tab.active { background: #d97706; color: white; font-weight: 600; }
+        .tool-node {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 0.75rem; border-radius: 0.75rem;
+            border: 2px solid #e7e5e4; background: white;
+            transition: all 0.2s;
+            min-width: 80px; text-align: center;
+        }
+        .tool-node:hover {
+            border-color: #d97706;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
+        }
+        .tool-node .tool-icon { font-size: 1.5rem; }
+        .tool-node .tool-label { font-size: 0.7rem; font-weight: 700; color: #44403c; }
+        .integration-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .integration-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🔗</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">
+                    Engineering Hour <span style="color:#d97706">P8</span>
+                </h1>
+            </div>
+            <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
+                Módulo 8: O Sistema Integrado — Ferramentas que se Conectam
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
+
+        <!-- Sidebar -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+
+            <p class="nav-group-label" data-i18n="nav.group.concept">O Conceito</p>
+            <button onclick="navigate('visao')" id="nav-visao" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔗</span> <span data-i18n="nav.visao">Visão do Sistema</span>
+            </button>
+            <button onclick="navigate('mapa')" id="nav-mapa" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🗺️</span> <span data-i18n="nav.mapa">Mapa das Ferramentas</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.practice">Na Prática</p>
+            <button onclick="navigate('cenarios')" id="nav-cenarios" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🎯</span> <span data-i18n="nav.cenarios">Cenários de Integração</span>
+            </button>
+            <button onclick="navigate('receitas')" id="nav-receitas" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📋</span> <span data-i18n="nav.receitas">Receitas Avançadas</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.impact">Impacto</p>
+            <button onclick="navigate('metricas')" id="nav-metricas" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📊</span> <span data-i18n="nav.metricas">Métricas de Integração</span>
+            </button>
+            <button onclick="navigate('limites')" id="nav-limites" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚠️</span> <span data-i18n="nav.limites">Limites &amp; Cuidados</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.action">Ação</p>
+            <button onclick="navigate('proximos')" id="nav-proximos" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> <span data-i18n="nav.proximos">Próximos Passos</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+
+            <!-- ============================================================ -->
+            <!-- SECTION 1: Visão do Sistema                                   -->
+            <!-- ============================================================ -->
+            <section id="sec-visao" class="block">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔗</span> <span data-i18n="sec.visao.h2">O Sistema Integrado</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.visao.intro">
+                        Nas sessões anteriores, estudamos cada ferramenta isoladamente: Hooks, Memory, Agents, Skills, Commands, Plans e MCP. Agora vamos ver o que acontece quando elas trabalham juntas. Não é um "triângulo de ouro" — é um sistema completo onde cada peça amplifica as outras.
+                    </p>
+                </div>
+
+                <!-- The shift -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                        <h3 class="font-bold text-stone-400 text-sm mb-3"><span>📦</span> <span data-i18n="sec.visao.isolated.title">Ferramentas Isoladas</span></h3>
+                        <ul class="text-sm text-stone-500 space-y-2 leading-relaxed">
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.isolated.li.1">Hook roda um lint e mostra o resultado</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.isolated.li.2">Memory guarda preferências do usuário</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.isolated.li.3">Agente executa uma tarefa e encerra</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.isolated.li.4">Skill formata um comando reutilizável</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.isolated.li.5">MCP conecta a uma fonte de dados</span></li>
+                        </ul>
+                    </div>
+                    <div class="rounded-xl border-2 p-5" style="background:#fffbeb; border-color:#fbbf24">
+                        <h3 class="font-bold text-sm mb-3" style="color:#d97706"><span>🔗</span> <span data-i18n="sec.visao.integrated.title">Ferramentas Integradas</span></h3>
+                        <ul class="text-sm space-y-2 leading-relaxed" style="color:#92400e">
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.integrated.li.1">Hook detecta erro → aciona agente → agente corrige → hook valida de novo</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.integrated.li.2">Skill coordena 3 agentes em paralelo com papéis diferentes</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.integrated.li.3">Agente consulta MCP, gera um Plan, e salva decisões na Memory</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.integrated.li.4">Memory informa o agente sobre padrões do projeto antes de cada tarefa</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.integrated.li.5">Command aciona um pipeline completo: plan → code → review → commit</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Key insight -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">💡</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.visao.insight.title">O Princípio da Composição</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.visao.insight.desc">Cada ferramenta do Claude Code foi projetada como uma primitiva composável. Hooks são event listeners. Skills são prompts empacotados. Agents são processos isolados. Memory é estado persistente. MCP é I/O externo. Quando você conecta essas primitivas, o poder não é aditivo — é multiplicativo.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 2: Mapa das Ferramentas                               -->
+            <!-- ============================================================ -->
+            <section id="sec-mapa" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🗺️</span> <span data-i18n="sec.mapa.h2">Mapa das Ferramentas</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.mapa.intro">
+                        Antes de integrar, é preciso entender o papel de cada peça no sistema. Cada ferramenta tem um domínio específico e interfaces claras com as outras.
+                    </p>
+                </div>
+
+                <!-- Tool map visual -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
+                    <div class="tool-node">
+                        <span class="tool-icon">⚡</span>
+                        <span class="tool-label" data-i18n="sec.mapa.tool.hooks">Hooks</span>
+                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.hooks">Eventos</span>
+                    </div>
+                    <div class="tool-node">
+                        <span class="tool-icon">🧠</span>
+                        <span class="tool-label" data-i18n="sec.mapa.tool.memory">Memory</span>
+                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.memory">Estado</span>
+                    </div>
+                    <div class="tool-node">
+                        <span class="tool-icon">🤖</span>
+                        <span class="tool-label" data-i18n="sec.mapa.tool.agents">Agents</span>
+                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.agents">Execução</span>
+                    </div>
+                    <div class="tool-node">
+                        <span class="tool-icon">🎯</span>
+                        <span class="tool-label" data-i18n="sec.mapa.tool.skills">Skills</span>
+                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.skills">Reutilização</span>
+                    </div>
+                    <div class="tool-node">
+                        <span class="tool-icon">⌨️</span>
+                        <span class="tool-label" data-i18n="sec.mapa.tool.commands">Commands</span>
+                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.commands">Interface</span>
+                    </div>
+                    <div class="tool-node">
+                        <span class="tool-icon">📐</span>
+                        <span class="tool-label" data-i18n="sec.mapa.tool.plans">Plans</span>
+                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.plans">Estratégia</span>
+                    </div>
+                    <div class="tool-node">
+                        <span class="tool-icon">🔌</span>
+                        <span class="tool-label" data-i18n="sec.mapa.tool.mcp">MCP</span>
+                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.mcp">I/O Externo</span>
+                    </div>
+                    <div class="tool-node">
+                        <span class="tool-icon">📋</span>
+                        <span class="tool-label" data-i18n="sec.mapa.tool.claudemd">CLAUDE.md</span>
+                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.claudemd">Diretrizes</span>
+                    </div>
+                </div>
+
+                <!-- Connection matrix -->
+                <h3 class="font-bold text-stone-800 text-sm mb-3" data-i18n="sec.mapa.matrix.title">Quem se conecta com quem</h3>
+                <div class="flex flex-col gap-3 mb-6">
+                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span>⚡</span>
+                            <span class="font-bold text-sm text-stone-800" data-i18n="sec.mapa.conn.hooks.title">Hooks →</span>
+                        </div>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.mapa.conn.hooks.desc">Podem acionar scripts que disparam agentes, atualizam memory, consultam MCP servers, ou executam validações externas. São o "event bus" do sistema.</p>
+                    </div>
+                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span>🤖</span>
+                            <span class="font-bold text-sm text-stone-800" data-i18n="sec.mapa.conn.agents.title">Agents →</span>
+                        </div>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.mapa.conn.agents.desc">Podem chamar skills, criar plans, ler/escrever memory, usar MCP tools, e spawnar sub-agentes. São os "workers" que executam qualquer combinação de ferramentas.</p>
+                    </div>
+                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span>🎯</span>
+                            <span class="font-bold text-sm text-stone-800" data-i18n="sec.mapa.conn.skills.title">Skills →</span>
+                        </div>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.mapa.conn.skills.desc">Podem ser invocados por agentes, por commands, ou até por outros skills. Definem o "como fazer" reutilizável. Podem coordenar multi-agentes internamente.</p>
+                    </div>
+                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-200">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span>🧠</span>
+                            <span class="font-bold text-sm text-stone-800" data-i18n="sec.mapa.conn.memory.title">Memory →</span>
+                        </div>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.mapa.conn.memory.desc">É consultada automaticamente no início de cada conversa. Agents e hooks podem atualizar memories. É o "estado de longo prazo" que sobrevive entre sessões.</p>
+                    </div>
+                </div>
+
+                <!-- Mental model -->
+                <div class="p-5 rounded-xl border-2 flex gap-4 items-start" style="background:#fffbeb; border-color:#fbbf24">
+                    <span class="text-2xl flex-shrink-0">🧩</span>
+                    <div>
+                        <h4 class="font-bold mb-1" style="color:#d97706" data-i18n="sec.mapa.mental.title">Modelo Mental: O Fluxo</h4>
+                        <p class="text-sm leading-relaxed" style="color:#92400e" data-i18n="sec.mapa.mental.desc">CLAUDE.md define as regras. Memory traz o contexto histórico. Um Command ou Skill inicia a ação. Agents executam o trabalho. Hooks validam cada passo. Plans documentam a estratégia. MCP conecta ao mundo externo. Tudo numa cadeia que se auto-reforça.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 3: Cenários de Integração                             -->
+            <!-- ============================================================ -->
+            <section id="sec-cenarios" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🎯</span> <span data-i18n="sec.cenarios.h2">Cenários de Integração</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.cenarios.intro">
+                        Cada cenário mostra ferramentas diferentes trabalhando juntas. Clique nos tabs para explorar as combinações.
+                    </p>
+                </div>
+
+                <!-- Scenario tabs -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <button onclick="showScenario('hookagent')" id="scntab-hookagent" class="scenario-tab active text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.cenarios.tab.hookagent">Hook → Agent</button>
+                    <button onclick="showScenario('skillmulti')" id="scntab-skillmulti" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.cenarios.tab.skillmulti">Skill → Multi-Agent</button>
+                    <button onclick="showScenario('agentplan')" id="scntab-agentplan" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.cenarios.tab.agentplan">Agent → Plan</button>
+                    <button onclick="showScenario('mcpmemory')" id="scntab-mcpmemory" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.cenarios.tab.mcpmemory">MCP → Memory</button>
+                    <button onclick="showScenario('pipeline')" id="scntab-pipeline" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.cenarios.tab.pipeline">Pipeline Completo</button>
+                </div>
+
+                <!-- Scenario 1: Hook → Agent → Memory -->
+                <div id="scn-hookagent" class="scenario-content">
+                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.cenarios.s1.label">Cenário 1</span>
+                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.cenarios.s1.title">Hook detecta padrão → Agent corrige → Memory registra</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.cenarios.s1.desc">
+                            Um PostToolUse hook detecta que um arquivo TypeScript foi escrito sem type exports. Um script aciona o Claude que lê o erro e corrige. A memory registra a decisão para que o Claude já saiba o padrão na próxima sessão.
+                        </p>
+                        <!-- Flow visual -->
+                        <div class="flex items-center gap-3 flex-wrap mb-4">
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-stone-100 border border-stone-200">
+                                <span>⚡</span><span class="text-xs font-bold text-stone-700">PostToolUse</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
+                                <span>🔍</span><span class="text-xs font-bold text-amber-700" data-i18n="sec.cenarios.s1.flow.detect">Detecta falta</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:#fffbeb; border: 1px solid #fbbf24">
+                                <span>🤖</span><span class="text-xs font-bold" style="color:#d97706" data-i18n="sec.cenarios.s1.flow.agent">Claude corrige</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                                <span>🧠</span><span class="text-xs font-bold text-emerald-700" data-i18n="sec.cenarios.s1.flow.memory">Memory salva</span>
+                            </div>
+                        </div>
+                        <pre><span class="text-stone-500">// .claude/settings.json — hook que valida exports</span>
+{
+  <span class="text-violet-400">"hooks"</span>: {
+    <span class="text-violet-400">"PostToolUse"</span>: [
+      {
+        <span class="text-violet-400">"matcher"</span>: <span class="text-emerald-400">"Write|Edit"</span>,
+        <span class="text-violet-400">"hooks"</span>: [
+          {
+            <span class="text-violet-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
+            <span class="text-violet-400">"command"</span>: <span class="text-emerald-400">"bash .claude/scripts/check-ts-exports.sh \"$TOOL_INPUT\""</span>
+          }
+        ]
+      }
+    ]
+  }
+}
+
+<span class="text-stone-500">// Fluxo completo:</span>
+<span class="text-stone-500">// 1. Claude escreve um arquivo .ts via Write</span>
+<span class="text-stone-500">// 2. Hook roda check-ts-exports.sh automaticamente</span>
+<span class="text-stone-500">// 3. Script retorna exit 1 + stderr se faltar exports</span>
+<span class="text-stone-500">// 4. Claude lê o erro e adiciona os exports faltantes</span>
+<span class="text-stone-500">// 5. Hook roda de novo → exit 0 → aprovado</span>
+<span class="text-stone-500">// 6. Claude salva na memory: "Este projeto exige type exports"</span></pre>
+                    </div>
+                </div>
+
+                <!-- Scenario 2: Skill → Multi-Agent -->
+                <div id="scn-skillmulti" class="scenario-content hidden">
+                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.cenarios.s2.label">Cenário 2</span>
+                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.cenarios.s2.title">Skill de review coordena 3 agentes especializados</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.cenarios.s2.desc">
+                            Um slash command /review-pr invoca um skill que internamente spawna 3 subagentes em paralelo: um para segurança, um para performance, um para testes. O skill consolida os resultados e apresenta um report unificado.
+                        </p>
+                        <!-- Flow visual -->
+                        <div class="flex items-center gap-3 flex-wrap mb-4">
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-stone-100 border border-stone-200">
+                                <span>⌨️</span><span class="text-xs font-bold text-stone-700">/review-pr</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:#fffbeb; border: 1px solid #fbbf24">
+                                <span>🎯</span><span class="text-xs font-bold" style="color:#d97706">Skill</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-red-50 border border-red-200">
+                                    <span class="text-xs font-bold text-red-700" data-i18n="sec.cenarios.s2.flow.security">🔒 Segurança</span>
+                                </div>
+                                <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-50 border border-blue-200">
+                                    <span class="text-xs font-bold text-blue-700" data-i18n="sec.cenarios.s2.flow.perf">⚡ Performance</span>
+                                </div>
+                                <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-purple-50 border border-purple-200">
+                                    <span class="text-xs font-bold text-purple-700" data-i18n="sec.cenarios.s2.flow.tests">🧪 Testes</span>
+                                </div>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                                <span>📄</span><span class="text-xs font-bold text-emerald-700" data-i18n="sec.cenarios.s2.flow.report">Report</span>
+                            </div>
+                        </div>
+                        <pre><span class="text-stone-500"># .claude/commands/review-pr.md</span>
+---
+description: Review de PR com agentes especializados
+allowed-tools: Agent, Read, Grep, Glob
+---
+
+Analise o PR atual com 3 subagentes em paralelo:
+
+1. **Agente de Segurança** (subagent_type: Explore)
+   - Busque vulnerabilidades OWASP top 10
+   - Verifique inputs não sanitizados
+   - Ferramentas: Grep, Read
+
+2. **Agente de Performance** (subagent_type: Explore)
+   - Identifique N+1 queries, loops desnecessários
+   - Verifique uso de índices em queries SQL
+   - Ferramentas: Grep, Read
+
+3. **Agente de Testes** (subagent_type: general-purpose)
+   - Verifique cobertura dos paths alterados
+   - Sugira testes faltantes
+   - Ferramentas: Grep, Read, Bash
+
+Consolide os 3 reports num único sumário com severidade
+(critical / warning / info) para cada item encontrado.</pre>
+                    </div>
+                </div>
+
+                <!-- Scenario 3: Agent → Plan -->
+                <div id="scn-agentplan" class="scenario-content hidden">
+                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.cenarios.s3.label">Cenário 3</span>
+                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.cenarios.s3.title">Agent Explore → Gera Plan → Agent Executor implementa</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.cenarios.s3.desc">
+                            Um agente do tipo Plan analisa o codebase, identifica os arquivos relevantes e cria um plano detalhado. Um segundo agente, com contexto limpo, recebe o plano e implementa. O clássico "Plan Then Build" mas agora orquestrado com agentes tipados.
+                        </p>
+                        <div class="flex items-center gap-3 flex-wrap mb-4">
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200">
+                                <span>🔍</span><span class="text-xs font-bold text-blue-700" data-i18n="sec.cenarios.s3.flow.explore">Agent Plan</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
+                                <span>📐</span><span class="text-xs font-bold text-amber-700" data-i18n="sec.cenarios.s3.flow.plan">Plan gerado</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:#fffbeb; border: 1px solid #fbbf24">
+                                <span>🤖</span><span class="text-xs font-bold" style="color:#d97706" data-i18n="sec.cenarios.s3.flow.exec">Agent Executor</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                                <span>✅</span><span class="text-xs font-bold text-emerald-700" data-i18n="sec.cenarios.s3.flow.done">Código pronto</span>
+                            </div>
+                        </div>
+                        <pre><span class="text-stone-500"># Passo 1: Agente planejador (subagent_type: Plan)</span>
+"Analise a codebase e crie um plano detalhado para
+ migrar o auth de JWT para session-based.
+ Identifique todos os arquivos afetados,
+ a ordem de alteração e possíveis breaking changes."
+
+<span class="text-stone-500"># O plano é salvo em .claude/plans/auth-migration.md</span>
+
+<span class="text-stone-500"># Passo 2: Agente executor (subagent_type: general-purpose)</span>
+"Implemente o plano em .claude/plans/auth-migration.md
+ Siga a ordem exata. Rode os testes após cada arquivo.
+ NÃO altere arquivos fora do escopo do plano."
+
+<span class="text-stone-500"># O executor começa com contexto limpo:</span>
+<span class="text-stone-500"># - Sem o histórico de exploração do planejador</span>
+<span class="text-stone-500"># - Focado exclusivamente na implementação</span>
+<span class="text-stone-500"># - Hooks validam cada escrita automaticamente</span></pre>
+                    </div>
+                </div>
+
+                <!-- Scenario 4: MCP → Memory -->
+                <div id="scn-mcpmemory" class="scenario-content hidden">
+                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.cenarios.s4.label">Cenário 4</span>
+                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.cenarios.s4.title">MCP consulta Linear → Agent decide → Memory registra</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.cenarios.s4.desc">
+                            Um agent usa um MCP server do Linear para buscar os tickets ativos da sprint. Com base nas prioridades, gera um plan de trabalho e salva as decisões na memory para que a próxima sessão continue de onde parou.
+                        </p>
+                        <div class="flex items-center gap-3 flex-wrap mb-4">
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-50 border border-violet-200">
+                                <span>🔌</span><span class="text-xs font-bold text-violet-700">MCP: Linear</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:#fffbeb; border: 1px solid #fbbf24">
+                                <span>🤖</span><span class="text-xs font-bold" style="color:#d97706" data-i18n="sec.cenarios.s4.flow.decide">Agent analisa</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
+                                <span>📐</span><span class="text-xs font-bold text-amber-700" data-i18n="sec.cenarios.s4.flow.plan">Plan de sprint</span>
+                            </div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                                <span>🧠</span><span class="text-xs font-bold text-emerald-700" data-i18n="sec.cenarios.s4.flow.save">Memory salva</span>
+                            </div>
+                        </div>
+                        <pre><span class="text-stone-500"># Configuração do MCP server em .claude/settings.json:</span>
+{
+  <span class="text-violet-400">"mcpServers"</span>: {
+    <span class="text-violet-400">"linear"</span>: {
+      <span class="text-violet-400">"command"</span>: <span class="text-emerald-400">"npx"</span>,
+      <span class="text-violet-400">"args"</span>: [<span class="text-emerald-400">"@anthropic/linear-mcp"</span>],
+      <span class="text-violet-400">"env"</span>: { <span class="text-violet-400">"LINEAR_API_KEY"</span>: <span class="text-emerald-400">"$LINEAR_API_KEY"</span> }
+    }
+  }
+}
+
+<span class="text-stone-500"># O agente recebe este prompt:</span>
+"Use a tool linear_list_issues para buscar tickets IN_PROGRESS.
+ Cruze com o estado atual da codebase (git log, git status).
+ Crie um plan em .claude/plans/sprint-atual.md
+ ordenado por prioridade.
+ Salve uma memory do tipo 'project' com o contexto da sprint."
+
+<span class="text-stone-500"># Na próxima sessão, o Claude já sabe:</span>
+<span class="text-stone-500"># - Quais tickets estão em andamento</span>
+<span class="text-stone-500"># - Qual a prioridade de cada um</span>
+<span class="text-stone-500"># - Onde parou da última vez</span></pre>
+                    </div>
+                </div>
+
+                <!-- Scenario 5: Pipeline Completo -->
+                <div id="scn-pipeline" class="scenario-content hidden">
+                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.cenarios.s5.label">Cenário 5</span>
+                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.cenarios.s5.title">Pipeline: Command → Plan → Code → Review → Memory → Commit</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.cenarios.s5.desc">
+                            O cenário mais ambicioso: um slash command inicia todo o pipeline. Memory traz contexto do projeto. Um agente cria o plan. Outro implementa. Hooks validam cada escrita. Um agente reviewer faz code review. Se aprovado, commita com mensagem baseada no plan.
+                        </p>
+                        <!-- Full pipeline visual -->
+                        <div class="flex items-center gap-2 flex-wrap mb-4">
+                            <div class="px-2 py-1 rounded bg-stone-100 border border-stone-200">
+                                <span class="text-xs font-bold text-stone-700">⌨️ /implement</span>
+                            </div>
+                            <span class="text-stone-400 text-xs">→</span>
+                            <div class="px-2 py-1 rounded bg-blue-50 border border-blue-200">
+                                <span class="text-xs font-bold text-blue-700">🧠 Memory</span>
+                            </div>
+                            <span class="text-stone-400 text-xs">→</span>
+                            <div class="px-2 py-1 rounded bg-amber-50 border border-amber-200">
+                                <span class="text-xs font-bold text-amber-700">📐 Plan</span>
+                            </div>
+                            <span class="text-stone-400 text-xs">→</span>
+                            <div class="px-2 py-1 rounded" style="background:#fffbeb; border: 1px solid #fbbf24">
+                                <span class="text-xs font-bold" style="color:#d97706">🤖 Coder</span>
+                            </div>
+                            <span class="text-stone-400 text-xs">→</span>
+                            <div class="px-2 py-1 rounded bg-violet-50 border border-violet-200">
+                                <span class="text-xs font-bold text-violet-700">⚡ Hook</span>
+                            </div>
+                            <span class="text-stone-400 text-xs">→</span>
+                            <div class="px-2 py-1 rounded bg-purple-50 border border-purple-200">
+                                <span class="text-xs font-bold text-purple-700">🔍 Reviewer</span>
+                            </div>
+                            <span class="text-stone-400 text-xs">→</span>
+                            <div class="px-2 py-1 rounded bg-emerald-50 border border-emerald-200">
+                                <span class="text-xs font-bold text-emerald-700">✅ Commit</span>
+                            </div>
+                        </div>
+                        <pre><span class="text-stone-500"># .claude/commands/implement.md</span>
+---
+description: Pipeline completo de implementação
+allowed-tools: Agent, Read, Write, Edit, Bash, Grep, Glob
+---
+
+## Pipeline de Implementação
+
+### Fase 1: Contexto
+- Leia as memories do projeto para entender decisões anteriores
+- Verifique o CLAUDE.md para convenções de código
+
+### Fase 2: Planejamento
+- Use um Agent (subagent_type: Plan) para criar o plano
+- Salve em .claude/plans/ com nome descritivo
+
+### Fase 3: Implementação
+- Use um Agent (subagent_type: general-purpose) para implementar
+- O agent segue o plano, os hooks validam cada escrita
+
+### Fase 4: Review
+- Spawne um Agent (subagent_type: Explore) para review
+- Se encontrar problemas, volte à Fase 3 com as correções
+
+### Fase 5: Finalização
+- Atualize a memory com decisões tomadas
+- Crie o commit com mensagem baseada no plano
+- Resuma o que foi feito para o humano validar</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 4: Receitas Avançadas                                 -->
+            <!-- ============================================================ -->
+            <section id="sec-receitas" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📋</span> <span data-i18n="sec.receitas.h2">Receitas Avançadas</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.receitas.intro">
+                        Configurações prontas para copiar e adaptar. Cada receita combina pelo menos 3 ferramentas diferentes.
+                    </p>
+                </div>
+
+                <!-- Recipe tabs -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <button onclick="showRecipe('r1')" id="rectab-r1" class="scenario-tab active text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.receitas.tab.r1">Hook + Memory</button>
+                    <button onclick="showRecipe('r2')" id="rectab-r2" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.receitas.tab.r2">Agent + Skills</button>
+                    <button onclick="showRecipe('r3')" id="rectab-r3" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.receitas.tab.r3">MCP + Plan</button>
+                    <button onclick="showRecipe('r4')" id="rectab-r4" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.receitas.tab.r4">CLAUDE.md evolutivo</button>
+                </div>
+
+                <!-- Recipe 1: Self-healing hook -->
+                <div id="rec-r1" class="recipe-content">
+                    <div class="integration-card p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.receitas.r1.label">Receita</span>
+                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.receitas.r1.title">Hook de Auto-Correção + Memory de Padrões</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.receitas.r1.desc">
+                            O hook detecta erros de lint após cada Write/Edit. O Claude lê o erro e corrige. Se o mesmo tipo de erro aparece repetidamente na sessão, salva uma memory de feedback para evitar o padrão nas próximas sessões.
+                        </p>
+                        <div class="flex gap-2 flex-wrap mb-3">
+                            <span class="tag-badge bg-stone-100 text-stone-600">⚡ Hook</span>
+                            <span class="text-stone-400">+</span>
+                            <span class="tag-badge bg-stone-100 text-stone-600">🤖 Auto-correção</span>
+                            <span class="text-stone-400">+</span>
+                            <span class="tag-badge bg-stone-100 text-stone-600">🧠 Memory</span>
+                        </div>
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0" id="recipe1"><span class="text-stone-500">// .claude/settings.json</span>
+{
+  <span class="text-violet-400">"hooks"</span>: {
+    <span class="text-violet-400">"PostToolUse"</span>: [
+      {
+        <span class="text-violet-400">"matcher"</span>: <span class="text-emerald-400">"Write|Edit"</span>,
+        <span class="text-violet-400">"hooks"</span>: [{
+          <span class="text-violet-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
+          <span class="text-violet-400">"command"</span>: <span class="text-emerald-400">"npx eslint --no-warn-ignored \"$TOOL_INPUT\" 2>&1 | head -20"</span>
+        }]
+      }
+    ]
+  }
+}
+
+<span class="text-stone-500">// O Claude aprende com o padrão de erros:</span>
+<span class="text-stone-500">// Sessão 1: corrige 5x "missing semicolons"</span>
+<span class="text-stone-500">// → salva memory de feedback: "usar sempre semicolons"</span>
+<span class="text-stone-500">// Sessão 2: nunca mais gera código sem semicolons</span></pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('recipe1')" data-i18n="sec.receitas.copy">copiar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recipe 2: Agent reusing skill -->
+                <div id="rec-r2" class="recipe-content hidden">
+                    <div class="integration-card p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.receitas.r2.label">Receita</span>
+                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.receitas.r2.title">Agent Orquestrador que reutiliza Skills</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.receitas.r2.desc">
+                            Um agente customizado usa a tool Skill internamente para invocar skills existentes como /commit ou /review-pr. O agente decide qual skill chamar baseado no contexto, sem que você precise orquestrar manualmente.
+                        </p>
+                        <div class="flex gap-2 flex-wrap mb-3">
+                            <span class="tag-badge bg-stone-100 text-stone-600">🤖 Agent</span>
+                            <span class="text-stone-400">+</span>
+                            <span class="tag-badge bg-stone-100 text-stone-600">🎯 Skill</span>
+                            <span class="text-stone-400">+</span>
+                            <span class="tag-badge bg-stone-100 text-stone-600">⌨️ Command</span>
+                        </div>
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0" id="recipe2"><span class="text-stone-500"># .claude/agents/orchestrator.md</span>
+---
+description: Orquestrador que usa skills existentes
+allowed-tools: Agent, Skill, Read, Grep, Glob, Bash
+---
+
+Você é um orquestrador de tarefas de desenvolvimento.
+
+## Workflow
+1. Analise a tarefa recebida
+2. Decida quais skills são necessários
+3. Execute-os na ordem correta
+
+## Skills disponíveis
+- Use `Skill: review-pr` para revisar código
+- Use `Skill: commit` para commitar alterações
+- Use `Agent` para tarefas de research ou implementação
+
+## Regra
+Nunca pule o review antes do commit.
+Se o review encontrar problemas, corrija antes de commitar.</pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('recipe2')" data-i18n="sec.receitas.copy">copiar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recipe 3: MCP-informed planning -->
+                <div id="rec-r3" class="recipe-content hidden">
+                    <div class="integration-card p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.receitas.r3.label">Receita</span>
+                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.receitas.r3.title">MCP + Plan + Memory para Sprint Planning</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.receitas.r3.desc">
+                            Um command consulta o tracker de tarefas via MCP, cruza com o estado da codebase, gera um plan de trabalho, e salva na memory o contexto da sprint para que todas as sessões subsequentes tenham consciência do que está em andamento.
+                        </p>
+                        <div class="flex gap-2 flex-wrap mb-3">
+                            <span class="tag-badge bg-stone-100 text-stone-600">🔌 MCP</span>
+                            <span class="text-stone-400">+</span>
+                            <span class="tag-badge bg-stone-100 text-stone-600">📐 Plan</span>
+                            <span class="text-stone-400">+</span>
+                            <span class="tag-badge bg-stone-100 text-stone-600">🧠 Memory</span>
+                        </div>
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0" id="recipe3"><span class="text-stone-500"># .claude/commands/sprint-plan.md</span>
+---
+description: Gera plan da sprint a partir do tracker
+allowed-tools: Agent, Read, Write, Grep, Glob
+---
+
+## Sprint Planning Automatizado
+
+1. Use a MCP tool do tracker para buscar tickets
+   com status IN_PROGRESS e TODO
+
+2. Para cada ticket, use um Agent (subagent_type: Explore)
+   para mapear os arquivos afetados na codebase
+
+3. Gere um plan em `.claude/plans/sprint-YYYY-MM-DD.md`
+   com: ticket, arquivos, dependências, ordem de execução
+
+4. Salve uma memory do tipo "project" com:
+   - Tickets da sprint e seus status
+   - Decisões de priorização
+   - Bloqueios identificados
+
+5. Apresente um resumo para o humano validar</pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('recipe3')" data-i18n="sec.receitas.copy">copiar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recipe 4: Evolving CLAUDE.md -->
+                <div id="rec-r4" class="recipe-content hidden">
+                    <div class="integration-card p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.receitas.r4.label">Receita</span>
+                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.receitas.r4.title">CLAUDE.md que evolui via Hook + Memory</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.receitas.r4.desc">
+                            Um hook no evento Stop analisa os feedbacks da sessão. Se padrões recorrentes são detectados, sugere atualizações ao CLAUDE.md. Assim as regras do projeto evoluem organicamente baseadas no uso real — mas sempre com aprovação humana.
+                        </p>
+                        <div class="flex gap-2 flex-wrap mb-3">
+                            <span class="tag-badge bg-stone-100 text-stone-600">⚡ Hook (Stop)</span>
+                            <span class="text-stone-400">+</span>
+                            <span class="tag-badge bg-stone-100 text-stone-600">🧠 Memory</span>
+                            <span class="text-stone-400">+</span>
+                            <span class="tag-badge bg-stone-100 text-stone-600">📋 CLAUDE.md</span>
+                        </div>
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0" id="recipe4"><span class="text-stone-500">// Hook no evento Stop</span>
+{
+  <span class="text-violet-400">"hooks"</span>: {
+    <span class="text-violet-400">"Stop"</span>: [
+      {
+        <span class="text-violet-400">"hooks"</span>: [{
+          <span class="text-violet-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
+          <span class="text-violet-400">"command"</span>: <span class="text-emerald-400">"echo 'Revise as memories de feedback desta sessão. Se algum padrão apareceu 3+ vezes, sugira uma adição ao CLAUDE.md.'"</span>
+        }]
+      }
+    ]
+  }
+}
+
+<span class="text-stone-500">// Ciclo de evolução:</span>
+<span class="text-stone-500">// 1. Você dá feedback durante a sessão</span>
+<span class="text-stone-500">// 2. Claude salva como memory de feedback</span>
+<span class="text-stone-500">// 3. No Stop, o hook sugere: "Adicionar ao CLAUDE.md?"</span>
+<span class="text-stone-500">// 4. Você aprova ou rejeita a alteração</span>
+<span class="text-stone-500">// 5. Regra agora vale para TODAS as sessões futuras</span></pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('recipe4')" data-i18n="sec.receitas.copy">copiar</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 5: Métricas de Integração                             -->
+            <!-- ============================================================ -->
+            <section id="sec-metricas" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📊</span> <span data-i18n="sec.metricas.h2">Métricas de Integração</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.metricas.intro">
+                        A integração de ferramentas impacta diretamente a qualidade e a consistência do trabalho. Veja a comparação entre usar ferramentas isoladas versus o sistema integrado.
+                    </p>
+                </div>
+
+                <!-- Chart -->
+                <div class="chart-container mb-6">
+                    <canvas id="integrationChart"></canvas>
+                </div>
+
+                <!-- Key metrics cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
+                        <div class="text-2xl mb-1">🔄</div>
+                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.metricas.card.1.title">Retrabalho</div>
+                        <div class="text-2xl font-extrabold my-1" style="color:#d97706">-60%</div>
+                        <p class="text-xs text-stone-500" data-i18n="sec.metricas.card.1.desc">Hooks + Memory previnem erros recorrentes</p>
+                    </div>
+                    <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
+                        <div class="text-2xl mb-1">🧠</div>
+                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.metricas.card.2.title">Contexto entre sessões</div>
+                        <div class="text-2xl font-extrabold my-1" style="color:#d97706">+85%</div>
+                        <p class="text-xs text-stone-500" data-i18n="sec.metricas.card.2.desc">Memory + Plans mantêm continuidade</p>
+                    </div>
+                    <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
+                        <div class="text-2xl mb-1">⚡</div>
+                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.metricas.card.3.title">Automação de validação</div>
+                        <div class="text-2xl font-extrabold my-1" style="color:#d97706">90%</div>
+                        <p class="text-xs text-stone-500" data-i18n="sec.metricas.card.3.desc">Hooks automatizam checks pós-escrita</p>
+                    </div>
+                </div>
+
+                <!-- Insight -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">💡</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.metricas.insight.title">O efeito composto</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.metricas.insight.desc">Cada ferramenta integrada reduz o atrito da seguinte. Memory reduz o onboarding de cada sessão. Hooks eliminam verificações manuais. Plans garantem que o agente não desvie do escopo. O ganho não é linear — é composto. 3 ferramentas integradas valem mais que 5 ferramentas isoladas.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 6: Limites & Cuidados                                 -->
+            <!-- ============================================================ -->
+            <section id="sec-limites" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.limites.h2">Limites &amp; Cuidados</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.limites.intro">
+                        Integração adiciona poder, mas também complexidade. Nem toda combinação faz sentido. Saiba quando simplificar.
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-8">
+                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl">
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.1.title">Integração por integração</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.1.desc">Conectar 6 ferramentas para uma tarefa que um agente único resolve em 30 segundos. O overhead de coordenação supera qualquer ganho. Se um agente único resolve, não escale.</p>
+                    </div>
+                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.2.title">Integre quando o problema exigir</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n="sec.limites.anti.2.desc">A integração deve surgir de uma necessidade real: erros recorrentes justificam hooks, perda de contexto entre sessões justifica memory, tarefas complexas justificam plan + agents. Comece simples, adicione peças conforme o atrito aparece.</p>
+                    </div>
+
+                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.3.title">Memory como banco de dados</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.3.desc">Salvar tudo na memory: logs, outputs de agentes, histórico completo de conversas. Memory tem limite de linhas no index. Guarde apenas o que o Claude precisa saber na próxima sessão e não consegue derivar do código ou git.</p>
+                    </div>
+                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.4.title">Memory seletiva e atualizada</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n="sec.limites.anti.4.desc">Salve decisões, preferências e contexto que não está no código. Atualize ou remova memories obsoletas. Uma memory precisa e enxuta vale mais que centenas de registros desatualizados.</p>
+                    </div>
+
+                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.5.title">Hooks que fazem tudo automaticamente</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.5.desc">Um hook que detecta, corrige, commita e pusha sem intervenção humana. Se algo der errado, o dano já foi feito antes de você perceber. Hooks devem validar e reportar, não tomar ações irreversíveis sozinhos.</p>
+                    </div>
+                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.6.title">Hooks validam, humanos aprovam</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n="sec.limites.anti.6.desc">O hook verifica e reporta. O Claude propõe a correção. Você aceita ou rejeita. Ações irreversíveis (push, deploy, delete) sempre passam pelo humano. O sistema sugere, mas não decide sozinho.</p>
+                    </div>
+                </div>
+
+                <!-- Warning -->
+                <div class="p-5 rounded-xl border border-amber-200 bg-amber-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">🧠</span>
+                    <div>
+                        <h4 class="font-bold text-amber-900 mb-1" data-i18n="sec.limites.warning.title">A regra dos 3 minutos</h4>
+                        <p class="text-sm text-amber-800 leading-relaxed" data-i18n="sec.limites.warning.desc">Se você não consegue explicar como as ferramentas se conectam no seu setup em 3 minutos, provavelmente tem complexidade desnecessária. Um setup integrado deve ser compreensível. Se nem você entende o fluxo, como vai debugar quando algo quebrar?</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 7: Próximos Passos                                    -->
+            <!-- ============================================================ -->
+            <section id="sec-proximos" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.proximos.h2">Próximos Passos</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.proximos.intro">Comece com uma integração que resolva um problema real. Depois amplie gradualmente.</p>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-8">
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.1.title">Configure um hook de lint + auto-correção</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.1.desc">Comece com a integração mais simples: um PostToolUse hook que roda ESLint ou Ruff após cada Write/Edit. O Claude lê os erros e corrige automaticamente.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">cat .claude/settings.json | grep -A5 "PostToolUse"</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('cat .claude/settings.json | grep -A5 \"PostToolUse\"')" data-i18n="sec.proximos.step.1.copy">copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.2.title">Crie um command que use Plan + Agent</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.2.desc">Escolha uma tarefa recorrente (ex: scaffold de feature) e crie um slash command que primeiro gera um plan e depois implementa com um agente fresco.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">touch .claude/commands/new-feature.md</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('touch .claude/commands/new-feature.md')" data-i18n="sec.proximos.step.2.copy">copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.3.title">Configure memories de projeto e feedback</h4>
+                            <p class="text-sm text-stone-600" data-i18n="sec.proximos.step.3.desc">Comece a salvar decisões arquiteturais e feedbacks sobre o que funciona e o que não funciona. Em poucas sessões, o Claude vai ter um "onboarding" automático do seu projeto.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.4.title">Monte seu primeiro pipeline integrado</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.4.desc">Combine tudo: um command que lê memory, gera plan, implementa com agent, valida com hook, e faz review com outro agent. Comece com 3 ferramentas e vá adicionando conforme a necessidade.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">ls .claude/commands/ .claude/agents/ .claude/plans/</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('ls .claude/commands/ .claude/agents/ .claude/plans/')" data-i18n="sec.proximos.step.4.copy">copiar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Closing mantra -->
+                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl shadow-xl" style="border-left: 8px solid #d97706">
+                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#fbbf24" data-i18n="sec.proximos.mantra.label">Mantra da Parte 8:</h4>
+                    <p class="text-lg italic font-serif" data-i18n="sec.proximos.mantra.text">"Ferramentas isoladas são úteis. Ferramentas integradas são um sistema. A diferença entre usar IA e ter um workflow de IA está nas conexões que você constrói entre elas — sempre com você como o arquiteto que decide o que conectar e quando."</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Session Complete -->
+    <div id="session-complete" class="hidden border-t border-stone-200 bg-stone-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
+            <span class="text-3xl mb-3 block">🎉</span>
+            <h3 class="text-xl font-bold text-stone-800 mb-2" data-i18n="complete.title">Sessão concluída!</h3>
+            <p class="text-stone-500 mb-6 text-sm" data-i18n="complete.desc">Você completou esta sessão. Continue para a próxima ou volte ao índice.</p>
+            <div class="flex items-center justify-center gap-3">
+                <a href="index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-lg text-sm font-semibold hover:bg-stone-700 transition-colors" data-i18n="complete.home">← Voltar ao índice</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Scenario tabs ─────────────────────────────────────────────────
+        function showScenario(id) {
+            document.querySelectorAll('.scenario-content').forEach(function(el) { el.classList.add('hidden'); });
+            document.querySelectorAll('#sec-cenarios .scenario-tab').forEach(function(el) { el.classList.remove('active'); });
+            document.getElementById('scn-' + id).classList.remove('hidden');
+            document.getElementById('scntab-' + id).classList.add('active');
+        }
+
+        // ── Recipe tabs ──────────────────────────────────────────────────
+        function showRecipe(id) {
+            document.querySelectorAll('.recipe-content').forEach(function(el) { el.classList.add('hidden'); });
+            document.querySelectorAll('#sec-receitas .scenario-tab').forEach(function(el) { el.classList.remove('active'); });
+            document.getElementById('rec-' + id).classList.remove('hidden');
+            document.getElementById('rectab-' + id).classList.add('active');
+        }
+
+        // ── Navigation hook (nav.js handles core logic) ─────────────
+        window.onNavigate = function(sectionId) {
+            if (sectionId === 'metricas' && !window.chartInit) initChart();
+        };
+
+        // ── Integration chart ───────────────────────────────────────────────
+        function initChart() {
+            window.chartInit = true;
+            var ctx = document.getElementById('integrationChart').getContext('2d');
+            window.integrationChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: [
+                        'Consistência de código',
+                        'Continuidade entre sessões',
+                        'Cobertura de validação',
+                        'Velocidade de onboarding',
+                        'Detecção de erros',
+                        'Reutilização de padrões'
+                    ],
+                    datasets: [
+                        {
+                            label: 'Ferramentas isoladas',
+                            data: [45, 20, 35, 30, 40, 25],
+                            borderColor: 'rgba(168, 162, 158, 0.8)',
+                            backgroundColor: 'rgba(168, 162, 158, 0.15)',
+                            pointBackgroundColor: '#a8a29e',
+                            borderWidth: 2,
+                        },
+                        {
+                            label: 'Sistema integrado',
+                            data: [85, 88, 90, 82, 87, 92],
+                            borderColor: '#d97706',
+                            backgroundColor: 'rgba(217, 119, 6, 0.12)',
+                            pointBackgroundColor: '#d97706',
+                            borderWidth: 2,
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { display: false },
+                            pointLabels: { font: { size: 11 } }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 12, font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // copyCode() provided by nav.js
+
+        // ── i18n: update chart labels on language change ─────────────────
+        window.addEventListener('i18n:applied', function(e) {
+            var t = function(k) { return e.detail.t(k); };
+            if (window.integrationChart) {
+                var chart = window.integrationChart;
+                chart.data.labels = [
+                    t('chart.integration.label.consistency') || 'Consistência de código',
+                    t('chart.integration.label.continuity') || 'Continuidade entre sessões',
+                    t('chart.integration.label.validation') || 'Cobertura de validação',
+                    t('chart.integration.label.onboarding') || 'Velocidade de onboarding',
+                    t('chart.integration.label.detection') || 'Detecção de erros',
+                    t('chart.integration.label.reuse') || 'Reutilização de padrões'
+                ];
+                chart.data.datasets[0].label = t('chart.integration.dataset.isolated') || 'Ferramentas isoladas';
+                chart.data.datasets[1].label = t('chart.integration.dataset.integrated') || 'Sistema integrado';
+                chart.update();
+            }
+        });
+
+        // Init and hash navigation handled by nav.js
+    </script>
+
+    <!-- Footer -->
+    <footer class="border-t border-stone-200 mt-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-sm text-stone-400">
+                <span class="text-base">🎓</span>
+                <span data-i18n-html="footer.brand">Engineering Hour · By <a href="https://github.com/griiettner/ai-engineering-hour" target="_blank" class="underline hover:text-stone-600">Paulo Griiettner</a></span>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-stone-400">
+                <span data-i18n="footer.stack">HTML · Tailwind CSS · Chart.js</span>
+                <span>·</span>
+                <span data-i18n="footer.tagline">Sem build. Abra e use.</span>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
