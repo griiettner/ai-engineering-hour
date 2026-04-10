@@ -1,758 +1,593 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Engineering Hour P3: Confiança Automatizada</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour P3: Planejamento Avançado</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="nav.js" defer></script>
     <script src="i18n.js" defer></script>
 
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              stone: {
-                50: '#fafaf9',
-                100: '#f5f5f4',
-                200: '#e7e5e4',
-                300: '#d6d3d1',
-                700: '#44403c',
-                800: '#292524',
-                900: '#1c1917',
-              },
-              auto: {
-                violet: '#6d28d9',
-                indigo: '#4338ca',
-                slate: '#334155',
-              },
-            },
-            fontFamily: {
-              sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-              mono: ['Fira Code', 'ui-monospace', 'monospace'],
-            },
-          },
-        },
-      };
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+                            300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
+                        },
+                        gov: {
+                            emerald: '#065f46',
+                            gold: '#b45309',
+                            slate: '#334155',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
     </script>
 
     <link rel="stylesheet" href="shared.css">
     <style>
-      :root { --accent: #6d28d9; }
-      .chart-container { max-width: 600px; height: 300px; max-height: 400px; }
-      .loop-node { transition: all 0.3s ease; }
-      .loop-active {
-        border-color: #6d28d9;
-        box-shadow: 0 0 20px rgba(109, 40, 217, 0.25);
-      }
-      .flow-arrow { color: #a78bfa; font-size: 1.5rem; flex-shrink: 0; }
-      .hook-type-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-      .hook-type-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      }
-      .danger-card { border-left: 4px solid #dc2626; }
-      .warning-card { border-left: 4px solid #d97706; }
+        :root { --accent: #065f46; }
+        .chart-container { max-width: 500px; height: 300px; }
+        .doc-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .doc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+        .doc-card:hover .doc-icon { transform: scale(1.1) rotate(5deg); }
+        .doc-icon { transition: transform 0.2s ease; }
     </style>
-  </head>
-  <body class="antialiased min-h-screen flex flex-col font-sans">
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans">
 
     <!-- Header -->
     <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <span class="text-2xl">⚡</span>
-          <h1 class="text-xl font-bold text-stone-800 tracking-tight">
-            Engineering Hour <span class="text-auto-violet">P3</span>
-          </h1>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🏛️</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">
+                    Engineering Hour <span class="text-gov-emerald">P3</span>
+                </h1>
+            </div>
+            <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
+                Módulo 3: Planejamento Avançado & Governança
+            </div>
         </div>
-        <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
-          Módulo 3: Claude Hooks & Confiança Automatizada
-        </div>
-      </div>
     </header>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
 
-      <!-- Sidebar Navigation -->
-      <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+        <!-- Sidebar Navigation -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
 
-        <div class="nav-group-label" data-i18n="nav.group.system">O Sistema</div>
-        <button onclick="navigate('loop')" id="nav-loop"
-          class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-          <span>🔄</span> <span data-i18n="nav.loop">Ciclo Autônomo</span>
-        </button>
-        <button onclick="navigate('hooks')" id="nav-hooks"
-          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-          <span>🔌</span> <span data-i18n="nav.hooks">Tipos de Hooks</span>
-        </button>
+            <div class="nav-group-label" data-i18n="nav.group.concept">O Conceito</div>
+            <button onclick="navigate('maturity')" id="nav-maturity"
+                class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📈</span> <span data-i18n="nav.maturity">Maturação de Contexto</span>
+            </button>
+            <button onclick="navigate('constitution')" id="nav-constitution"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📜</span> <span data-i18n="nav.constitution">A Constituição (.md)</span>
+            </button>
 
-        <div class="nav-group-label mt-2" data-i18n="nav.group.implementation">Implementação</div>
-        <button onclick="navigate('config')" id="nav-config"
-          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-          <span>🛠️</span> <span data-i18n="nav.config">Configuração</span>
-        </button>
-        <button onclick="navigate('limits')" id="nav-limits"
-          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-          <span>⚠️</span> <span data-i18n="nav.limits">Limites & Cuidados</span>
-        </button>
+            <div class="nav-group-label mt-2" data-i18n="nav.group.execution">Execução</div>
+            <button onclick="navigate('lifecycle')" id="nav-lifecycle"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🗺️</span> <span data-i18n="nav.lifecycle">Ritual do Plan.md</span>
+            </button>
+            <button onclick="navigate('decision')" id="nav-decision"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚖️</span> <span data-i18n="nav.decision">Estratégia vs Código</span>
+            </button>
 
-        <div class="nav-group-label mt-2" data-i18n="nav.group.impact">Impacto</div>
-        <button onclick="navigate('metrics')" id="nav-metrics"
-          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-          <span>📊</span> <span data-i18n="nav.metrics">Métricas de Confiança</span>
-        </button>
-        <button onclick="navigate('review')" id="nav-review"
-          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-          <span>🔍</span> <span data-i18n="nav.review">O Novo Code Review</span>
-        </button>
+            <div class="nav-group-label mt-2" data-i18n="nav.group.caution">Cuidados</div>
+            <button onclick="navigate('limits')" id="nav-limits"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚠️</span> <span data-i18n="nav.limits">Limites & Cuidados</span>
+            </button>
 
-        <div class="nav-group-label mt-2" data-i18n="nav.group.action">Ação</div>
-        <button onclick="navigate('nextsteps')" id="nav-nextsteps"
-          class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-          <span>🚀</span> <span data-i18n="nav.nextsteps">Próximos Passos</span>
-        </button>
-      </nav>
+            <div class="nav-group-label mt-2" data-i18n="nav.group.action">Ação</div>
+            <button onclick="navigate('nextsteps')" id="nav-nextsteps"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> <span data-i18n="nav.nextsteps">Próximos Passos</span>
+            </button>
+        </nav>
 
-      <!-- Main Content -->
-      <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+        <!-- Main Content -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
 
-        <!-- SECTION 1: Ciclo Autônomo -->
-        <section id="sec-loop" class="block">
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔄</span> <span data-i18n="sec.loop.h2">O Ciclo Autônomo de Correção</span></h2>
-            <p class="text-stone-600" data-i18n-html="sec.loop.intro">
-              O objetivo dos <strong>Claude Hooks</strong> é criar um sistema que se auto-valida. A IA não apenas
-              escreve o código, mas ela é forçada a testá-lo e corrigi-lo antes de te entregar o resultado final.
-              Clique nos estágios para entender o fluxo.
-            </p>
-          </div>
-
-          <div class="flex flex-col items-center py-10 bg-stone-50 rounded-2xl border border-stone-200 relative overflow-hidden">
-
-            <!-- Nodes + Arrows Row -->
-            <div class="flex flex-wrap justify-center items-center gap-2 relative z-10 px-4">
-
-              <!-- Node 1 -->
-              <div id="node-1"
-                class="loop-node w-36 h-36 rounded-full border-4 border-stone-300 bg-white flex flex-col items-center justify-center text-center p-3 cursor-pointer loop-active"
-                onclick="activateNode(1)">
-                <span class="text-2xl mb-1">✍️</span>
-                <h4 class="font-bold text-xs uppercase text-stone-800" data-i18n="sec.loop.node1.title">Escrita</h4>
-                <p class="text-[9px] text-stone-500 mt-1" data-i18n="sec.loop.node1.desc">IA gera o código inicial baseado no prompt.</p>
-              </div>
-
-              <!-- Arrow 1→2 -->
-              <div class="flow-arrow">→</div>
-
-              <!-- Node 2 -->
-              <div id="node-2"
-                class="loop-node w-36 h-36 rounded-full border-4 border-stone-300 bg-white flex flex-col items-center justify-center text-center p-3 cursor-pointer"
-                onclick="activateNode(2)">
-                <span class="text-2xl mb-1">🧼</span>
-                <h4 class="font-bold text-xs uppercase text-stone-800" data-i18n="sec.loop.node2.title">Lint & Estilo</h4>
-                <p class="text-[9px] text-stone-500 mt-1" data-i18n="sec.loop.node2.desc">Hook automático roda o Linter do projeto.</p>
-              </div>
-
-              <!-- Arrow 2→3 -->
-              <div class="flow-arrow">→</div>
-
-              <!-- Node 3 -->
-              <div id="node-3"
-                class="loop-node w-36 h-36 rounded-full border-4 border-stone-300 bg-white flex flex-col items-center justify-center text-center p-3 cursor-pointer"
-                onclick="activateNode(3)">
-                <span class="text-2xl mb-1">🧪</span>
-                <h4 class="font-bold text-xs uppercase text-stone-800" data-i18n="sec.loop.node3.title">Testes</h4>
-                <p class="text-[9px] text-stone-500 mt-1" data-i18n="sec.loop.node3.desc">Hook executa suíte de testes unitários.</p>
-              </div>
-
-              <!-- Arrow 3→4 -->
-              <div class="flow-arrow">→</div>
-
-              <!-- Node 4 -->
-              <div id="node-4"
-                class="loop-node w-36 h-36 rounded-full border-4 border-stone-300 bg-white flex flex-col items-center justify-center text-center p-3 cursor-pointer"
-                onclick="activateNode(4)">
-                <span class="text-2xl mb-1">🔧</span>
-                <h4 class="font-bold text-xs uppercase text-stone-800" data-i18n="sec.loop.node4.title">Correção</h4>
-                <p class="text-[9px] text-stone-500 mt-1" data-i18n="sec.loop.node4.desc">Se falhar, a IA lê o erro e corrige sozinha.</p>
-              </div>
-            </div>
-
-            <!-- Loop-back indicator -->
-            <div class="mt-4 flex items-center gap-2 text-violet-500 text-xs font-medium">
-              <span class="text-base">↩️</span>
-              <span data-i18n-html="sec.loop.loopback">Se a correção falhar, o ciclo recomeça do Lint, até todos os hooks retornarem <code class="bg-violet-100 text-violet-700 px-1 rounded font-mono">exit 0</code></span>
-            </div>
-
-            <!-- Detail card -->
-            <div class="mt-8 w-full max-w-2xl px-6">
-              <div id="node-info" class="bg-white rounded-2xl shadow-md border border-stone-200 overflow-hidden transition-all duration-300">
-                <div id="node-info-placeholder" class="px-6 py-5 flex items-center gap-3 text-stone-400">
-                  <span class="text-xl">👆</span>
-                  <span class="text-sm italic" data-i18n="sec.loop.placeholder">Clique em um estágio para ver detalhes da automação.</span>
+            <!-- SECTION 1: Maturação -->
+            <section id="sec-maturity" class="block">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📈</span> <span data-i18n="sec.maturity.h2">Maturação: O Fim do "Chute"</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.maturity.intro">
+                        Quanto mais madura é a sua documentação, menos a IA precisa adivinhar.
+                        A Parte 1 cobriu o mínimo viável. Aqui saímos do básico e entramos na <strong>governança corporativa</strong>.
+                        O gráfico mostra como documentos específicos eliminam riscos de desenvolvimento.
+                    </p>
                 </div>
-                <div id="node-info-content" class="hidden">
-                  <div id="node-info-header" class="flex items-center gap-3 px-6 py-4 border-b border-stone-100 bg-stone-50">
-                    <span id="node-info-icon" class="text-2xl"></span>
-                    <div>
-                      <p class="text-[10px] font-bold uppercase tracking-widest text-stone-400" data-i18n="sec.loop.activeStage">Estágio Ativo</p>
-                      <h4 id="node-info-title" class="font-bold text-stone-800 text-base"></h4>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-xl border border-stone-200 mb-6">
+                    <div class="chart-container">
+                        <canvas id="maturityChart"></canvas>
                     </div>
-                    <span id="node-info-badge" class="ml-auto text-[10px] font-mono font-bold px-2 py-1 rounded-full bg-violet-100 text-violet-700"></span>
-                  </div>
-                  <div id="node-info-body" class="px-6 py-4 text-sm text-stone-600 leading-relaxed"></div>
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-gov-emerald">
+                            <h4 class="font-bold text-sm text-gov-emerald uppercase" data-i18n="sec.maturity.card.1.title">Escalabilidade de Contexto</h4>
+                            <p class="text-sm text-stone-600 mt-1" data-i18n-html="sec.maturity.card.1.desc">Documentos granulares permitem que a IA carregue <em>apenas o necessário</em> para cada tarefa, economizando tokens e mantendo precisão.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-gov-gold">
+                            <h4 class="font-bold text-sm text-gov-gold uppercase" data-i18n="sec.maturity.card.2.title">Segurança de Decisão</h4>
+                            <p class="text-sm text-stone-600 mt-1" data-i18n-html="sec.maturity.card.2.desc">Com um histórico de decisões (ADRs), a IA para de sugerir padrões que o time já decidiu abandonar no passado.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-stone-400">
+                            <h4 class="font-bold text-sm text-stone-600 uppercase" data-i18n="sec.maturity.card.3.title">A Evolução Natural</h4>
+                            <p class="text-sm text-stone-500 mt-1" data-i18n-html="sec.maturity.card.3.desc">
+                                Parte 1: <code class="bg-stone-100 font-mono px-1 rounded text-xs">CLAUDE.md + TECH_STACK + ARCHITECTURE</code><br>
+                                Parte 3: + Constituição completa + Plan.md ritual
+                            </p>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
+            </section>
 
-        <!-- SECTION 2: Tipos de Hooks -->
-        <section id="sec-hooks" class="hidden">
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔌</span> <span data-i18n="sec.hooks.h2">Tipos de Hooks Disponíveis</span></h2>
-            <p class="text-stone-600" data-i18n-html="sec.hooks.intro">
-              Hooks não são apenas para escrita de arquivos. O Claude Code expõe <strong>4 eventos</strong> do ciclo de vida do agente
-              que você pode interceptar. Cada um tem um propósito diferente.
-            </p>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-
-            <!-- PreToolUse -->
-            <div class="hook-type-card p-5 rounded-2xl border-2 border-violet-200 bg-violet-50">
-              <div class="flex items-start justify-between mb-3">
-                <div>
-                  <span class="text-[10px] font-bold uppercase tracking-widest text-violet-400" data-i18n="sec.hooks.eventLabel">Evento</span>
-                  <h3 class="font-bold text-violet-900 text-lg font-mono">PreToolUse</h3>
+            <!-- SECTION 2: A Constituição -->
+            <section id="sec-constitution" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📜</span> <span data-i18n="sec.constitution.h2">A Constituição do Projeto</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.constitution.intro">
+                        Uma estrutura documental avançada é o que chamamos de "Constituição": ela define os <strong>limites inegociáveis</strong>
+                        da IA no projeto. Cada categoria tem um propósito distinto na mente do modelo.
+                    </p>
                 </div>
-                <span class="text-2xl">🛡️</span>
-              </div>
-              <p class="text-sm text-violet-800 leading-relaxed mb-3" data-i18n-html="sec.hooks.pre.desc">
-                Roda <strong>antes</strong> de qualquer ferramenta ser executada pelo agente.
-                Pode <strong>bloquear ou modificar</strong> a ação antes que aconteça.
-              </p>
-              <div class="bg-white rounded-lg p-3 border border-violet-100">
-                <p class="text-[11px] font-bold text-violet-600 mb-1" data-i18n="sec.hooks.pre.usecases">Casos de uso:</p>
-                <ul class="text-[11px] text-stone-600 space-y-1">
-                  <li data-i18n="sec.hooks.pre.li.1">• Validar se o arquivo está na lista de permissões</li>
-                  <li data-i18n="sec.hooks.pre.li.2">• Bloquear escrita em diretórios protegidos</li>
-                  <li data-i18n="sec.hooks.pre.li.3">• Logar auditoria de toda ação do agente</li>
-                </ul>
-              </div>
-            </div>
 
-            <!-- PostToolUse -->
-            <div class="hook-type-card p-5 rounded-2xl border-2 border-blue-200 bg-blue-50">
-              <div class="flex items-start justify-between mb-3">
-                <div>
-                  <span class="text-[10px] font-bold uppercase tracking-widest text-blue-400" data-i18n="sec.hooks.post.eventLabel">Evento</span>
-                  <h3 class="font-bold text-blue-900 text-lg font-mono">PostToolUse</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+
+                    <!-- Comportamento -->
+                    <div class="doc-card border border-stone-200 p-5 rounded-xl bg-stone-50">
+                        <div class="doc-icon text-2xl mb-3">🤖</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.constitution.card.1.title">Comportamento (LLM)</h3>
+                        <p class="text-xs text-stone-500 mb-3" data-i18n="sec.constitution.card.1.desc">Define quem a IA é e como ela deve agir.</p>
+                        <div class="space-y-1">
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CLAUDE.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">LLM_CONTEXT.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CLI_AND_DEV_RULES.md</span>
+                        </div>
+                    </div>
+
+                    <!-- Design & Padrões -->
+                    <div class="doc-card border border-stone-200 p-5 rounded-xl bg-stone-50">
+                        <div class="doc-icon text-2xl mb-3">📐</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.constitution.card.2.title">Design & Padrões</h3>
+                        <p class="text-xs text-stone-500 mb-3" data-i18n="sec.constitution.card.2.desc">Impede que a IA invente estruturas ou padrões não aprovados.</p>
+                        <div class="space-y-1">
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">FOLDER_STRUCTURE.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CODING_GUIDELINES.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">API_SPEC.md</span>
+                        </div>
+                    </div>
+
+                    <!-- Histórico & Decisões -->
+                    <div class="doc-card border border-stone-200 p-5 rounded-xl bg-stone-50">
+                        <div class="doc-icon text-2xl mb-3">🕰️</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.constitution.card.3.title">Histórico & Decisões</h3>
+                        <p class="text-xs text-stone-500 mb-3" data-i18n="sec.constitution.card.3.desc">Evita que a IA repita erros do passado ou reverta decisões já tomadas.</p>
+                        <div class="space-y-1">
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">DECISIONS.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">DATABASE_DISCOVERIES.md</span>
+                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CHANGELOG.md</span>
+                        </div>
+                    </div>
                 </div>
-                <span class="text-2xl">⚙️</span>
-              </div>
-              <p class="text-sm text-blue-800 leading-relaxed mb-3" data-i18n-html="sec.hooks.post.desc">
-                Roda <strong>depois</strong> que uma ferramenta completa. Recebe o output completo
-                da operação. É o hook mais usado para lint e testes.
-              </p>
-              <div class="bg-white rounded-lg p-3 border border-blue-100">
-                <p class="text-[11px] font-bold text-blue-600 mb-1" data-i18n="sec.hooks.post.usecases">Casos de uso:</p>
-                <ul class="text-[11px] text-stone-600 space-y-1">
-                  <li data-i18n="sec.hooks.post.li.1">• Rodar ESLint/Prettier após escrita de arquivo</li>
-                  <li data-i18n="sec.hooks.post.li.2">• Executar testes dos arquivos modificados</li>
-                  <li data-i18n="sec.hooks.post.li.3">• Atualizar índices ou geração de tipos</li>
-                </ul>
-              </div>
-            </div>
 
-            <!-- Stop -->
-            <div class="hook-type-card p-5 rounded-2xl border-2 border-emerald-200 bg-emerald-50">
-              <div class="flex items-start justify-between mb-3">
-                <div>
-                  <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-400" data-i18n="sec.hooks.stop.eventLabel">Evento</span>
-                  <h3 class="font-bold text-emerald-900 text-lg font-mono">Stop</h3>
+                <!-- The LLM_CONTEXT index tip -->
+                <div class="bg-stone-900 text-stone-100 rounded-2xl p-6 mb-6">
+                    <h4 class="font-bold mb-3 flex items-center gap-2"><span>💡</span> <span data-i18n="sec.constitution.tip.title">O Truque do Índice: LLM_CONTEXT.md</span></h4>
+                    <p class="text-sm text-stone-300 mb-4 leading-relaxed" data-i18n-html="sec.constitution.tip.desc">
+                        Com muitos documentos, a IA pode não saber qual ler primeiro. O <code class="bg-stone-700 text-emerald-300 font-mono px-1 rounded text-xs">LLM_CONTEXT.md</code>
+                        funciona como um roteador: instrui a IA a carregar o documento certo para cada tipo de tarefa.
+                    </p>
+                    <pre class="text-xs !p-3 !bg-stone-800"><span class="text-emerald-400"># LLM_CONTEXT.md: Índice de Instruções</span>
+
+<span class="text-blue-400">## Antes de qualquer tarefa, leia:</span>
+- CLAUDE.md → regras gerais de comportamento
+- TECH_STACK.md → versões e libs disponíveis
+
+<span class="text-blue-400">## Se for mexer em banco de dados:</span>
+- DATABASE_DISCOVERIES.md → gotchas e decisões sobre o schema
+
+<span class="text-blue-400">## Se for criar uma nova feature:</span>
+- ARCHITECTURE.md → padrão Feature Folders
+- REQUIREMENTS.md → regras de negócio vigentes
+
+<span class="text-blue-400">## Se for alterar algo existente:</span>
+- DECISIONS.md → verifique se existe ADR sobre o componente</pre>
                 </div>
-                <span class="text-2xl">🏁</span>
-              </div>
-              <p class="text-sm text-emerald-800 leading-relaxed mb-3" data-i18n-html="sec.hooks.stop.desc">
-                Roda quando o Claude <strong>finaliza a resposta</strong> completa ao usuário.
-                Ideal para ações de encerramento e notificações.
-              </p>
-              <div class="bg-white rounded-lg p-3 border border-emerald-100">
-                <p class="text-[11px] font-bold text-emerald-600 mb-1" data-i18n="sec.hooks.stop.usecases">Casos de uso:</p>
-                <ul class="text-[11px] text-stone-600 space-y-1">
-                  <li data-i18n="sec.hooks.stop.li.1">• Notificar via Slack quando uma task termina</li>
-                  <li data-i18n="sec.hooks.stop.li.2">• Gerar relatório de alterações feitas</li>
-                  <li data-i18n="sec.hooks.stop.li.3">• Rodar um build final de validação</li>
-                </ul>
-              </div>
-            </div>
+            </section>
 
-            <!-- Notification -->
-            <div class="hook-type-card p-5 rounded-2xl border-2 border-orange-200 bg-orange-50">
-              <div class="flex items-start justify-between mb-3">
-                <div>
-                  <span class="text-[10px] font-bold uppercase tracking-widest text-orange-400" data-i18n="sec.hooks.notif.eventLabel">Evento</span>
-                  <h3 class="font-bold text-orange-900 text-lg font-mono">Notification</h3>
+            <!-- SECTION 3: Ritual do Plan.md -->
+            <section id="sec-lifecycle" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🗺️</span> <span data-i18n="sec.lifecycle.h2">O Ritual do Plan.md</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.lifecycle.intro">
+                        O <code class="bg-stone-100 font-mono px-1 rounded text-sm">plan.md</code> é onde a IA "pensa alto" antes de escrever uma linha de código.
+                        Você aprova a <strong>estratégia</strong> antes da execução, eliminando retrabalho por decisões erradas de arquitetura.
+                    </p>
                 </div>
-                <span class="text-2xl">🔔</span>
-              </div>
-              <p class="text-sm text-orange-800 leading-relaxed mb-3" data-i18n-html="sec.hooks.notif.desc">
-                Roda quando o Claude emite um <strong>alerta ou notificação</strong> interna,
-                como avisos de permissão ou status de longa operação.
-              </p>
-              <div class="bg-white rounded-lg p-3 border border-orange-100">
-                <p class="text-[11px] font-bold text-orange-600 mb-1" data-i18n="sec.hooks.notif.usecases">Casos de uso:</p>
-                <ul class="text-[11px] text-stone-600 space-y-1">
-                  <li data-i18n="sec.hooks.notif.li.1">• Customizar alertas de permissão para o time</li>
-                  <li data-i18n="sec.hooks.notif.li.2">• Integrar com ferramentas de observabilidade</li>
-                  <li data-i18n="sec.hooks.notif.li.3">• Notificações de desktop em tarefas longas</li>
-                </ul>
-              </div>
-            </div>
-          </div>
 
-          <!-- Matcher explanation -->
-          <div class="bg-stone-900 rounded-2xl p-6 text-stone-100">
-            <h4 class="font-bold mb-3 flex items-center gap-2"><span>🎯</span> <span data-i18n="sec.hooks.matcher.h4">Como o Matcher funciona</span></h4>
-            <p class="text-sm text-stone-300 mb-4 leading-relaxed" data-i18n-html="sec.hooks.matcher.desc">
-              Cada hook usa um <code class="bg-stone-700 text-violet-300 px-1 rounded font-mono text-xs">matcher</code> para filtrar
-              em qual ferramenta ele deve disparar. Sem matcher, dispara em todas.
-            </p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div class="bg-stone-800 rounded-lg p-3">
-                <p class="text-[10px] text-stone-400 font-mono mb-1">matcher: "Write"</p>
-                <p class="text-xs text-stone-300" data-i18n="sec.hooks.matcher.write">Só dispara quando o agente cria um arquivo novo.</p>
-              </div>
-              <div class="bg-stone-800 rounded-lg p-3">
-                <p class="text-[10px] text-stone-400 font-mono mb-1">matcher: "Write|Edit"</p>
-                <p class="text-xs text-stone-300" data-i18n-html="sec.hooks.matcher.writeEdit">Dispara em criação <em>e</em> edição de arquivos.</p>
-              </div>
-              <div class="bg-stone-800 rounded-lg p-3">
-                <p class="text-[10px] text-stone-400 font-mono mb-1">matcher: "Bash"</p>
-                <p class="text-xs text-stone-300" data-i18n="sec.hooks.matcher.bash">Dispara antes de qualquer comando de terminal.</p>
-              </div>
-            </div>
-          </div>
-        </section>
+                <div class="space-y-4 mb-8">
 
-        <!-- SECTION 3: Configuração de Hooks -->
-        <section id="sec-config" class="hidden">
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🛠️</span> <span data-i18n="sec.config.h2">Implementação Técnica</span></h2>
-            <p class="text-stone-600" data-i18n-html="sec.config.intro">
-              A configuração vive em <code class="bg-stone-100 text-stone-700 px-1 rounded font-mono text-sm">~/.claude/settings.json</code> (global)
-              ou <code class="bg-stone-100 text-stone-700 px-1 rounded font-mono text-sm">.claude/settings.json</code> (por projeto).
-              Este arquivo conecta o agente ao seu ambiente de desenvolvimento.
-            </p>
-          </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">1</div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-bold text-stone-800" data-i18n="sec.lifecycle.step.1.title">A Proposta</h4>
+                                <span class="text-xs bg-stone-800 text-white px-2 py-1 rounded-full" data-i18n="sec.lifecycle.step.1.badge">IA escreve</span>
+                            </div>
+                            <p class="text-sm text-stone-600" data-i18n-html="sec.lifecycle.step.1.desc">Você pede: <em>"Antes de começar, crie um plan.md listando cada arquivo que será alterado e por quê."</em> A IA mapeia o impacto completo da mudança.</p>
+                        </div>
+                    </div>
 
-          <div class="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden mb-6">
-            <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex items-center gap-3">
-              <span class="font-mono text-xs font-bold text-stone-700">📄 .claude/settings.json</span>
-              <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full" data-i18n="sec.config.badge">estrutura real</span>
-            </div>
-            <pre class="m-0 rounded-none border-0 font-mono text-sm leading-relaxed">{
-  <span class="text-violet-400">"hooks"</span>: {
-    <span class="text-violet-400">"PostToolUse"</span>: [
-      {
-        <span class="text-blue-400">"matcher"</span>: <span class="text-emerald-400">"Write|Edit|MultiEdit"</span>,
-        <span class="text-blue-400">"hooks"</span>: [
-          {
-            <span class="text-blue-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
-            <span class="text-blue-400">"command"</span>: <span class="text-emerald-400">"cd $CLAUDE_PROJECT_DIR &amp;&amp; npm run lint --fix"</span>
-          },
-          {
-            <span class="text-blue-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
-            <span class="text-blue-400">"command"</span>: <span class="text-emerald-400">"cd $CLAUDE_PROJECT_DIR &amp;&amp; npx vitest run --reporter=verbose"</span>
-          }
-        ]
-      }
-    ],
-    <span class="text-violet-400">"Stop"</span>: [
-      {
-        <span class="text-blue-400">"hooks"</span>: [
-          {
-            <span class="text-blue-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
-            <span class="text-blue-400">"command"</span>: <span class="text-emerald-400">"notify-send 'Claude Code' 'Task finalizada!'"</span>
-          }
-        ]
-      }
-    ]
-  }
-}</pre>
-          </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">2</div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-bold text-stone-800" data-i18n="sec.lifecycle.step.2.title">O Crivo do Arquiteto</h4>
+                                <span class="text-xs bg-gov-gold text-white px-2 py-1 rounded-full" data-i18n="sec.lifecycle.step.2.badge">Você revisa</span>
+                            </div>
+                            <p class="text-sm text-stone-600" data-i18n-html="sec.lifecycle.step.2.desc">Você lê o plano. Se a IA quer alterar um Provider que você não quer mexer, ou ignora um edge case, você corrige o plano <em>antes</em> da execução, não depois.</p>
+                        </div>
+                    </div>
 
-          <!-- Variable reference -->
-          <div class="mb-6 p-4 bg-stone-800 rounded-xl">
-            <h4 class="font-bold text-stone-200 text-sm mb-3"><span>📦</span> <span data-i18n="sec.config.envVars.h4">Variáveis de ambiente disponíveis nos hooks</span></h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div class="flex items-start gap-2">
-                <code class="text-[11px] bg-stone-700 text-violet-300 px-2 py-1 rounded font-mono flex-shrink-0">$CLAUDE_PROJECT_DIR</code>
-                <span class="text-[11px] text-stone-400" data-i18n="sec.config.envVars.projectDir">Raiz do projeto atual</span>
-              </div>
-              <div class="flex items-start gap-2">
-                <code class="text-[11px] bg-stone-700 text-violet-300 px-2 py-1 rounded font-mono flex-shrink-0">$CLAUDE_TOOL_NAME</code>
-                <span class="text-[11px] text-stone-400" data-i18n="sec.config.envVars.toolName">Nome da ferramenta que disparou o hook</span>
-              </div>
-              <div class="flex items-start gap-2">
-                <code class="text-[11px] bg-stone-700 text-violet-300 px-2 py-1 rounded font-mono flex-shrink-0">$CLAUDE_FILE_PATHS</code>
-                <span class="text-[11px] text-stone-400" data-i18n="sec.config.envVars.filePaths">Arquivos afetados pela operação (PostToolUse)</span>
-              </div>
-              <div class="flex items-start gap-2">
-                <code class="text-[11px] bg-stone-700 text-violet-300 px-2 py-1 rounded font-mono flex-shrink-0">$CLAUDE_SESSION_ID</code>
-                <span class="text-[11px] text-stone-400" data-i18n="sec.config.envVars.sessionId">ID único da sessão corrente</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 bg-violet-50 rounded-xl border border-violet-100">
-              <h4 class="font-bold text-violet-800 text-sm mb-2" data-i18n="sec.config.whyHooks.title">Por que Hooks e não CI/CD?</h4>
-              <p class="text-xs text-violet-900 leading-relaxed" data-i18n-html="sec.config.whyHooks.desc">
-                O CI/CD roda <em>depois</em> do push. O Hook roda <strong>durante</strong> a geração do código.
-                A IA recebe o erro do terminal em tempo real e não entrega o resultado até o comando retornar sucesso.
-              </p>
-            </div>
-            <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
-              <h4 class="font-bold text-blue-800 text-sm mb-2" data-i18n="sec.config.globalVsProject.title">Global vs. Por Projeto</h4>
-              <p class="text-xs text-blue-900 leading-relaxed" data-i18n-html="sec.config.globalVsProject.desc">
-                Hooks em <code class="font-mono bg-blue-100 px-0.5 rounded">~/.claude/settings.json</code> valem para todos os projetos.
-                Hooks em <code class="font-mono bg-blue-100 px-0.5 rounded">.claude/settings.json</code> são específicos do repositório
-                e podem ser versionados com o time.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- SECTION 4: Limites & Cuidados -->
-        <section id="sec-limits" class="hidden">
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.limits.h2">Limites & Cuidados</span></h2>
-            <p class="text-stone-600" data-i18n="sec.limits.intro">
-              Hooks são poderosos, mas mal configurados podem travar seu workflow ou criar falsos positivos.
-              Conheça os riscos antes de colocar em produção.
-            </p>
-          </div>
-
-          <!-- Dangers -->
-          <div class="space-y-4 mb-8">
-            <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider"><span>🔴</span> <span data-i18n="sec.limits.dangers.h3">Riscos a evitar</span></h3>
-
-            <div class="danger-card bg-red-50 rounded-xl p-5">
-              <div class="flex items-start gap-3">
-                <span class="text-xl">∞</span>
-                <div>
-                  <h4 class="font-bold text-red-800 mb-1" data-i18n="sec.limits.dangers.loop.title">Loop Infinito</h4>
-                  <p class="text-sm text-red-700 leading-relaxed" data-i18n="sec.limits.dangers.loop.desc">
-                    Se o hook sempre retorna falha (ex: lint com regra impossível de satisfazer),
-                    o Claude fica em loop tentando corrigir indefinidamente. Sempre teste o hook
-                    manualmente antes de ativar.
-                  </p>
-                  <div class="mt-2 bg-red-100 rounded-lg p-2">
-                    <p class="text-[11px] text-red-800 font-mono" data-i18n-html="sec.limits.dangers.loop.tip">✓ Defina um timeout máximo no comando: <code>timeout 30 npm run lint</code></p>
-                  </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">3</div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-bold text-stone-800" data-i18n="sec.lifecycle.step.3.title">Execução de Baixa Fricção</h4>
+                                <span class="text-xs bg-gov-emerald text-white px-2 py-1 rounded-full" data-i18n="sec.lifecycle.step.3.badge">IA executa</span>
+                            </div>
+                            <p class="text-sm text-stone-600" data-i18n="sec.lifecycle.step.3.desc">Com a estratégia aprovada, a IA executa. Erros de lógica e de arquitetura caem drasticamente, porque foram eliminados no passo 2.</p>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
 
-            <div class="danger-card bg-red-50 rounded-xl p-5">
-              <div class="flex items-start gap-3">
-                <span class="text-xl">🔓</span>
-                <div>
-                  <h4 class="font-bold text-red-800 mb-1" data-i18n="sec.limits.dangers.security.title">Permissões de Segurança</h4>
-                  <p class="text-sm text-red-700 leading-relaxed" data-i18n-html="sec.limits.dangers.security.desc">
-                    Hooks executam com <strong>suas permissões de sistema</strong>. Um hook mal escrito ou
-                    injetado pode executar comandos arbitrários. Nunca copie configurações de hooks de fontes
-                    desconhecidas sem revisar.
-                  </p>
-                  <div class="mt-2 bg-red-100 rounded-lg p-2">
-                    <p class="text-[11px] text-red-800 font-mono" data-i18n="sec.limits.dangers.security.tip">✓ Prefira hooks com escopo mínimo necessário</p>
-                  </div>
+                <!-- Real plan.md example -->
+                <div class="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden">
+                    <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex items-center gap-3">
+                        <span class="font-mono text-xs font-bold text-stone-700" data-i18n="sec.lifecycle.example.label">📄 plan.md: Exemplo real</span>
+                        <span class="text-[10px] bg-emerald-100 text-gov-emerald font-bold px-2 py-0.5 rounded-full" data-i18n="sec.lifecycle.example.badge">template para copiar</span>
+                    </div>
+                    <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Plan: Adicionar rate limit no endpoint de login</span>
+
+<span class="text-blue-400">## Contexto</span>
+POST /auth/login não tem proteção contra brute force.
+Ref: REQUIREMENTS.md → "Edge Cases Críticos"
+
+<span class="text-blue-400">## Arquivos a MODIFICAR</span>
+1. `src/features/auth/auth.routes.ts`
+   → adicionar middleware de rate limit antes do handler
+2. `src/features/auth/auth.test.ts`
+   → adicionar testes: 5 tentativas ok, 6ª retorna 429
+
+<span class="text-blue-400">## Arquivos a CRIAR</span>
+3. `src/shared/middleware/rate-limit.ts`
+   → encapsular lógica do @fastify/rate-limit (já no TECH_STACK.md)
+
+<span class="text-blue-400">## Arquivos que NÃO serão modificados</span>
+- Qualquer coisa fora de `src/features/auth/` e `src/shared/middleware/`
+- Schema do banco (não há mudança de persistência)
+
+<span class="text-blue-400">## Riscos identificados</span>
+- Usuários atrás de proxy corporativo podem compartilhar IP
+- Rate limit distribuído requer Redis, não está no TECH_STACK.md (confirmar antes)
+
+<span class="text-blue-400">## Aguardando aprovação para prosseguir.</span></pre>
                 </div>
-              </div>
-            </div>
-          </div>
+            </section>
 
-          <!-- Warnings -->
-          <div class="space-y-4 mb-8">
-            <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider"><span>🟡</span> <span data-i18n="sec.limits.warnings.h3">Pontos de atenção</span></h3>
-
-            <div class="warning-card bg-amber-50 rounded-xl p-5">
-              <div class="flex items-start gap-3">
-                <span class="text-xl">🐢</span>
-                <div>
-                  <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.warnings.perf.title">Performance em projetos grandes</h4>
-                  <p class="text-sm text-amber-700 leading-relaxed" data-i18n-html="sec.limits.warnings.perf.desc">
-                    Rodar toda a suíte de testes a cada <code class="bg-amber-100 rounded px-1 font-mono text-xs">PostToolUse</code>
-                    em um monorepo com 10k testes vai paralisar seu fluxo. Use o matcher para limitar o escopo
-                    e filtre apenas os testes relacionados ao arquivo modificado.
-                  </p>
+            <!-- SECTION 4: Estratégia vs Código -->
+            <section id="sec-decision" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚖️</span> <span data-i18n="sec.decision.h2">Estratégia vs. Implementação</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.decision.intro">
+                        Desentupir o gargalo significa parar de olhar ponto e vírgula e começar a olhar a arquitetura.
+                        O Plan.md ritual muda o <em>tipo</em> de conversa que você tem com a IA.
+                    </p>
                 </div>
-              </div>
-            </div>
 
-            <div class="warning-card bg-amber-50 rounded-xl p-5">
-              <div class="flex items-start gap-3">
-                <span class="text-xl">🌐</span>
-                <div>
-                  <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.warnings.external.title">Dependências externas</h4>
-                  <p class="text-sm text-amber-700 leading-relaxed" data-i18n="sec.limits.warnings.external.desc">
-                    Hooks que chamam APIs externas, bancos de dados ou serviços de rede podem falhar por razões
-                    fora do seu controle (timeout, sem internet). Isso vai bloquear o Claude mesmo que o código
-                    esteja correto. Isole hooks de validação de código dos hooks de integração.
-                  </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="antipattern-wrong bg-red-50 rounded-xl p-6">
+                        <h3 class="font-bold text-red-800 mb-4 flex items-center gap-2"><span>⚠️</span> <span data-i18n="sec.decision.wrong.title">O Gargalo Antigo</span></h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-red-100">
+                                <span class="text-red-400 flex-shrink-0">❌</span>
+                                <span class="text-sm text-stone-600" data-i18n="sec.decision.wrong.li.1">Revisão de sintaxe linha por linha.</span>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-red-100">
+                                <span class="text-red-400 flex-shrink-0">❌</span>
+                                <span class="text-sm text-stone-600" data-i18n="sec.decision.wrong.li.2">IA decide a arquitetura, dev descobre só no código.</span>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-red-100 font-semibold">
+                                <span class="text-red-400 flex-shrink-0">❌</span>
+                                <span class="text-sm text-red-700" data-i18n="sec.decision.wrong.li.3">Retrabalho por decisão errada já codificada.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="antipattern-right bg-emerald-50 rounded-xl p-6">
+                        <h3 class="font-bold text-gov-emerald mb-4 flex items-center gap-2"><span>✅</span> <span data-i18n="sec.decision.right.title">O Fluxo Novo</span></h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-emerald-100 shadow-sm">
+                                <span class="text-gov-emerald flex-shrink-0">✅</span>
+                                <span class="text-sm text-stone-600" data-i18n="sec.decision.right.li.1">Guardrails automatizados eliminam revisão de sintaxe.</span>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-emerald-100 shadow-sm">
+                                <span class="text-gov-emerald flex-shrink-0">✅</span>
+                                <span class="text-sm text-stone-600" data-i18n-html="sec.decision.right.li.2">Você aprova a <strong>estratégia</strong> no Plan.md antes do código existir.</span>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-emerald-100 shadow-sm font-semibold">
+                                <span class="text-gov-emerald flex-shrink-0">✅</span>
+                                <span class="text-sm text-gov-emerald" data-i18n="sec.decision.right.li.3">Retrabalho arquitetural cai por eliminação.</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
 
-            <div class="warning-card bg-amber-50 rounded-xl p-5">
-              <div class="flex items-start gap-3">
-                <span class="text-xl">🤖</span>
-                <div>
-                  <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.warnings.judgment.title">A IA não substitui julgamento humano</h4>
-                  <p class="text-sm text-amber-700 leading-relaxed" data-i18n-html="sec.limits.warnings.judgment.desc">
-                    Hooks validam o que é <strong>verificável por máquina</strong>: sintaxe, tipos, cobertura.
-                    Eles não detectam lógica de negócio errada, edge cases não cobertos por testes, ou decisões
-                    arquiteturais ruins. O código revisado pela IA ainda precisa de olho humano, só que em um
-                    nível mais alto.
-                  </p>
+                <!-- Risk prompt example -->
+                <div class="bg-stone-50 border border-stone-200 rounded-xl p-5 mb-8">
+                    <h4 class="font-bold text-stone-800 mb-3 flex items-center gap-2"><span>💬</span> <span data-i18n="sec.decision.prompts.title">Prompts de Alto Valor para Estratégia</span></h4>
+                    <div class="space-y-3">
+                        <div class="bg-gov-emerald/10 border border-gov-emerald/20 p-3 rounded-lg">
+                            <p class="text-xs font-bold text-gov-emerald mb-1" data-i18n="sec.decision.prompts.risk.label">Prompt de Riscos</p>
+                            <p class="text-sm text-stone-700 italic" data-i18n="sec.decision.prompts.risk.text">"Antes de aplicar este plano, analise o RISKS.md e liste 3 possíveis efeitos colaterais desta mudança na camada de autenticação."</p>
+                        </div>
+                        <div class="bg-gov-gold/10 border border-gov-gold/20 p-3 rounded-lg">
+                            <p class="text-xs font-bold text-gov-gold mb-1" data-i18n="sec.decision.prompts.history.label">Prompt de Verificação Histórica</p>
+                            <p class="text-sm text-stone-700 italic" data-i18n="sec.decision.prompts.history.text">"Antes de criar um novo cache layer, verifique o DECISIONS.md. Já tomamos alguma decisão sobre caching que eu deva conhecer?"</p>
+                        </div>
+                        <div class="bg-stone-100 border border-stone-200 p-3 rounded-lg">
+                            <p class="text-xs font-bold text-stone-500 mb-1" data-i18n="sec.decision.prompts.scope.label">Prompt de Escopo</p>
+                            <p class="text-sm text-stone-700 italic" data-i18n="sec.decision.prompts.scope.text">"No plan.md, liste explicitamente os arquivos que NÃO devem ser modificados nesta tarefa."</p>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <!-- Good practices -->
-          <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
-            <h3 class="font-bold text-emerald-800 mb-4 flex items-center gap-2"><span>✅</span> <span data-i18n="sec.limits.practices.h3">Boas práticas</span></h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="flex items-start gap-2">
-                <span class="text-emerald-500 font-bold text-sm flex-shrink-0">1.</span>
-                <p class="text-sm text-emerald-800" data-i18n="sec.limits.practices.li.1">Comece com um único hook simples. Adicione complexidade gradualmente.</p>
-              </div>
-              <div class="flex items-start gap-2">
-                <span class="text-emerald-500 font-bold text-sm flex-shrink-0">2.</span>
-                <p class="text-sm text-emerald-800" data-i18n-html="sec.limits.practices.li.2">Sempre use <code class="bg-emerald-100 font-mono text-xs px-1 rounded">timeout</code> em comandos que podem travar.</p>
-              </div>
-              <div class="flex items-start gap-2">
-                <span class="text-emerald-500 font-bold text-sm flex-shrink-0">3.</span>
-                <p class="text-sm text-emerald-800" data-i18n-html="sec.limits.practices.li.3">Versione o <code class="bg-emerald-100 font-mono text-xs px-1 rounded">.claude/settings.json</code> no repositório do projeto.</p>
-              </div>
-              <div class="flex items-start gap-2">
-                <span class="text-emerald-500 font-bold text-sm flex-shrink-0">4.</span>
-                <p class="text-sm text-emerald-800" data-i18n="sec.limits.practices.li.4">Documente no README o que cada hook faz e por quê existe.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- SECTION 5: Métricas de Confiança -->
-        <section id="sec-metrics" class="hidden">
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📊</span> <span data-i18n="sec.metrics.h2">Impacto no Gargalo</span></h2>
-            <p class="text-stone-600" data-i18n-html="sec.metrics.intro">
-              A economia de tempo não vem da escrita, mas da <strong>revisão</strong>. Quando a IA se auto-corrige,
-              o tempo humano é liberado para decisões arquiteturais.
-            </p>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-xl border border-stone-200">
-            <div class="chart-container">
-              <canvas id="metricsChart"></canvas>
-            </div>
-            <div class="space-y-4">
-              <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-rose-500">
-                <h4 class="font-bold text-sm text-rose-700 uppercase" data-i18n="sec.metrics.before.title">Revisão Manual (Antes)</h4>
-                <p class="text-xs text-stone-600 italic mt-1" data-i18n="sec.metrics.before.desc">
-                  "Faltou um ponto e vírgula", "Esse nome de variável está ruim", "Esqueceu de tratar o catch".
-                </p>
-              </div>
-              <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-auto-violet">
-                <h4 class="font-bold text-sm text-auto-violet uppercase" data-i18n="sec.metrics.after.title">Revisão com Hooks (Depois)</h4>
-                <p class="text-xs text-stone-600 italic mt-1" data-i18n="sec.metrics.after.desc">
-                  "Essa abstração faz sentido para o negócio?", "O design da API é escalável?".
-                </p>
-              </div>
-              <p class="text-[11px] text-stone-400 leading-tight" data-i18n="sec.metrics.footnote">
-                Dados simulam a transição de esforço após implementação de hooks. O tempo de revisão manual
-                cai progressivamente conforme a confiança na suíte de testes aumenta.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- SECTION 6: O Novo Code Review -->
-        <section id="sec-review" class="hidden">
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔍</span> <span data-i18n="sec.review.h2">De Revisor de Sintaxe a Arquiteto</span></h2>
-            <p class="text-stone-600" data-i18n-html="sec.review.intro">
-              Como fica o seu dia a dia após desentupir o gargalo? Sua sênioridade agora é aplicada onde a IA ainda
-              falha: <strong>Intencionalidade e Negócio</strong>.
-            </p>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Before Card -->
-            <div class="border border-stone-200 p-6 rounded-2xl bg-stone-50">
-              <h3 class="font-bold text-red-700 mb-4 flex items-center gap-2"><span>❌</span> <span data-i18n="sec.review.before.h3">Review "Old School"</span></h3>
-              <div class="space-y-3">
-                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-red-100 opacity-60">
-                  <span class="text-xs font-mono bg-red-50 text-red-800 px-2 py-1 rounded w-10 text-center flex-shrink-0">1h</span>
-                  <span class="text-xs text-stone-700" data-i18n="sec.review.before.li.1">Verificando indentação e linter.</span>
+                <!-- Mantra -->
+                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl border-l-8 border-gov-emerald shadow-xl">
+                    <h4 class="font-bold mb-2 text-stone-400 text-xs uppercase tracking-widest" data-i18n="sec.decision.mantra.label">O Mantra da Parte 3:</h4>
+                    <p class="text-lg italic font-serif" data-i18n="sec.decision.mantra.text">"Aprovamos estratégias, não linhas de código. A IA executa o que o arquiteto aprovou."</p>
                 </div>
-                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-red-100 opacity-60">
-                  <span class="text-xs font-mono bg-red-50 text-red-800 px-2 py-1 rounded w-10 text-center flex-shrink-0">2h</span>
-                  <span class="text-xs text-stone-700" data-i18n="sec.review.before.li.2">Apontando erros de lógica básica.</span>
+            </section>
+
+            <!-- SECTION 5: Limites & Cuidados -->
+            <section id="sec-limits" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.limits.h2">Limites & Cuidados</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.limits.intro">
+                        Governança excessiva é tão prejudicial quanto governança insuficiente. Documentação em excesso
+                        ou mal mantida pode confundir a IA mais do que ajudá-la.
+                    </p>
                 </div>
-                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-red-100 opacity-60">
-                  <span class="text-xs font-mono bg-red-50 text-red-800 px-2 py-1 rounded w-10 text-center flex-shrink-0">30m</span>
-                  <span class="text-xs text-red-800 font-bold" data-i18n="sec.review.before.li.3">Fadigado para o que importa.</span>
+
+                <div class="space-y-4 mb-8">
+                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider"><span>🔴</span> <span data-i18n="sec.limits.risks.title">Riscos a evitar</span></h3>
+
+                    <div class="bg-red-50 rounded-xl p-5 border-l-4 border-red-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">🦠</span>
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1" data-i18n="sec.limits.risk.1.title">Documentation Rot</h4>
+                                <p class="text-sm text-red-700 leading-relaxed" data-i18n-html="sec.limits.risk.1.desc">
+                                    Documentos que não são atualizados ficam desatualizados e passam a <strong>mentir</strong> para a IA.
+                                    Um <code class="bg-red-100 font-mono px-1 rounded text-xs">TECH_STACK.md</code> com React 17 quando você usa 19 é pior do que não ter o arquivo.
+                                </p>
+                                <div class="mt-2 bg-red-100 rounded-lg p-2">
+                                    <p class="text-[11px] text-red-800" data-i18n="sec.limits.risk.1.tip">✓ Defina um dono por documento e revise no início de cada sprint.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 rounded-xl p-5 border-l-4 border-red-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">📚</span>
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1" data-i18n="sec.limits.risk.2.title">Documentação Demais</h4>
+                                <p class="text-sm text-red-700 leading-relaxed" data-i18n="sec.limits.risk.2.desc">
+                                    30 arquivos de contexto fragmentados consomem o contexto da IA antes mesmo de ela começar a trabalhar.
+                                    Se a IA precisa ler 15 arquivos para entender uma tarefa simples, a estrutura está errada.
+                                </p>
+                                <div class="mt-2 bg-red-100 rounded-lg p-2">
+                                    <p class="text-[11px] text-red-800" data-i18n-html="sec.limits.risk.2.tip">✓ Use o <code class="font-mono">LLM_CONTEXT.md</code> como índice: só carregue o necessário para cada tarefa.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
 
-            <!-- After Card -->
-            <div class="border-2 border-auto-violet p-6 rounded-2xl bg-violet-50/30">
-              <h3 class="font-bold text-auto-violet mb-4 flex items-center gap-2">
-                <span>✅</span> <span data-i18n="sec.review.after.h3">Review "AI-Augmented"</span>
-              </h3>
-              <div class="space-y-3">
-                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-violet-100 shadow-sm">
-                  <span class="text-xs font-mono bg-violet-100 text-auto-violet px-2 py-1 rounded w-10 text-center flex-shrink-0">0m</span>
-                  <span class="text-xs text-stone-700" data-i18n="sec.review.after.li.1">Linter e testes já passaram nos Hooks.</span>
+                <div class="space-y-4 mb-8">
+                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider"><span>🟡</span> <span data-i18n="sec.limits.attention.title">Pontos de atenção</span></h3>
+
+                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">⚔️</span>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.attention.1.title">Regras Conflitantes</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed" data-i18n-html="sec.limits.attention.1.desc">
+                                    Se o <code class="bg-amber-100 font-mono px-1 rounded text-xs">CLAUDE.md</code> diz "use Zustand" e o
+                                    <code class="bg-amber-100 font-mono px-1 rounded text-xs">CODING_GUIDELINES.md</code> diz "evite estado global",
+                                    a IA vai flutuar entre os dois. Conflitos silenciosos são difíceis de diagnosticar.
+                                </p>
+                                <div class="mt-2 bg-amber-100 rounded-lg p-2">
+                                    <p class="text-[11px] text-amber-800" data-i18n="sec.limits.attention.1.tip">✓ Quando alterar uma regra, busque contradições nos outros arquivos.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">🗺️</span>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.attention.2.title">Plan.md não é contrato imutável</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed" data-i18n-html="sec.limits.attention.2.desc">
+                                    Durante a execução, a IA pode descobrir que o plano era inviável por um motivo técnico.
+                                    Isso é normal. A IA deve te avisar e propor revisão, não executar mesmo assim ou parar silenciosamente.
+                                    Instrua isso explicitamente no <code class="bg-amber-100 font-mono px-1 rounded text-xs">CLAUDE.md</code>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">🤖</span>
+                            <div>
+                                <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.attention.3.title">Governança não elimina revisão humana</h4>
+                                <p class="text-sm text-amber-700 leading-relaxed" data-i18n-html="sec.limits.attention.3.desc">
+                                    Documentação avançada reduz erros de <em>padrão</em>, não erros de <em>lógica de negócio</em>.
+                                    A IA pode gerar código perfeitamente estruturado que resolve o problema errado.
+                                    Revisar a intenção da solução ainda é responsabilidade humana.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-violet-100 shadow-sm">
-                  <span class="text-xs font-mono bg-violet-100 text-auto-violet px-2 py-1 rounded w-10 text-center flex-shrink-0">15m</span>
-                  <span class="text-xs text-stone-700" data-i18n="sec.review.after.li.2">Validando contrato da API e segurança.</span>
+
+                <!-- Good practices -->
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
+                    <h3 class="font-bold text-gov-emerald mb-4 flex items-center gap-2"><span>✅</span> <span data-i18n="sec.limits.practices.title">Boas práticas</span></h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start gap-2">
+                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">1.</span>
+                            <p class="text-sm text-gov-emerald" data-i18n="sec.limits.practices.li.1">Comece com 3-5 arquivos. Só adicione um novo quando sentir a falta dele.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">2.</span>
+                            <p class="text-sm text-gov-emerald" data-i18n="sec.limits.practices.li.2">Revise a Constituição toda vez que uma regra for violada: atualize, não apenas corrija no chat.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">3.</span>
+                            <p class="text-sm text-gov-emerald" data-i18n="sec.limits.practices.li.3">Adicione uma data de atualização no header de cada arquivo de contexto.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">4.</span>
+                            <p class="text-sm text-gov-emerald" data-i18n="sec.limits.practices.li.4">Versione todos os arquivos de contexto junto com o código. PRs devem incluir mudanças de docs.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-violet-200 shadow-sm">
-                  <span class="text-xs font-mono bg-violet-600 text-white px-2 py-1 rounded w-10 text-center flex-shrink-0">2h</span>
-                  <span class="text-xs text-stone-900 font-bold" data-i18n="sec.review.after.li.3">Focando em Arquitetura e Negócio.</span>
+            </section>
+
+            <!-- SECTION 6: Próximos Passos -->
+            <section id="sec-nextsteps" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.nextsteps.h2">Como começar hoje</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.nextsteps.intro">
+                        Evolua a partir do que foi criado na Parte 1. Quatro passos para ir do mínimo viável
+                        para uma Constituição funcional.
+                    </p>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="mt-8 p-6 bg-stone-900 text-stone-100 rounded-2xl border-l-8 border-auto-violet shadow-xl">
-            <h4 class="font-bold mb-2 text-stone-400 text-xs uppercase tracking-widest" data-i18n="sec.review.mantra.label">O Mantra da Parte 3:</h4>
-            <p class="text-lg italic font-serif" data-i18n="sec.review.mantra.text">"A máquina valida o que é verificável. Você julga o que é intencional."</p>
-          </div>
-        </section>
+                <div class="space-y-4 mb-10">
 
-        <!-- SECTION 7: Próximos Passos -->
-        <section id="sec-nextsteps" class="hidden">
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.nextsteps.h2">Como começar hoje</span></h2>
-            <p class="text-stone-600" data-i18n="sec.nextsteps.intro">
-              Não precisa configurar tudo de uma vez. O caminho mais seguro é começar simples,
-              validar, e expandir. Aqui está um roteiro de 4 passos.
-            </p>
-          </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.1.title">Crie o DECISIONS.md com as últimas 3 decisões do time</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.1.desc">Não precisa ser retroativo. Documente as 3 decisões mais recentes que a IA deveria conhecer antes de sugerir algo.</p>
+                            <pre class="text-xs !p-3"><span class="text-emerald-400"># DECISIONS.md</span>
 
-          <!-- Steps -->
-          <div class="space-y-4 mb-10">
+<span class="text-blue-400">## [2025-03] Migração de Axios para ky</span>
+<span class="text-stone-400">Motivo: ky é mais leve e tem melhor suporte a streams.
+Status: Migração completa. Não usar axios em código novo.</span>
 
-            <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-              <div class="step-number flex-shrink-0">1</div>
-              <div class="flex-1">
-                <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step1.title">Crie o arquivo de configuração</h4>
-                <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step1.desc">Crie ou edite o arquivo de hooks do seu projeto:</p>
-                <pre class="text-xs !p-3">mkdir -p .claude
-touch .claude/settings.json</pre>
-              </div>
-            </div>
+<span class="text-blue-400">## [2025-02] Abandonamos Redux</span>
+<span class="text-stone-400">Motivo: Over-engineering para o tamanho do projeto.
+Adotamos Zustand. Não sugerir Redux.</span></pre>
+                        </div>
+                    </div>
 
-            <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-              <div class="step-number flex-shrink-0">2</div>
-              <div class="flex-1">
-                <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step2.title">Adicione um hook de lint como primeiro teste</h4>
-                <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step2.desc">Comece apenas com lint pois é rápido, seguro e dá feedback imediato:</p>
-                <pre class="text-xs !p-3">{
-  <span class="text-violet-400">"hooks"</span>: {
-    <span class="text-violet-400">"PostToolUse"</span>: [
-      {
-        <span class="text-blue-400">"matcher"</span>: <span class="text-emerald-400">"Write|Edit"</span>,
-        <span class="text-blue-400">"hooks"</span>: [
-          {
-            <span class="text-blue-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
-            <span class="text-blue-400">"command"</span>: <span class="text-emerald-400">"cd $CLAUDE_PROJECT_DIR &amp;&amp; timeout 20 npm run lint"</span>
-          }
-        ]
-      }
-    ]
-  }
-}</pre>
-              </div>
-            </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.2.title">Transforme o CLAUDE.md em um índice de roteamento</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.2.desc">Adicione uma seção que instrui a IA a carregar documentos específicos para cada tipo de tarefa.</p>
+                            <pre class="text-xs !p-3"><span class="text-emerald-400"># Adicionar no CLAUDE.md:</span>
 
-            <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-              <div class="step-number flex-shrink-0">3</div>
-              <div class="flex-1">
-                <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step3.title">Valide em uma task real</h4>
-                <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step3.desc">Peça ao Claude para criar ou modificar um arquivo e observe o hook disparar no terminal. Confirme que:</p>
-                <ul class="text-sm text-stone-600 space-y-1">
-                  <li class="flex items-center gap-2"><span class="text-violet-500 font-bold">→</span> <span data-i18n="sec.nextsteps.step3.li.1">O lint rodou automaticamente após a escrita</span></li>
-                  <li class="flex items-center gap-2"><span class="text-violet-500 font-bold">→</span> <span data-i18n="sec.nextsteps.step3.li.2">Um erro de lint forçou o Claude a tentar novamente</span></li>
-                  <li class="flex items-center gap-2"><span class="text-violet-500 font-bold">→</span> <span data-i18n="sec.nextsteps.step3.li.3">O resultado final entregue já estava limpo</span></li>
-                </ul>
-              </div>
-            </div>
+<span class="text-blue-400">## Documentos de Contexto</span>
+- Para tarefas de banco: leia DATABASE_DISCOVERIES.md primeiro
+- Para novas features: leia ARCHITECTURE.md + REQUIREMENTS.md
+- Antes de qualquer decisão técnica: verifique DECISIONS.md</pre>
+                        </div>
+                    </div>
 
-            <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-              <div class="step-number flex-shrink-0">4</div>
-              <div class="flex-1">
-                <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step4.title">Expanda com testes e versione com o time</h4>
-                <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.nextsteps.step4.desc">Quando lint estiver funcionando bem, adicione testes. Depois faça commit do <code class="bg-stone-100 font-mono text-xs px-1 rounded">.claude/settings.json</code> para que todo o time se beneficie:</p>
-                <pre class="text-xs !p-3">git add .claude/settings.json
-git commit -m "feat: add Claude Code hooks for lint and tests"</pre>
-              </div>
-            </div>
-          </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.3.title">Execute o ritual Plan.md em uma tarefa real</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.3.desc">Pegue a próxima feature do seu backlog e execute o ritual completo: peça o plano, revise, aprove, execute.</p>
+                            <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
+                                <span class="text-lg flex-shrink-0">💬</span>
+                                <span data-i18n="sec.nextsteps.step.3.prompt">"Leia o CLAUDE.md e o REQUIREMENTS.md. Antes de escrever qualquer código, crie um plan.md com os arquivos que serão modificados e os riscos que você identificou."</span>
+                            </div>
+                        </div>
+                    </div>
 
-          <!-- Resources -->
-          <div class="bg-stone-50 border border-stone-200 rounded-2xl p-6">
-            <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>📚</span> <span data-i18n="sec.nextsteps.refs.h3">Referências</span></h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
-                <span class="text-lg">📖</span>
-                <div>
-                  <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.docs.title">Documentação oficial de Hooks</p>
-                  <p class="text-xs text-stone-500 font-mono">docs.anthropic.com/claude-code/hooks</p>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number flex-shrink-0">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.4.title">Agende uma revisão trimestral da Constituição</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.4.desc">Documentação apodrecida é pior do que ausente. Reserve 30 minutos por trimestre para revisar cada arquivo de contexto com o time.</p>
+                            <div class="bg-stone-50 border border-stone-200 p-3 rounded-lg text-sm text-stone-600 flex gap-3">
+                                <span class="text-lg flex-shrink-0">📅</span>
+                                <span data-i18n="sec.nextsteps.step.4.checklist">Checklist trimestral: versões no TECH_STACK ainda corretas? Decisões no DECISIONS.md ainda válidas? Regras no CLAUDE.md ainda seguidas?</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
-                <span class="text-lg">⚙️</span>
-                <div>
-                  <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.settings.title">Referência de settings.json</p>
-                  <p class="text-xs text-stone-500 font-mono">docs.anthropic.com/claude-code/settings</p>
-                </div>
-              </div>
-              <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
-                <span class="text-lg">💬</span>
-                <div>
-                  <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.community.title">Repositório de exemplos da comunidade</p>
-                  <p class="text-xs text-stone-500 font-mono">github.com/anthropics/claude-code</p>
-                </div>
-              </div>
-              <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
-                <span class="text-lg">🎓</span>
-                <div>
-                  <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.next.title">Próximo módulo: Claude como agente autônomo</p>
-                  <p class="text-xs text-stone-500" data-i18n="sec.nextsteps.refs.next.desc">Engineering Hour - Parte 4</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-      </main>
+                <!-- References -->
+                <div class="bg-stone-50 border border-stone-200 rounded-2xl p-6">
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>📚</span> <span data-i18n="sec.nextsteps.refs.title">Referências</span></h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">📖</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.1.title">Claude Code | CLAUDE.md docs</p>
+                                <p class="text-xs text-stone-500 font-mono">docs.anthropic.com/claude-code/memory</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">📐</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.2.title">ADR (Architecture Decision Records)</p>
+                                <p class="text-xs text-stone-500 font-mono">adr.github.io</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">⬅️</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.3.title">Módulo anterior: Setup & Regras de Ouro</p>
+                                <p class="text-xs text-stone-500" data-i18n="sec.nextsteps.refs.3.desc">Engineering Hour · Parte 1</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
+                            <span class="text-lg">🎓</span>
+                            <div>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.4.title">Próximo módulo: Claude Hooks</p>
+                                <p class="text-xs text-stone-500" data-i18n="sec.nextsteps.refs.4.desc">Engineering Hour · Parte 4</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
     </div>
 
     <!-- Session Complete -->
@@ -767,132 +602,73 @@ git commit -m "feat: add Claude Code hooks for lint and tests"</pre>
         </div>
     </div>
 
-    <!-- JavaScript Logic -->
     <script>
-      let currentState = { activeSection: 'loop', chart: null };
+        let currentState = { activeSection: 'maturity', chart: null };
 
-      const nodeData = {
-        1: {
-          icon: '✍️',
-          title: 'Escrita',
-          badge: 'Ponto de partida',
-          body: 'A IA propõe o código com base no seu prompt. Sem hooks, esse seria o fim da linha, e você teria que revisar manualmente cada detalhe de sintaxe e estilo.',
-        },
-        2: {
-          icon: '🧼',
-          title: 'Lint & Estilo',
-          badge: 'PostToolUse → Write|Edit',
-          body: 'O hook <code class="bg-violet-50 text-violet-700 px-1 py-0.5 rounded text-xs font-mono">PostToolUse</code> com matcher <code class="bg-violet-50 text-violet-700 px-1 py-0.5 rounded text-xs font-mono">Write|Edit</code> dispara assim que o arquivo é salvo e roda o <strong>Prettier/ESLint</strong>. Se houver erro, a IA recebe o log completo do terminal e tenta uma nova correção automaticamente.',
-        },
-        3: {
-          icon: '🧪',
-          title: 'Testes',
-          badge: 'PostToolUse → Write|Edit',
-          body: 'O hook executa <code class="bg-violet-50 text-violet-700 px-1 py-0.5 rounded text-xs font-mono">vitest run</code> ou <code class="bg-violet-50 text-violet-700 px-1 py-0.5 rounded text-xs font-mono">jest</code> nos arquivos afetados. A IA "sente" em tempo real se quebrou algo na lógica existente e inclui o stack trace na próxima tentativa de correção.',
-        },
-        4: {
-          icon: '🔧',
-          title: 'Correção Autônoma',
-          badge: 'Loop até exit 0',
-          body: 'Quando lint ou testes falham, o Claude lê o output do terminal, entende o erro e reescreve o trecho problemático. O ciclo se repete até que <strong>todos os hooks retornem código 0</strong> (sucesso). Só então o resultado é entregue a você.',
-        },
-      };
+        // ── Navigation hook (nav.js handles core logic) ─────────────
+        window.onNavigate = function(sectionId) {
+            if (!currentState.chart) initChart();
+            currentState.activeSection = sectionId;
+        };
 
-      // ── Navigation hook (nav.js handles core logic) ─────────────
-      window.onNavigate = function(sectionId) {
-        if (sectionId === 'metrics' && !currentState.chart) initChart();
-        currentState.activeSection = sectionId;
-      };
-
-      function activateNode(id) {
-        document.querySelectorAll('.loop-node').forEach((n) => n.classList.remove('loop-active'));
-        document.getElementById(`node-${id}`).classList.add('loop-active');
-
-        const data = nodeData[id];
-        document.getElementById('node-info-placeholder').classList.add('hidden');
-        document.getElementById('node-info-content').classList.remove('hidden');
-        document.getElementById('node-info-icon').textContent = data.icon;
-        document.getElementById('node-info-title').textContent = data.title;
-        document.getElementById('node-info-badge').textContent = data.badge;
-        document.getElementById('node-info-body').innerHTML = data.body;
-      }
-
-      function initChart() {
-        const ctx = document.getElementById('metricsChart').getContext('2d');
-        currentState.chart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: ['Fix de bug', 'Feature nova', 'Refactor', 'Hotfix crítico', 'Integração API'],
-            datasets: [
-              {
-                label: 'Revisão Manual (min)',
-                data: [48, 55, 40, 35, 60],
-                borderColor: '#e11d48',
-                backgroundColor: 'rgba(225, 29, 72, 0.08)',
-                fill: true,
-                tension: 0.4,
-                pointRadius: 5,
-              },
-              {
-                label: 'Revisão com Hooks (min)',
-                data: [12, 10, 7, 5, 14],
-                borderColor: '#6d28d9',
-                backgroundColor: 'rgba(109, 40, 217, 0.08)',
-                fill: true,
-                tension: 0.4,
-                pointRadius: 5,
-              },
-            ],
-          },
-          options: {
-            maintainAspectRatio: false,
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: true,
-                title: { display: true, text: 'Tempo de revisão (min)', font: { size: 10 } },
-              },
-              x: {
-                ticks: { font: { size: 10 } },
-              },
-            },
-            plugins: {
-              legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-            },
-          },
-        });
-      }
-
-      window.addEventListener('i18n:applied', ({ detail: { t } }) => {
-        // Update chart labels and datasets with translated strings
-        if (currentState.chart) {
-          currentState.chart.data.labels = [
-            t('chart.labels.bugfix'),
-            t('chart.labels.feature'),
-            t('chart.labels.refactor'),
-            t('chart.labels.hotfix'),
-            t('chart.labels.apiIntegration')
-          ];
-          currentState.chart.data.datasets[0].label = t('chart.dataset.manual');
-          currentState.chart.data.datasets[1].label = t('chart.dataset.hooks');
-          currentState.chart.options.scales.y.title.text = t('chart.yAxis');
-          currentState.chart.update();
+        function initChart() {
+            const ctx = document.getElementById('maturityChart').getContext('2d');
+            currentState.chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Segurança', 'Performance', 'Arquitetura', 'Negócio', 'Manutenibilidade'],
+                    datasets: [
+                        {
+                            label: 'Sem Documentação (Chute)',
+                            data: [30, 40, 20, 50, 25],
+                            backgroundColor: 'rgba(225, 29, 72, 0.15)',
+                            borderColor: '#e11d48',
+                            borderWidth: 1.5,
+                            pointBackgroundColor: '#e11d48',
+                        },
+                        {
+                            label: 'Com Constituição (Maturidade)',
+                            data: [90, 85, 95, 80, 90],
+                            backgroundColor: 'rgba(6, 95, 70, 0.15)',
+                            borderColor: '#065f46',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#065f46',
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { font: { size: 10 }, stepSize: 25 },
+                            pointLabels: { font: { size: 11 } },
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
         }
 
-        // Update nodeData with translated strings
-        nodeData[1].title = t('nodeData.1.title');
-        nodeData[1].badge = t('nodeData.1.badge');
-        nodeData[1].body = t('nodeData.1.body');
-        nodeData[2].title = t('nodeData.2.title');
-        nodeData[2].badge = t('nodeData.2.badge');
-        nodeData[2].body = t('nodeData.2.body');
-        nodeData[3].title = t('nodeData.3.title');
-        nodeData[3].badge = t('nodeData.3.badge');
-        nodeData[3].body = t('nodeData.3.body');
-        nodeData[4].title = t('nodeData.4.title');
-        nodeData[4].badge = t('nodeData.4.badge');
-        nodeData[4].body = t('nodeData.4.body');
-      });
+        // Chart is initialized via onNavigate on first load
+
+        window.addEventListener('i18n:applied', ({ detail: { t } }) => {
+            if (currentState.chart) {
+                currentState.chart.data.labels = [
+                    t['chart.label.security'],
+                    t['chart.label.performance'],
+                    t['chart.label.architecture'],
+                    t['chart.label.business'],
+                    t['chart.label.maintainability']
+                ];
+                currentState.chart.data.datasets[0].label = t['chart.dataset.noDoc'];
+                currentState.chart.data.datasets[1].label = t['chart.dataset.withConstitution'];
+                currentState.chart.update();
+            }
+        });
     </script>
 
     <!-- Footer -->

@@ -5,7 +5,7 @@ Scaffold a new presentation part for the Engineering Hour series.
 
 Example: `/new-part 8 "Orquestração de Pipelines com IA"`
 
-## Workflow — Two Phases
+## Workflow: Two Phases
 
 This skill creates the session in **Phase 1 only**. Translation (Phase 2) happens separately, after human review.
 
@@ -14,7 +14,7 @@ This skill creates the session in **Phase 1 only**. Translation (Phase 2) happen
 2. Add `data-i18n` / `data-i18n-html` annotations on all visible text
 3. Add `i18n:applied` listener if page has charts
 4. Update `index.html` card to "Available"
-5. **Do NOT create `locales/en/part{N}.json`** — wait for human approval
+5. **Do NOT create `locales/en/part{N}.json`** · wait for human approval
 
 ### Phase 2: Translation (after human says "go" / "finish" / "translate")
 1. Create `locales/en/part{N}.json` with all translation keys
@@ -89,12 +89,12 @@ Then create `part<number>.html` following the complete structure below.
 ---
 
 ### Required sections (minimum 6)
-1. **Introdução / Conceito Central** — explain the core idea with an interactive element
-2. **Como Funciona** — technical detail with a code block or diagram
-3. **Casos de Uso Reais** — concrete examples from the dev workflow
-4. **Limites & Cuidados** — what can go wrong, when NOT to use
-5. **Impacto / Métricas** — comparison or chart showing the value
-6. **Próximos Passos** — 4-step actionable checklist with real commands + closing mantra
+1. **Introdução / Conceito Central** · explain the core idea with an interactive element
+2. **Como Funciona** · technical detail with a code block or diagram
+3. **Casos de Uso Reais** · concrete examples from the dev workflow
+4. **Limites & Cuidados** · what can go wrong, when NOT to use
+5. **Impacto / Métricas** · comparison or chart showing the value
+6. **Próximos Passos** · 4-step actionable checklist with real commands + closing mantra
 
 ### Nav structure
 Group sections with `nav-group-label` divs (uppercase, `text-stone-400`). Suggested groups:
@@ -151,11 +151,11 @@ Group sections with `nav-group-label` divs (uppercase, `text-stone-400`). Sugges
 </footer>
 ```
 
-### Navigation — handled by `nav.js`
+### Navigation: handled by `nav.js`
 
 **Do NOT write a `navigate()` function or `window.onload` in the page.** The shared `nav.js` handles:
 - Section show/hide, nav active state, session-complete toggle (auto-detects last nav-item)
-- URL hash sync (`#sectionId`) — survives page refresh
+- URL hash sync (`#sectionId`), survives page refresh
 - Auto-init on DOMContentLoaded (navigates to hash or first section)
 
 If the page has **page-specific logic** on navigate (e.g. chart init), define a hook:
@@ -169,13 +169,13 @@ If no page-specific logic is needed, do not define `onNavigate`.
 
 ---
 
-### i18n annotations (Phase 1 — HTML only, no JSON yet)
+### i18n annotations (Phase 1: HTML only, no JSON yet)
 
 Every user-visible text element MUST have i18n attributes during scaffolding:
 - `data-i18n="key"` for plain text (replaces `textContent`)
 - `data-i18n-html="key"` for text with inline HTML (`<strong>`, `<code>`, `<a>`)
 - **Never** annotate inside `<pre>` blocks
-- Emoji prefix: separate spans — `<span>🚀</span> <span data-i18n="key">Text</span>`
+- Emoji prefix: separate spans: `<span>🚀</span> <span data-i18n="key">Text</span>`
 
 **Key naming convention** (flat dot notation):
 - Nav items: `nav.{sectionId}` or `nav.group.{groupName}`
@@ -185,7 +185,7 @@ Every user-visible text element MUST have i18n attributes during scaffolding:
 - Chart labels: `chart.{name}.label.{item}`, `chart.{name}.dataset.{item}`
 - Header: `header.subtitle`
 
-**Chart.js i18n listener** — add this if the page has charts (even though JSON doesn't exist yet, the listener should be ready):
+**Chart.js i18n listener**: add this if the page has charts (even though JSON doesn't exist yet, the listener should be ready):
 ```javascript
 window.addEventListener('i18n:applied', function(e) {
     var t = function(k) { return e.detail.t(k); };
@@ -199,23 +199,25 @@ window.addEventListener('i18n:applied', function(e) {
 });
 ```
 
-**Shared keys** (footer, complete, header.subtitle) are already in `locales/en/common.json` — do NOT duplicate them in the part JSON.
+**Shared keys** (footer, complete, header.subtitle) are already in `locales/en/common.json`, do NOT duplicate them in the part JSON.
 
 **Do NOT create `locales/en/part{N}.json` in this phase.** The human will review content first.
 
 ---
 
-### Color accent — pick a DISTINCT color
+### Color accent: pick a DISTINCT color
 Already used:
 | Part | Color | Hex |
 |------|-------|-----|
 | P1 | Sky Blue | `#0284c7` |
-| P2 | Gov Emerald | `#065f46` |
-| P3 | Violet | `#6d28d9` |
-| P4 | Teal | `#0d9488` |
-| P5 | Orange | `#ea580c` |
-| P6 | Indigo | `#4f46e5` |
-| P7 | Fuchsia | `#c026d3` |
+| P2 | Cyan | `#0891b2` |
+| P3 | Gov Emerald | `#065f46` |
+| P4 | Violet | `#6d28d9` |
+| P5 | Teal | `#0d9488` |
+| P6 | Orange | `#ea580c` |
+| P7 | Indigo | `#4f46e5` |
+| P8 | Fuchsia | `#c026d3` |
+| P9 | Amber | `#d97706` |
 
 Pick a new distinct color for the new part. Document it in the HTML file's tailwind config.
 
@@ -225,31 +227,32 @@ Pick a new distinct color for the new part. Document it in the HTML file's tailw
 After creating the part file:
 1. Find the "Coming soon" card for this part number in `index.html`
 2. Change its status from "Coming soon" to "Available" with an `<a href="part{N}.html">` link
-3. **Do NOT update `locales/en/index.json` yet** — that happens in Phase 2
+3. **Do NOT update `locales/en/index.json` yet**, that happens in Phase 2
 
 ---
 
 ### Phase 1 Checklist (scaffold)
 - [ ] All nav items have matching `id="sec-*"` and `id="nav-*"` pairs
 - [ ] `<script src="nav.js" defer>` is in `<head>` (before i18n.js)
-- [ ] No inline `navigate()` function — use `window.onNavigate` hook if needed
+- [ ] No inline `navigate()` function, use `window.onNavigate` hook if needed
 - [ ] Session complete CTA is present between layout `</div>` and `<script>`
 - [ ] Footer is present before `</body>`
 - [ ] `<script src="i18n.js" defer>` is in `<head>`
 - [ ] All visible text has `data-i18n` or `data-i18n-html` attributes
 - [ ] No `data-i18n` inside `<pre>` blocks
 - [ ] `i18n:applied` event listener added for any Chart.js charts
-- [ ] No "Task 1, Task 2" chart labels — use realistic scenario names
+- [ ] No "Task 1, Task 2" chart labels, use realistic scenario names
 - [ ] Copy buttons use real `navigator.clipboard.writeText()`
 - [ ] Code examples use real API/config syntax (verify against docs)
 - [ ] Closing mantra avoids putting 100% responsibility on the machine
 - [ ] Brazilian Portuguese throughout visible content
-- [ ] No references to "Ubivis" — this is a personal project
+- [ ] **No em dash character anywhere** in the generated HTML. Use comma, colon, period, pipe (|), or middle dot (·) instead
+- [ ] No references to "Ubivis", this is a personal project
 - [ ] Accent color is distinct from all existing parts
 - [ ] `index.html` card updated from "Coming soon" to "Available"
-- [ ] **No `locales/en/part{N}.json` created** — wait for Phase 2
+- [ ] **No `locales/en/part{N}.json` created**, wait for Phase 2
 
-### Phase 2 Checklist (translation — after human approval)
+### Phase 2 Checklist (translation, after human approval)
 - [ ] `locales/en/part{N}.json` created with ALL `data-i18n` and `data-i18n-html` keys
 - [ ] `locales/en/index.json` updated with card text for this part
 - [ ] No shared keys duplicated (footer, complete, header are in `common.json`)

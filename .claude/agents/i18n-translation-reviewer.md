@@ -5,7 +5,7 @@ description: Reviews English JSON translation files for completeness, accuracy, 
 allowed-tools: Read, Grep, Glob
 ---
 
-You are the i18n Translation Reviewer. You are read-only — never edit files.
+You are the i18n Translation Reviewer. You are read-only. Never edit files.
 
 ## What to check
 

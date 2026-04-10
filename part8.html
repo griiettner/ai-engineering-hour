@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Hour P8: O Sistema Integrado</title>
+    <title>Engineering Hour P8: Agentes & Sub-Agentes</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,10 +19,10 @@
                             50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
                             300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
                         },
-                        accent: {
-                            amber: '#d97706',
-                            light: '#fffbeb',
-                            border: '#fbbf24',
+                        agent: {
+                            fuchsia: '#c026d3',
+                            light: '#fdf4ff',
+                            border: '#e879f9',
                         }
                     },
                     fontFamily: {
@@ -36,27 +36,19 @@
 
     <link rel="stylesheet" href="shared.css">
     <style>
-        :root { --accent: #d97706; }
-        .scenario-tab { transition: all 0.15s; cursor: pointer; }
-        .scenario-tab.active { background: #d97706; color: white; font-weight: 600; }
-        .tool-node {
-            display: flex; flex-direction: column; align-items: center; gap: 6px;
-            padding: 0.75rem; border-radius: 0.75rem;
-            border: 2px solid #e7e5e4; background: white;
-            transition: all 0.2s;
-            min-width: 80px; text-align: center;
+        :root { --accent: #c026d3; }
+        .agent-node {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
         }
-        .tool-node:hover {
-            border-color: #d97706;
-            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
+        .agent-bubble {
+            border-radius: 9999px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            flex-shrink: 0;
         }
-        .tool-node .tool-icon { font-size: 1.5rem; }
-        .tool-node .tool-label { font-size: 0.7rem; font-weight: 700; color: #44403c; }
-        .integration-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .integration-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        }
+        .compare-tab, .agent-tab { transition: all 0.15s; }
+        .compare-tab.active, .agent-tab.active { background: #c026d3; color: white; font-weight: 600; }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
@@ -65,13 +57,13 @@
     <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="text-2xl">🔗</span>
+                <span class="text-2xl">🤖</span>
                 <h1 class="text-xl font-bold text-stone-800 tracking-tight">
-                    Engineering Hour <span style="color:#d97706">P8</span>
+                    Engineering Hour <span style="color:#c026d3">P8</span>
                 </h1>
             </div>
             <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
-                Módulo 8: O Sistema Integrado — Ferramentas que se Conectam
+                Módulo 8: Agentes, Sub-Agentes &amp; Agent Teams
             </div>
         </div>
     </header>
@@ -82,24 +74,27 @@
         <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
 
             <p class="nav-group-label" data-i18n="nav.group.concept">O Conceito</p>
-            <button onclick="navigate('visao')" id="nav-visao" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🔗</span> <span data-i18n="nav.visao">Visão do Sistema</span>
+            <button onclick="navigate('single')" id="nav-single" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🤖</span> <span data-i18n="nav.single">Agente Único</span>
             </button>
-            <button onclick="navigate('mapa')" id="nav-mapa" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🗺️</span> <span data-i18n="nav.mapa">Mapa das Ferramentas</span>
+            <button onclick="navigate('porque')" id="nav-porque" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🧩</span> <span data-i18n="nav.porque">Por que Multi-Agente</span>
             </button>
 
-            <p class="nav-group-label mt-2" data-i18n="nav.group.practice">Na Prática</p>
-            <button onclick="navigate('cenarios')" id="nav-cenarios" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🎯</span> <span data-i18n="nav.cenarios">Cenários de Integração</span>
+            <p class="nav-group-label mt-2" data-i18n="nav.group.patterns">Os Padrões</p>
+            <button onclick="navigate('subagentes')" id="nav-subagentes" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔀</span> <span data-i18n="nav.subagentes">Subagentes</span>
             </button>
-            <button onclick="navigate('receitas')" id="nav-receitas" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📋</span> <span data-i18n="nav.receitas">Receitas Avançadas</span>
+            <button onclick="navigate('teams')" id="nav-teams" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>👥</span> <span data-i18n="nav.teams">Agent Teams</span>
+            </button>
+            <button onclick="navigate('comparacao')" id="nav-comparacao" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚖️</span> <span data-i18n="nav.comparacao">Quando usar cada um</span>
             </button>
 
             <p class="nav-group-label mt-2" data-i18n="nav.group.impact">Impacto</p>
-            <button onclick="navigate('metricas')" id="nav-metricas" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📊</span> <span data-i18n="nav.metricas">Métricas de Integração</span>
+            <button onclick="navigate('tokens')" id="nav-tokens" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🪙</span> <span data-i18n="nav.tokens">Economia de Tokens</span>
             </button>
             <button onclick="navigate('limites')" id="nav-limites" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
                 <span>⚠️</span> <span data-i18n="nav.limites">Limites &amp; Cuidados</span>
@@ -115,781 +110,820 @@
         <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
 
             <!-- ============================================================ -->
-            <!-- SECTION 1: Visão do Sistema                                   -->
+            <!-- SECTION 1: Agente Único                                       -->
             <!-- ============================================================ -->
-            <section id="sec-visao" class="block">
+            <section id="sec-single" class="block">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔗</span> <span data-i18n="sec.visao.h2">O Sistema Integrado</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.visao.intro">
-                        Nas sessões anteriores, estudamos cada ferramenta isoladamente: Hooks, Memory, Agents, Skills, Commands, Plans e MCP. Agora vamos ver o que acontece quando elas trabalham juntas. Não é um "triângulo de ouro" — é um sistema completo onde cada peça amplifica as outras.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🤖</span> <span data-i18n="sec.single.h2">Agente Único</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.single.intro">
+                        O ponto de partida. Um único Claude com uma única janela de contexto processa tudo em sequência. Para a maioria das tarefas do dia a dia, é exatamente o que você precisa, e a forma mais barata e previsível de trabalhar.
                     </p>
                 </div>
 
-                <!-- The shift -->
+                <!-- What it is -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
-                        <h3 class="font-bold text-stone-400 text-sm mb-3"><span>📦</span> <span data-i18n="sec.visao.isolated.title">Ferramentas Isoladas</span></h3>
-                        <ul class="text-sm text-stone-500 space-y-2 leading-relaxed">
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.isolated.li.1">Hook roda um lint e mostra o resultado</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.isolated.li.2">Memory guarda preferências do usuário</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.isolated.li.3">Agente executa uma tarefa e encerra</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.isolated.li.4">Skill formata um comando reutilizável</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.isolated.li.5">MCP conecta a uma fonte de dados</span></li>
+                        <h3 class="font-bold text-stone-800 text-sm mb-3"><span>✅</span> <span data-i18n="sec.single.ideal.title">Ideal para</span></h3>
+                        <ul class="text-sm text-stone-600 space-y-2 leading-relaxed">
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.ideal.li.1">Tarefas com escopo claro e delimitado</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.ideal.li.2">Arquivos que cabem dentro da janela de contexto</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.ideal.li.3">Trabalho sequencial onde cada passo depende do anterior</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.ideal.li.4">Iterações rápidas com feedback imediato</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.ideal.li.5">Custo controlado e comportamento previsível</span></li>
                         </ul>
                     </div>
-                    <div class="rounded-xl border-2 p-5" style="background:#fffbeb; border-color:#fbbf24">
-                        <h3 class="font-bold text-sm mb-3" style="color:#d97706"><span>🔗</span> <span data-i18n="sec.visao.integrated.title">Ferramentas Integradas</span></h3>
-                        <ul class="text-sm space-y-2 leading-relaxed" style="color:#92400e">
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.integrated.li.1">Hook detecta erro → aciona agente → agente corrige → hook valida de novo</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.integrated.li.2">Skill coordena 3 agentes em paralelo com papéis diferentes</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.integrated.li.3">Agente consulta MCP, gera um Plan, e salva decisões na Memory</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.integrated.li.4">Memory informa o agente sobre padrões do projeto antes de cada tarefa</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.visao.integrated.li.5">Command aciona um pipeline completo: plan → code → review → commit</span></li>
+                    <div class="bg-red-50 rounded-xl border border-red-100 p-5">
+                        <h3 class="font-bold text-red-700 text-sm mb-3"><span>❌</span> <span data-i18n="sec.single.wall.title">Onde bate na parede</span></h3>
+                        <ul class="text-sm text-red-800 space-y-2 leading-relaxed">
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.wall.li.1">Repositórios grandes com centenas de arquivos relevantes</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.wall.li.2">Tarefas independentes que poderiam rodar em paralelo</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n-html="sec.single.wall.li.3"><strong>Context fatigue</strong>: a partir de ~60–70% da janela, a qualidade cai</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.wall.li.4">Research que exigiria explorar muitos caminhos ao mesmo tempo</span></li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- Key insight -->
-                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
-                    <span class="text-2xl flex-shrink-0">💡</span>
-                    <div>
-                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.visao.insight.title">O Princípio da Composição</h4>
-                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.visao.insight.desc">Cada ferramenta do Claude Code foi projetada como uma primitiva composável. Hooks são event listeners. Skills são prompts empacotados. Agents são processos isolados. Memory é estado persistente. MCP é I/O externo. Quando você conecta essas primitivas, o poder não é aditivo — é multiplicativo.</p>
+                <!-- Context fatigue visual -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <h3 class="font-bold text-stone-800 text-sm mb-4" data-i18n="sec.single.fatigue.title">A Degradação do Contexto (Context Fatigue)</h3>
+                    <div class="flex items-end gap-1 h-20 mb-3">
+                        <div class="flex flex-col items-center gap-1 flex-1">
+                            <div class="w-full rounded-t" style="height:80px; background:#c026d3; opacity:1.0"></div>
+                            <span class="text-xs text-stone-500">0%</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-1">
+                            <div class="w-full rounded-t" style="height:78px; background:#c026d3; opacity:0.9"></div>
+                            <span class="text-xs text-stone-500">20%</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-1">
+                            <div class="w-full rounded-t" style="height:72px; background:#c026d3; opacity:0.75"></div>
+                            <span class="text-xs text-stone-500">40%</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-1">
+                            <div class="w-full rounded-t" style="height:60px; background:#c026d3; opacity:0.6"></div>
+                            <span class="text-xs text-stone-500">60%</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-1">
+                            <div class="w-full rounded-t" style="height:38px; background:#e11d48; opacity:0.8"></div>
+                            <span class="text-xs text-red-500 font-bold">70%</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-1">
+                            <div class="w-full rounded-t" style="height:22px; background:#e11d48; opacity:0.9"></div>
+                            <span class="text-xs text-red-500 font-bold">85%</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1 flex-1">
+                            <div class="w-full rounded-t" style="height:10px; background:#e11d48"></div>
+                            <span class="text-xs text-red-500 font-bold">100%</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-stone-400 border-t border-stone-200 pt-2">
+                        <span data-i18n="sec.single.fatigue.start">Início da sessão</span>
+                        <span class="text-red-500 font-semibold"><span>⚠️</span> <span data-i18n="sec.single.fatigue.risk">Zona de risco, respostas degradam</span></span>
+                        <span data-i18n="sec.single.fatigue.full">Contexto cheio</span>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-3 leading-relaxed" data-i18n="sec.single.fatigue.desc">A partir de ~70% da janela de contexto, agentes comecem a esquecer instruções anteriores, repetir trabalho e produzir respostas menos precisas. Reconhecer esse limite é o primeiro passo para saber quando escalar.</p>
+                </div>
+
+                <div class="p-4 rounded-xl border border-fuchsia-200 bg-fuchsia-50 flex gap-3 items-start" style="border-color:#e879f9; background:#fdf4ff">
+                    <span class="text-xl flex-shrink-0">💡</span>
+                    <p class="text-sm leading-relaxed" style="color:#86198f" data-i18n-html="sec.single.tip"><strong>Regra prática:</strong> Se você consegue descrever a tarefa em um parágrafo e ela não exige explorar mais de ~30 arquivos, um agente único é suficiente. Quando a tarefa começa a pedir paralelismo ou o contexto fica lotado, é hora de escalar.</p>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 2: Por que Multi-Agente                               -->
+            <!-- ============================================================ -->
+            <section id="sec-porque" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🧩</span> <span data-i18n="sec.porque.h2">Por que Multi-Agente?</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.porque.intro">
+                        Sistemas multi-agentes funcionam principalmente porque <strong>permitem gastar tokens suficientes para resolver o problema</strong>. A pesquisa da Anthropic é direta: o uso de tokens explica 80% da variância de desempenho. Mais agentes = mais processamento paralelo = melhores resultados.
+                    </p>
+                </div>
+
+                <!-- Performance chart -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <p class="text-xs font-bold text-stone-400 uppercase mb-4" data-i18n="sec.porque.chart.label">Dados de pesquisa, Anthropic Multi-Agent Research System</p>
+                    <div class="chart-container">
+                        <canvas id="perfChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Key stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="p-5 rounded-2xl border-2 border-stone-200 bg-white text-center">
+                        <div class="text-3xl font-extrabold mb-1" style="color:#c026d3">90.2%</div>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.porque.stat.1.desc">melhoria de desempenho com multi-agente vs agente único em tarefas de research</p>
+                    </div>
+                    <div class="p-5 rounded-2xl border-2 border-stone-200 bg-white text-center">
+                        <div class="text-3xl font-extrabold mb-1" style="color:#c026d3">80%</div>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n-html="sec.porque.stat.2.desc">da variância de desempenho explicada pelo <strong>volume de tokens</strong> utilizados</p>
+                    </div>
+                    <div class="p-5 rounded-2xl border-2 border-stone-200 bg-white text-center">
+                        <div class="text-3xl font-extrabold mb-1" style="color:#c026d3">90%</div>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.porque.stat.3.desc">de redução no tempo com tool calling paralelo em vez de sequencial</p>
+                    </div>
+                </div>
+
+                <!-- The analogy -->
+                <div class="bg-stone-900 rounded-xl p-5 text-stone-200 mb-6">
+                    <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#e879f9" data-i18n="sec.porque.analogy.label">Por que isso funciona, a analogia da Anthropic</p>
+                    <p class="text-sm leading-relaxed italic" data-i18n="sec.porque.analogy.quote">"Humanos individualmente não ficaram muito mais inteligentes nos últimos 100.000 anos, mas sociedades se tornaram exponencialmente mais capazes através de inteligência coletiva e coordenação. Multi-agentes fazem o mesmo com IA."</p>
+                </div>
+
+                <!-- Three cases for multi-agent -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
+                        <div class="text-2xl mb-2">⏱️</div>
+                        <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.porque.case.1.title">Paralelismo</h4>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.porque.case.1.desc">Tarefas que podem rodar simultaneamente: 5 agentes revisam 5 módulos ao mesmo tempo em vez de sequencialmente.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
+                        <div class="text-2xl mb-2">🔭</div>
+                        <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.porque.case.2.title">Escala</h4>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.porque.case.2.desc">Repositórios grandes que não cabem em um contexto só. Cada agente explora uma área sem poluir os outros.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
+                        <div class="text-2xl mb-2">🎭</div>
+                        <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.porque.case.3.title">Especialização</h4>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.porque.case.3.desc">Um agente revisor de segurança com contexto focado em OWASP produz resultado melhor que um generalista sobrecarregado.</p>
                     </div>
                 </div>
             </section>
 
             <!-- ============================================================ -->
-            <!-- SECTION 2: Mapa das Ferramentas                               -->
+            <!-- SECTION 3: Subagentes                                         -->
             <!-- ============================================================ -->
-            <section id="sec-mapa" class="hidden">
+            <section id="sec-subagentes" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🗺️</span> <span data-i18n="sec.mapa.h2">Mapa das Ferramentas</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.mapa.intro">
-                        Antes de integrar, é preciso entender o papel de cada peça no sistema. Cada ferramenta tem um domínio específico e interfaces claras com as outras.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔀</span> <span data-i18n="sec.subagentes.h2">Subagentes</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.subagentes.intro">
+                        Cada subagente tem <strong>contexto isolado</strong> e reporta de volta ao orquestrador. Mas o que a maioria das descrições simplifica: subagentes <strong>não precisam rodar em paralelo</strong>. Você pode, e muitas vezes deve, orquestrar um <strong>pipeline sequencial com dependências</strong>, onde o output de um agente vira o input do próximo. Toda a arquitetura é definida por você nas instruções do agente orquestrador.
                     </p>
                 </div>
 
-                <!-- Tool map visual -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
-                    <div class="tool-node">
-                        <span class="tool-icon">⚡</span>
-                        <span class="tool-label" data-i18n="sec.mapa.tool.hooks">Hooks</span>
-                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.hooks">Eventos</span>
-                    </div>
-                    <div class="tool-node">
-                        <span class="tool-icon">🧠</span>
-                        <span class="tool-label" data-i18n="sec.mapa.tool.memory">Memory</span>
-                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.memory">Estado</span>
-                    </div>
-                    <div class="tool-node">
-                        <span class="tool-icon">🤖</span>
-                        <span class="tool-label" data-i18n="sec.mapa.tool.agents">Agents</span>
-                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.agents">Execução</span>
-                    </div>
-                    <div class="tool-node">
-                        <span class="tool-icon">🎯</span>
-                        <span class="tool-label" data-i18n="sec.mapa.tool.skills">Skills</span>
-                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.skills">Reutilização</span>
-                    </div>
-                    <div class="tool-node">
-                        <span class="tool-icon">⌨️</span>
-                        <span class="tool-label" data-i18n="sec.mapa.tool.commands">Commands</span>
-                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.commands">Interface</span>
-                    </div>
-                    <div class="tool-node">
-                        <span class="tool-icon">📐</span>
-                        <span class="tool-label" data-i18n="sec.mapa.tool.plans">Plans</span>
-                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.plans">Estratégia</span>
-                    </div>
-                    <div class="tool-node">
-                        <span class="tool-icon">🔌</span>
-                        <span class="tool-label" data-i18n="sec.mapa.tool.mcp">MCP</span>
-                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.mcp">I/O Externo</span>
-                    </div>
-                    <div class="tool-node">
-                        <span class="tool-icon">📋</span>
-                        <span class="tool-label" data-i18n="sec.mapa.tool.claudemd">CLAUDE.md</span>
-                        <span class="text-xs text-stone-400" data-i18n="sec.mapa.role.claudemd">Diretrizes</span>
+                <!-- Two modes tabs -->
+                <div class="flex gap-2 mb-5">
+                    <button onclick="showSubTab('parallel')" id="subtab-parallel" class="compare-tab active text-sm px-4 py-2 rounded-lg border border-stone-200" data-i18n="sec.subagentes.tab.parallel">Paralelo (independente)</button>
+                    <button onclick="showSubTab('pipeline')" id="subtab-pipeline" class="compare-tab text-sm px-4 py-2 rounded-lg border border-stone-200" data-i18n="sec.subagentes.tab.pipeline">Pipeline (sequencial)</button>
+                </div>
+
+                <!-- Parallel mode -->
+                <div id="submode-parallel" class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <p class="text-xs text-stone-500 mb-4 leading-relaxed" data-i18n="sec.subagentes.parallel.desc">O orquestrador spawna vários subagentes ao mesmo tempo para tarefas independentes. Cada um trabalha isolado e reporta ao pai. Bom para exploração, research e revisões que não dependem umas das outras.</p>
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="agent-node">
+                            <div class="agent-bubble w-14 h-14 text-white text-xl" style="background:#c026d3">👑</div>
+                            <span class="text-xs font-bold text-stone-700" data-i18n="sec.subagentes.parallel.orchestrator">Orquestrador</span>
+                        </div>
+                        <div class="flex gap-8 text-stone-400 text-xs">
+                            <span>↙ <span data-i18n="sec.subagentes.parallel.delegates">delega</span></span><span>↓ <span data-i18n="sec.subagentes.parallel.delegates">delega</span></span><span>↘ <span data-i18n="sec.subagentes.parallel.delegates">delega</span></span>
+                        </div>
+                        <div class="flex gap-6 flex-wrap justify-center">
+                            <div class="agent-node">
+                                <div class="agent-bubble w-11 h-11 bg-white border-2 text-lg" style="border-color:#c026d3">🔍</div>
+                                <span class="text-xs text-stone-600 font-bold">Researcher A</span>
+                                <span class="text-xs text-stone-400" data-i18n="sec.subagentes.parallel.researcher.a.scope">módulo auth</span>
+                            </div>
+                            <div class="agent-node">
+                                <div class="agent-bubble w-11 h-11 bg-white border-2 text-lg" style="border-color:#c026d3">🔍</div>
+                                <span class="text-xs text-stone-600 font-bold">Researcher B</span>
+                                <span class="text-xs text-stone-400" data-i18n="sec.subagentes.parallel.researcher.b.scope">módulo payments</span>
+                            </div>
+                            <div class="agent-node">
+                                <div class="agent-bubble w-11 h-11 bg-white border-2 text-lg" style="border-color:#c026d3">🔍</div>
+                                <span class="text-xs text-stone-600 font-bold">Researcher C</span>
+                                <span class="text-xs text-stone-400" data-i18n="sec.subagentes.parallel.researcher.c.scope">módulo notifications</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 text-stone-400 text-xs">
+                            <span>↗ <span data-i18n="sec.subagentes.parallel.returns">retorna relatório</span></span><span>↑ <span data-i18n="sec.subagentes.parallel.returns">retorna relatório</span></span><span>↖ <span data-i18n="sec.subagentes.parallel.returns">retorna relatório</span></span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Connection matrix -->
-                <h3 class="font-bold text-stone-800 text-sm mb-3" data-i18n="sec.mapa.matrix.title">Quem se conecta com quem</h3>
-                <div class="flex flex-col gap-3 mb-6">
-                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-200">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span>⚡</span>
-                            <span class="font-bold text-sm text-stone-800" data-i18n="sec.mapa.conn.hooks.title">Hooks →</span>
+                <!-- Pipeline mode -->
+                <div id="submode-pipeline" class="hidden bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <p class="text-xs text-stone-500 mb-4 leading-relaxed" data-i18n-html="sec.subagentes.pipeline.desc">O orquestrador define uma cadeia: cada agente recebe o output do anterior e passa para o próximo. Permite loops de feedback (ex: Programador ↔ Revisor até passar). <strong>O humano escreve toda esta lógica no arquivo de instruções do orquestrador.</strong></p>
+
+                    <!-- Pipeline steps -->
+                    <div class="flex flex-col gap-2">
+                        <!-- Human -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-stone-800 text-white text-base flex-shrink-0">🧑</div>
+                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs" data-i18n-html="sec.subagentes.pipeline.human.desc">
+                                <strong class="text-stone-700">Humano</strong> · entrega a tarefa e aprova o plano antes da execução
+                            </div>
                         </div>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.mapa.conn.hooks.desc">Podem acionar scripts que disparam agentes, atualizam memory, consultam MCP servers, ou executam validações externas. São o "event bus" do sistema.</p>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.human.arrow">tarefa</span></div>
+
+                        <!-- Project Owner -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 text-white text-base flex-shrink-0" style="background:#c026d3">👑</div>
+                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs" data-i18n-html="sec.subagentes.pipeline.po.desc">
+                                <strong style="color:#c026d3">Project Owner</strong> · sintetiza a tarefa e passa para o PM
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.po.arrow">briefing</span></div>
+
+                        <!-- Project Manager -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 text-white text-base flex-shrink-0" style="background:#7c3aed">🗂️</div>
+                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs" data-i18n-html="sec.subagentes.pipeline.pm.desc">
+                                <strong class="text-violet-700">Project Manager</strong> · orquestra toda a sequência, distribui tarefas e recebe reports
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.pm.arrow">tarefa de pesquisa (pode dividir em N researchers)</span></div>
+
+                        <!-- Researcher -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-blue-100 text-base flex-shrink-0 border-2 border-blue-300">🔍</div>
+                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs" data-i18n-html="sec.subagentes.pipeline.researcher.desc">
+                                <strong class="text-blue-700">Researcher</strong> <span class="text-stone-400">(Read Only)</span> · explora código, docs e dependências. PM pode spawnar múltiplos em paralelo se necessário
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.researcher.arrow">discovery report → PM → Secretary</span></div>
+
+                        <!-- Secretary -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-amber-100 text-base flex-shrink-0 border-2 border-amber-300">📝</div>
+                            <div class="flex-1 p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-xs" data-i18n-html="sec.subagentes.pipeline.secretary1.desc">
+                                <strong class="text-amber-700">Secretary</strong> · debate o plano com PM, Researcher e PO. Se houver dúvidas sem resposta, o PO pergunta ao humano. Quando consenso atingido, escreve <code class="font-mono bg-amber-100 px-0.5 rounded">plan.md</code> para aprovação humana
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.secretary1.arrow">humano aprova plan.md → PM delega ao Programador</span></div>
+
+                        <!-- Programmer -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-emerald-100 text-base flex-shrink-0 border-2 border-emerald-300">💻</div>
+                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs" data-i18n-html="sec.subagentes.pipeline.programmer.desc">
+                                <strong class="text-emerald-700">Programador</strong> · implementa exatamente o que está no plano aprovado, reporta ao PM
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.programmer.arrow">código → PM → Revisor</span></div>
+
+                        <!-- Revisor loop -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-orange-100 text-base flex-shrink-0 border-2 border-orange-300">🔄</div>
+                            <div class="flex-1 p-2.5 bg-orange-50 rounded-lg border border-orange-200 text-xs" data-i18n-html="sec.subagentes.pipeline.reviewer.desc">
+                                <strong class="text-orange-700">Revisor</strong> · revisa o código e reporta ao PM. Se houver bugs, PM devolve ao Programador. <span class="font-semibold">Loop até "pass".</span>
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.reviewer.arrow">pass → PM → Security Review</span></div>
+
+                        <!-- Security Review loop -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-red-100 text-base flex-shrink-0 border-2 border-red-300">🛡️</div>
+                            <div class="flex-1 p-2.5 bg-red-50 rounded-lg border border-red-200 text-xs" data-i18n-html="sec.subagentes.pipeline.security.desc">
+                                <strong class="text-red-700">Security Review</strong> · auditoria de segurança. Mesmo loop: falhas voltam ao Programador via PM até aprovação.
+                            </div>
+                        </div>
+                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.security.arrow">aprovado → PM → Secretary</span></div>
+
+                        <!-- Secretary docs -->
+                        <div class="flex items-center gap-3">
+                            <div class="agent-bubble w-10 h-10 bg-amber-100 text-base flex-shrink-0 border-2 border-amber-300">📚</div>
+                            <div class="flex-1 p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-xs" data-i18n-html="sec.subagentes.pipeline.secretary2.desc">
+                                <strong class="text-amber-700">Secretary</strong> · atualiza <code class="font-mono bg-amber-100 px-0.5 rounded">CHANGELOG.md</code>, <code class="font-mono bg-amber-100 px-0.5 rounded">MEMORY.md</code> e documentação final
+                            </div>
+                        </div>
                     </div>
-                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-200">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span>🤖</span>
-                            <span class="font-bold text-sm text-stone-800" data-i18n="sec.mapa.conn.agents.title">Agents →</span>
-                        </div>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.mapa.conn.agents.desc">Podem chamar skills, criar plans, ler/escrever memory, usar MCP tools, e spawnar sub-agentes. São os "workers" que executam qualquer combinação de ferramentas.</p>
-                    </div>
-                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-200">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span>🎯</span>
-                            <span class="font-bold text-sm text-stone-800" data-i18n="sec.mapa.conn.skills.title">Skills →</span>
-                        </div>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.mapa.conn.skills.desc">Podem ser invocados por agentes, por commands, ou até por outros skills. Definem o "como fazer" reutilizável. Podem coordenar multi-agentes internamente.</p>
-                    </div>
-                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-200">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span>🧠</span>
-                            <span class="font-bold text-sm text-stone-800" data-i18n="sec.mapa.conn.memory.title">Memory →</span>
-                        </div>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.mapa.conn.memory.desc">É consultada automaticamente no início de cada conversa. Agents e hooks podem atualizar memories. É o "estado de longo prazo" que sobrevive entre sessões.</p>
+
+                    <div class="mt-4 p-3 rounded-lg border text-xs leading-relaxed" style="background:#fdf4ff; border-color:#e879f9; color:#86198f">
+                        <span data-i18n-html="sec.subagentes.pipeline.note"><strong>O humano define toda esta arquitetura</strong> nas instruções do agente orquestrador (CLAUDE.md ou o arquivo do PM). O Claude não inventa a hierarquia, ele executa o workflow que você especificou.</span>
                     </div>
                 </div>
 
-                <!-- Mental model -->
-                <div class="p-5 rounded-xl border-2 flex gap-4 items-start" style="background:#fffbeb; border-color:#fbbf24">
-                    <span class="text-2xl flex-shrink-0">🧩</span>
-                    <div>
-                        <h4 class="font-bold mb-1" style="color:#d97706" data-i18n="sec.mapa.mental.title">Modelo Mental: O Fluxo</h4>
-                        <p class="text-sm leading-relaxed" style="color:#92400e" data-i18n="sec.mapa.mental.desc">CLAUDE.md define as regras. Memory traz o contexto histórico. Um Command ou Skill inicia a ação. Agents executam o trabalho. Hooks validam cada passo. Plans documentam a estratégia. MCP conecta ao mundo externo. Tudo numa cadeia que se auto-reforça.</p>
+                <!-- Custom agents -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-stone-800 text-sm mb-3" data-i18n-html="sec.subagentes.agents.title">Definindo cada agente em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/agents/</code></h3>
+                    <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n-html="sec.subagentes.agents.desc">Cada papel do pipeline vira um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">.md</code> com frontmatter, ferramentas permitidas e instruções de tarefa.</p>
+
+                    <!-- Agent file selector -->
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <button onclick="showAgent('pm')" id="agentbtn-pm" class="agent-tab active text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">project-manager</button>
+                        <button onclick="showAgent('researcher')" id="agentbtn-researcher" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">researcher</button>
+                        <button onclick="showAgent('programmer')" id="agentbtn-programmer" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">programmer</button>
+                        <button onclick="showAgent('code-reviewer')" id="agentbtn-code-reviewer" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">code-reviewer</button>
+                        <button onclick="showAgent('security-reviewer')" id="agentbtn-security-reviewer" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">security-reviewer</button>
+                        <button onclick="showAgent('secretary')" id="agentbtn-secretary" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">secretary</button>
+                    </div>
+
+                    <div id="agent-filename" class="flex items-center justify-between mb-2">
+                        <p id="agent-filepath" class="text-xs font-bold text-stone-400 uppercase">.claude/agents/project-manager.md</p>
+                        <button class="copy-btn" onclick="copyCurrentAgent()" data-i18n="sec.subagentes.agents.copy">copiar</button>
+                    </div>
+
+                    <!-- PM -->
+                    <pre id="agentcode-pm" class="agent-code text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">project-manager</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Orquestra o pipeline completo de uma feature: research,</span>
+<span style="color:#6ee7b7">  planejamento, implementação, revisão de código, segurança e docs.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Task, Read, Write</span>
+---
+
+Você é o Project Manager. Ao receber uma tarefa do Project Owner:
+
+1. **Research**: use Task para delegar ao `researcher`. Consolide o relatório.
+2. **Plano**: use Task para delegar ao `secretary` (escreve plan.md).
+   Aguarde aprovação humana antes de prosseguir.
+3. **Implementação**: use Task para delegar ao `programmer` com plan.md aprovado.
+4. **Revisão**: use Task para delegar ao `code-reviewer`.
+   Se issues → retorne ao `programmer` com feedback. Repita até pass.
+5. **Segurança**: use Task para delegar ao `security-reviewer`.
+   Se findings → retorne ao `programmer`. Repita até aprovado.
+6. **Docs**: use Task para delegar ao `secretary` (CHANGELOG.md e docs finais).
+
+Reporte o resultado final ao Project Owner.</pre>
+
+                    <!-- Researcher -->
+                    <pre id="agentcode-researcher" class="agent-code hidden text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">researcher</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Explora o código-base, lê docs e dependências para gerar um</span>
+<span style="color:#6ee7b7">  discovery report antes de qualquer implementação.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Grep, Glob, WebFetch</span>
+---
+
+Você é um researcher read-only. Não edite arquivos.
+
+Dada a tarefa recebida do Project Manager:
+- Mapeie os arquivos e módulos relevantes
+- Leia dependências externas e docs de API envolvidas
+- Identifique riscos, acoplamentos e pontos de atenção
+
+Entregue um **Discovery Report** estruturado:
+- Arquivos-chave (paths + propósito)
+- Dependências envolvidas
+- Riscos identificados
+- Perguntas em aberto para o PM resolver antes do plano</pre>
+
+                    <!-- Programmer -->
+                    <pre id="agentcode-programmer" class="agent-code hidden text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">programmer</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Implementa exatamente o que está no plan.md aprovado pelo humano.</span>
+<span style="color:#6ee7b7">  Não toma decisões de design por conta própria.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Write, Edit, Bash, Glob, Grep</span>
+---
+
+Você é um programador de implementação. Seu único input é o plan.md aprovado
+(ou o feedback do code-reviewer / security-reviewer).
+
+Regras:
+- Implemente exatamente o que está no plano, sem features extras
+- Se receber feedback de revisão, corrija apenas os pontos apontados
+- Não refatore código fora do escopo da tarefa
+- Reporte ao PM quando concluído, listando arquivos alterados</pre>
+
+                    <!-- Code Reviewer -->
+                    <pre id="agentcode-code-reviewer" class="agent-code hidden text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">code-reviewer</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisa qualidade de código: lógica, cobertura de edge cases,</span>
+<span style="color:#6ee7b7">  padrões do projeto e clareza. Não toca em segurança.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Grep, Glob</span>
+---
+
+Você é um revisor de código sênior. Analise o código implementado:
+
+- Lógica e corretude (edge cases, condições de erro)
+- Aderência aos padrões do projeto (naming, estrutura)
+- Clareza e manutenibilidade
+- Cobertura de testes (se aplicável)
+
+Responda com:
+**Resultado**: ✅ Pass | ❌ Fail
+**Issues** (se Fail): lista numerada com arquivo, linha e descrição
+**Não toque em**: análise de segurança (responsabilidade do security-reviewer)</pre>
+
+                    <!-- Security Reviewer -->
+                    <pre id="agentcode-security-reviewer" class="agent-code hidden text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">security-reviewer</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Auditoria de segurança OWASP Top 10. Chamado pelo PM após o</span>
+<span style="color:#6ee7b7">  code-reviewer aprovar. Não revisa qualidade de código.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Grep, Glob</span>
+---
+
+Você é um auditor de segurança. Analise o código em busca de:
+
+- Injection (SQL, Command, LDAP) · A03
+- Autenticação e sessão quebradas · A07
+- Exposição de dados sensíveis · A02
+- Inputs sem sanitização ou validação
+- Dependências com vulnerabilidades conhecidas
+
+Responda com:
+**Resultado**: ✅ Aprovado | ❌ Reprovado
+**Severidade geral**: Alta / Média / Baixa
+**Findings** (se Reprovado): arquivo, linha, OWASP ref e correção sugerida</pre>
+
+                    <!-- Secretary -->
+                    <pre id="agentcode-secretary" class="agent-code hidden text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">secretary</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Consolida debates em documentos (plan.md, CHANGELOG.md, MEMORY.md).</span>
+<span style="color:#6ee7b7">  Chamado duas vezes: antes da implementação e após aprovação final.</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Write, Edit</span>
+---
+
+Você é o secretary do pipeline. Você tem duas responsabilidades:
+
+**Fase 1 | Planejamento**:
+Dada a conversa entre PM, Researcher e PO, consolide o consenso em plan.md.
+Se houver dúvidas sem resposta, sinalize ao PO para consultar o humano.
+O plan.md só é finalizado quando o humano aprovar.
+
+**Fase 2 | Documentação final**:
+Após aprovação do security-reviewer, atualize:
+- CHANGELOG.md (o que mudou, por quê)
+- MEMORY.md (decisões de arquitetura, contexto para o futuro)
+- Qualquer doc técnico relevante ao que foi implementado</pre>
+
+                </div>
+
+                <!-- Built-in agent types -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                    <h3 class="font-bold text-stone-800 text-sm mb-3" data-i18n-html="sec.subagentes.builtin.title">Tipos de agente built-in (campo <code class="font-mono bg-stone-100 px-1 rounded text-xs">agent:</code>)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono font-bold text-stone-700">general-purpose</code>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.subagentes.builtin.gp.desc">Ferramentas completas. Padrão quando nenhum tipo é especificado.</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono font-bold text-stone-700">Explore</code>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.subagentes.builtin.explore.desc">Ferramentas read-only otimizadas para explorar codebases. Não edita arquivos.</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono font-bold text-stone-700">Plan</code>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.subagentes.builtin.plan.desc">Focado em arquitetura e planejamento. Sem execução direta de código.</p>
+                        </div>
                     </div>
                 </div>
             </section>
 
             <!-- ============================================================ -->
-            <!-- SECTION 3: Cenários de Integração                             -->
+            <!-- SECTION 4: Agent Teams                                        -->
             <!-- ============================================================ -->
-            <section id="sec-cenarios" class="hidden">
+            <section id="sec-teams" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🎯</span> <span data-i18n="sec.cenarios.h2">Cenários de Integração</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.cenarios.intro">
-                        Cada cenário mostra ferramentas diferentes trabalhando juntas. Clique nos tabs para explorar as combinações.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>👥</span> <span data-i18n="sec.teams.h2">Agent Teams</span></h2>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="tag-badge bg-amber-100 text-amber-700"><span>⚗️</span> <span data-i18n="sec.teams.experimental">Experimental</span></span>
+                        <span class="text-xs text-stone-500" data-i18n-html="sec.teams.requires">Requer <code class="font-mono bg-stone-100 px-1 rounded">CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code></span>
+                    </div>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.teams.intro">
+                        Agent Teams vai além dos subagentes: os integrantes <strong>se comunicam diretamente entre si</strong> via um sistema de mailbox compartilhado. Um team lead coordena, mas os teammates não são subordinados, são colegas que colaboram.
                     </p>
                 </div>
 
-                <!-- Scenario tabs -->
-                <div class="flex flex-wrap gap-2 mb-6">
-                    <button onclick="showScenario('hookagent')" id="scntab-hookagent" class="scenario-tab active text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.cenarios.tab.hookagent">Hook → Agent</button>
-                    <button onclick="showScenario('skillmulti')" id="scntab-skillmulti" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.cenarios.tab.skillmulti">Skill → Multi-Agent</button>
-                    <button onclick="showScenario('agentplan')" id="scntab-agentplan" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.cenarios.tab.agentplan">Agent → Plan</button>
-                    <button onclick="showScenario('mcpmemory')" id="scntab-mcpmemory" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.cenarios.tab.mcpmemory">MCP → Memory</button>
-                    <button onclick="showScenario('pipeline')" id="scntab-pipeline" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.cenarios.tab.pipeline">Pipeline Completo</button>
-                </div>
-
-                <!-- Scenario 1: Hook → Agent → Memory -->
-                <div id="scn-hookagent" class="scenario-content">
-                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
-                        <div class="flex items-center gap-3 mb-3">
-                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.cenarios.s1.label">Cenário 1</span>
-                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.cenarios.s1.title">Hook detecta padrão → Agent corrige → Memory registra</h3>
+                <!-- Communication flow - teams -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <h3 class="font-bold text-stone-800 text-sm mb-5" data-i18n="sec.teams.flow.title">Fluxo de comunicação: rede peer-to-peer</h3>
+                    <div class="flex flex-col items-center gap-4">
+                        <!-- Lead -->
+                        <div class="agent-node">
+                            <div class="agent-bubble w-16 h-16 text-white text-2xl" style="background:#c026d3">🎯</div>
+                            <span class="text-xs font-bold text-stone-700" data-i18n="sec.teams.flow.lead">Team Lead</span>
+                            <span class="text-xs text-stone-400" data-i18n="sec.teams.flow.lead.desc">coordena + shared task list</span>
                         </div>
-                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.cenarios.s1.desc">
-                            Um PostToolUse hook detecta que um arquivo TypeScript foi escrito sem type exports. Um script aciona o Claude que lê o erro e corrige. A memory registra a decisão para que o Claude já saiba o padrão na próxima sessão.
-                        </p>
-                        <!-- Flow visual -->
-                        <div class="flex items-center gap-3 flex-wrap mb-4">
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-stone-100 border border-stone-200">
-                                <span>⚡</span><span class="text-xs font-bold text-stone-700">PostToolUse</span>
+                        <!-- Shared task list indicator -->
+                        <div class="w-full max-w-xs bg-white border-2 rounded-lg p-2 text-center text-xs" style="border-color:#c026d3">
+                            <span class="font-bold" style="color:#c026d3"><span>📋</span> <span data-i18n="sec.teams.flow.tasklist">Shared Task List</span></span>
+                            <span class="text-stone-400 ml-1">+ mailbox</span>
+                        </div>
+                        <!-- Teammates with peer arrows -->
+                        <div class="flex gap-4 flex-wrap justify-center items-center">
+                            <div class="agent-node">
+                                <div class="agent-bubble w-12 h-12 bg-white border-2 text-xl" style="border-color:#c026d3">🔍</div>
+                                <span class="text-xs font-bold text-stone-600">Teammate A</span>
                             </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
-                                <span>🔍</span><span class="text-xs font-bold text-amber-700" data-i18n="sec.cenarios.s1.flow.detect">Detecta falta</span>
+                            <div class="flex flex-col gap-1 text-stone-400 text-xs items-center">
+                                <span>←→</span>
+                                <span class="text-stone-300" data-i18n="sec.teams.flow.peer">peer msg</span>
                             </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:#fffbeb; border: 1px solid #fbbf24">
-                                <span>🤖</span><span class="text-xs font-bold" style="color:#d97706" data-i18n="sec.cenarios.s1.flow.agent">Claude corrige</span>
+                            <div class="agent-node">
+                                <div class="agent-bubble w-12 h-12 bg-white border-2 text-xl" style="border-color:#c026d3">🛡️</div>
+                                <span class="text-xs font-bold text-stone-600">Teammate B</span>
                             </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
-                                <span>🧠</span><span class="text-xs font-bold text-emerald-700" data-i18n="sec.cenarios.s1.flow.memory">Memory salva</span>
+                            <div class="flex flex-col gap-1 text-stone-400 text-xs items-center">
+                                <span>←→</span>
+                                <span class="text-stone-300" data-i18n="sec.teams.flow.peer">peer msg</span>
+                            </div>
+                            <div class="agent-node">
+                                <div class="agent-bubble w-12 h-12 bg-white border-2 text-xl" style="border-color:#c026d3">🧪</div>
+                                <span class="text-xs font-bold text-stone-600">Teammate C</span>
                             </div>
                         </div>
-                        <pre><span class="text-stone-500">// .claude/settings.json — hook que valida exports</span>
-{
-  <span class="text-violet-400">"hooks"</span>: {
-    <span class="text-violet-400">"PostToolUse"</span>: [
-      {
-        <span class="text-violet-400">"matcher"</span>: <span class="text-emerald-400">"Write|Edit"</span>,
-        <span class="text-violet-400">"hooks"</span>: [
-          {
-            <span class="text-violet-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
-            <span class="text-violet-400">"command"</span>: <span class="text-emerald-400">"bash .claude/scripts/check-ts-exports.sh \"$TOOL_INPUT\""</span>
-          }
-        ]
-      }
-    ]
-  }
-}
-
-<span class="text-stone-500">// Fluxo completo:</span>
-<span class="text-stone-500">// 1. Claude escreve um arquivo .ts via Write</span>
-<span class="text-stone-500">// 2. Hook roda check-ts-exports.sh automaticamente</span>
-<span class="text-stone-500">// 3. Script retorna exit 1 + stderr se faltar exports</span>
-<span class="text-stone-500">// 4. Claude lê o erro e adiciona os exports faltantes</span>
-<span class="text-stone-500">// 5. Hook roda de novo → exit 0 → aprovado</span>
-<span class="text-stone-500">// 6. Claude salva na memory: "Este projeto exige type exports"</span></pre>
+                        <p class="text-xs text-stone-500 text-center" data-i18n="sec.teams.flow.note">Teammates se comunicam diretamente, não só com o lead</p>
                     </div>
                 </div>
 
-                <!-- Scenario 2: Skill → Multi-Agent -->
-                <div id="scn-skillmulti" class="scenario-content hidden">
-                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
-                        <div class="flex items-center gap-3 mb-3">
-                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.cenarios.s2.label">Cenário 2</span>
-                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.cenarios.s2.title">Skill de review coordena 3 agentes especializados</h3>
-                        </div>
-                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.cenarios.s2.desc">
-                            Um slash command /review-pr invoca um skill que internamente spawna 3 subagentes em paralelo: um para segurança, um para performance, um para testes. O skill consolida os resultados e apresenta um report unificado.
-                        </p>
-                        <!-- Flow visual -->
-                        <div class="flex items-center gap-3 flex-wrap mb-4">
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-stone-100 border border-stone-200">
-                                <span>⌨️</span><span class="text-xs font-bold text-stone-700">/review-pr</span>
-                            </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:#fffbeb; border: 1px solid #fbbf24">
-                                <span>🎯</span><span class="text-xs font-bold" style="color:#d97706">Skill</span>
-                            </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex flex-col gap-1">
-                                <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-red-50 border border-red-200">
-                                    <span class="text-xs font-bold text-red-700" data-i18n="sec.cenarios.s2.flow.security">🔒 Segurança</span>
-                                </div>
-                                <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-50 border border-blue-200">
-                                    <span class="text-xs font-bold text-blue-700" data-i18n="sec.cenarios.s2.flow.perf">⚡ Performance</span>
-                                </div>
-                                <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-purple-50 border border-purple-200">
-                                    <span class="text-xs font-bold text-purple-700" data-i18n="sec.cenarios.s2.flow.tests">🧪 Testes</span>
-                                </div>
-                            </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
-                                <span>📄</span><span class="text-xs font-bold text-emerald-700" data-i18n="sec.cenarios.s2.flow.report">Report</span>
-                            </div>
-                        </div>
-                        <pre><span class="text-stone-500"># .claude/commands/review-pr.md</span>
----
-description: Review de PR com agentes especializados
-allowed-tools: Agent, Read, Grep, Glob
----
-
-Analise o PR atual com 3 subagentes em paralelo:
-
-1. **Agente de Segurança** (subagent_type: Explore)
-   - Busque vulnerabilidades OWASP top 10
-   - Verifique inputs não sanitizados
-   - Ferramentas: Grep, Read
-
-2. **Agente de Performance** (subagent_type: Explore)
-   - Identifique N+1 queries, loops desnecessários
-   - Verifique uso de índices em queries SQL
-   - Ferramentas: Grep, Read
-
-3. **Agente de Testes** (subagent_type: general-purpose)
-   - Verifique cobertura dos paths alterados
-   - Sugira testes faltantes
-   - Ferramentas: Grep, Read, Bash
-
-Consolide os 3 reports num único sumário com severidade
-(critical / warning / info) para cada item encontrado.</pre>
+                <!-- Setup -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-stone-800 text-sm mb-3" data-i18n="sec.teams.config.title">Configuração</h3>
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs font-bold text-stone-400 uppercase">~/.claude/teams/code-review/config.json</p>
+                        <button class="copy-btn" onclick="copyCode('team-config')" data-i18n="sec.teams.config.copy">copiar</button>
                     </div>
-                </div>
-
-                <!-- Scenario 3: Agent → Plan -->
-                <div id="scn-agentplan" class="scenario-content hidden">
-                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
-                        <div class="flex items-center gap-3 mb-3">
-                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.cenarios.s3.label">Cenário 3</span>
-                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.cenarios.s3.title">Agent Explore → Gera Plan → Agent Executor implementa</h3>
-                        </div>
-                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.cenarios.s3.desc">
-                            Um agente do tipo Plan analisa o codebase, identifica os arquivos relevantes e cria um plano detalhado. Um segundo agente, com contexto limpo, recebe o plano e implementa. O clássico "Plan Then Build" mas agora orquestrado com agentes tipados.
-                        </p>
-                        <div class="flex items-center gap-3 flex-wrap mb-4">
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200">
-                                <span>🔍</span><span class="text-xs font-bold text-blue-700" data-i18n="sec.cenarios.s3.flow.explore">Agent Plan</span>
-                            </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
-                                <span>📐</span><span class="text-xs font-bold text-amber-700" data-i18n="sec.cenarios.s3.flow.plan">Plan gerado</span>
-                            </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:#fffbeb; border: 1px solid #fbbf24">
-                                <span>🤖</span><span class="text-xs font-bold" style="color:#d97706" data-i18n="sec.cenarios.s3.flow.exec">Agent Executor</span>
-                            </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
-                                <span>✅</span><span class="text-xs font-bold text-emerald-700" data-i18n="sec.cenarios.s3.flow.done">Código pronto</span>
-                            </div>
-                        </div>
-                        <pre><span class="text-stone-500"># Passo 1: Agente planejador (subagent_type: Plan)</span>
-"Analise a codebase e crie um plano detalhado para
- migrar o auth de JWT para session-based.
- Identifique todos os arquivos afetados,
- a ordem de alteração e possíveis breaking changes."
-
-<span class="text-stone-500"># O plano é salvo em .claude/plans/auth-migration.md</span>
-
-<span class="text-stone-500"># Passo 2: Agente executor (subagent_type: general-purpose)</span>
-"Implemente o plano em .claude/plans/auth-migration.md
- Siga a ordem exata. Rode os testes após cada arquivo.
- NÃO altere arquivos fora do escopo do plano."
-
-<span class="text-stone-500"># O executor começa com contexto limpo:</span>
-<span class="text-stone-500"># - Sem o histórico de exploração do planejador</span>
-<span class="text-stone-500"># - Focado exclusivamente na implementação</span>
-<span class="text-stone-500"># - Hooks validam cada escrita automaticamente</span></pre>
-                    </div>
-                </div>
-
-                <!-- Scenario 4: MCP → Memory -->
-                <div id="scn-mcpmemory" class="scenario-content hidden">
-                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
-                        <div class="flex items-center gap-3 mb-3">
-                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.cenarios.s4.label">Cenário 4</span>
-                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.cenarios.s4.title">MCP consulta Linear → Agent decide → Memory registra</h3>
-                        </div>
-                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.cenarios.s4.desc">
-                            Um agent usa um MCP server do Linear para buscar os tickets ativos da sprint. Com base nas prioridades, gera um plan de trabalho e salva as decisões na memory para que a próxima sessão continue de onde parou.
-                        </p>
-                        <div class="flex items-center gap-3 flex-wrap mb-4">
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-50 border border-violet-200">
-                                <span>🔌</span><span class="text-xs font-bold text-violet-700">MCP: Linear</span>
-                            </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:#fffbeb; border: 1px solid #fbbf24">
-                                <span>🤖</span><span class="text-xs font-bold" style="color:#d97706" data-i18n="sec.cenarios.s4.flow.decide">Agent analisa</span>
-                            </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
-                                <span>📐</span><span class="text-xs font-bold text-amber-700" data-i18n="sec.cenarios.s4.flow.plan">Plan de sprint</span>
-                            </div>
-                            <span class="flow-arrow">→</span>
-                            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
-                                <span>🧠</span><span class="text-xs font-bold text-emerald-700" data-i18n="sec.cenarios.s4.flow.save">Memory salva</span>
-                            </div>
-                        </div>
-                        <pre><span class="text-stone-500"># Configuração do MCP server em .claude/settings.json:</span>
-{
-  <span class="text-violet-400">"mcpServers"</span>: {
-    <span class="text-violet-400">"linear"</span>: {
-      <span class="text-violet-400">"command"</span>: <span class="text-emerald-400">"npx"</span>,
-      <span class="text-violet-400">"args"</span>: [<span class="text-emerald-400">"@anthropic/linear-mcp"</span>],
-      <span class="text-violet-400">"env"</span>: { <span class="text-violet-400">"LINEAR_API_KEY"</span>: <span class="text-emerald-400">"$LINEAR_API_KEY"</span> }
+                    <pre id="team-config" class="text-xs">{
+  <span style="color:#a5b4fc">"name"</span>: <span style="color:#6ee7b7">"code-review"</span>,
+  <span style="color:#a5b4fc">"teammates"</span>: [
+    {
+      <span style="color:#a5b4fc">"name"</span>: <span style="color:#6ee7b7">"security"</span>,
+      <span style="color:#a5b4fc">"agent"</span>: <span style="color:#6ee7b7">"security-reviewer"</span>
+    },
+    {
+      <span style="color:#a5b4fc">"name"</span>: <span style="color:#6ee7b7">"performance"</span>,
+      <span style="color:#a5b4fc">"agent"</span>: <span style="color:#6ee7b7">"perf-analyst"</span>
+    },
+    {
+      <span style="color:#a5b4fc">"name"</span>: <span style="color:#6ee7b7">"tests"</span>,
+      <span style="color:#a5b4fc">"agent"</span>: <span style="color:#6ee7b7">"test-coverage"</span>
     }
-  }
-}
-
-<span class="text-stone-500"># O agente recebe este prompt:</span>
-"Use a tool linear_list_issues para buscar tickets IN_PROGRESS.
- Cruze com o estado atual da codebase (git log, git status).
- Crie um plan em .claude/plans/sprint-atual.md
- ordenado por prioridade.
- Salve uma memory do tipo 'project' com o contexto da sprint."
-
-<span class="text-stone-500"># Na próxima sessão, o Claude já sabe:</span>
-<span class="text-stone-500"># - Quais tickets estão em andamento</span>
-<span class="text-stone-500"># - Qual a prioridade de cada um</span>
-<span class="text-stone-500"># - Onde parou da última vez</span></pre>
-                    </div>
+  ]
+}</pre>
                 </div>
 
-                <!-- Scenario 5: Pipeline Completo -->
-                <div id="scn-pipeline" class="scenario-content hidden">
-                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
-                        <div class="flex items-center gap-3 mb-3">
-                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.cenarios.s5.label">Cenário 5</span>
-                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.cenarios.s5.title">Pipeline: Command → Plan → Code → Review → Memory → Commit</h3>
-                        </div>
-                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.cenarios.s5.desc">
-                            O cenário mais ambicioso: um slash command inicia todo o pipeline. Memory traz contexto do projeto. Um agente cria o plan. Outro implementa. Hooks validam cada escrita. Um agente reviewer faz code review. Se aprovado, commita com mensagem baseada no plan.
-                        </p>
-                        <!-- Full pipeline visual -->
-                        <div class="flex items-center gap-2 flex-wrap mb-4">
-                            <div class="px-2 py-1 rounded bg-stone-100 border border-stone-200">
-                                <span class="text-xs font-bold text-stone-700">⌨️ /implement</span>
-                            </div>
-                            <span class="text-stone-400 text-xs">→</span>
-                            <div class="px-2 py-1 rounded bg-blue-50 border border-blue-200">
-                                <span class="text-xs font-bold text-blue-700">🧠 Memory</span>
-                            </div>
-                            <span class="text-stone-400 text-xs">→</span>
-                            <div class="px-2 py-1 rounded bg-amber-50 border border-amber-200">
-                                <span class="text-xs font-bold text-amber-700">📐 Plan</span>
-                            </div>
-                            <span class="text-stone-400 text-xs">→</span>
-                            <div class="px-2 py-1 rounded" style="background:#fffbeb; border: 1px solid #fbbf24">
-                                <span class="text-xs font-bold" style="color:#d97706">🤖 Coder</span>
-                            </div>
-                            <span class="text-stone-400 text-xs">→</span>
-                            <div class="px-2 py-1 rounded bg-violet-50 border border-violet-200">
-                                <span class="text-xs font-bold text-violet-700">⚡ Hook</span>
-                            </div>
-                            <span class="text-stone-400 text-xs">→</span>
-                            <div class="px-2 py-1 rounded bg-purple-50 border border-purple-200">
-                                <span class="text-xs font-bold text-purple-700">🔍 Reviewer</span>
-                            </div>
-                            <span class="text-stone-400 text-xs">→</span>
-                            <div class="px-2 py-1 rounded bg-emerald-50 border border-emerald-200">
-                                <span class="text-xs font-bold text-emerald-700">✅ Commit</span>
-                            </div>
-                        </div>
-                        <pre><span class="text-stone-500"># .claude/commands/implement.md</span>
----
-description: Pipeline completo de implementação
-allowed-tools: Agent, Read, Write, Edit, Bash, Grep, Glob
----
-
-## Pipeline de Implementação
-
-### Fase 1: Contexto
-- Leia as memories do projeto para entender decisões anteriores
-- Verifique o CLAUDE.md para convenções de código
-
-### Fase 2: Planejamento
-- Use um Agent (subagent_type: Plan) para criar o plano
-- Salve em .claude/plans/ com nome descritivo
-
-### Fase 3: Implementação
-- Use um Agent (subagent_type: general-purpose) para implementar
-- O agent segue o plano, os hooks validam cada escrita
-
-### Fase 4: Review
-- Spawne um Agent (subagent_type: Explore) para review
-- Se encontrar problemas, volte à Fase 3 com as correções
-
-### Fase 5: Finalização
-- Atualize a memory com decisões tomadas
-- Crie o commit com mensagem baseada no plano
-- Resuma o que foi feito para o humano validar</pre>
+                <!-- Real use cases from docs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
+                        <h4 class="font-bold text-stone-800 text-sm mb-2"><span>✅</span> <span data-i18n="sec.teams.usecase.1.title">Code review paralelo</span></h4>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.teams.usecase.1.desc">3 teammates revisam simultaneamente: segurança, performance e cobertura de testes. Cada um com contexto focado no seu domínio.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
+                        <h4 class="font-bold text-stone-800 text-sm mb-2"><span>✅</span> <span data-i18n="sec.teams.usecase.2.title">Hipóteses concorrentes</span></h4>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.teams.usecase.2.desc">5 teammates investigam 5 teorias diferentes para um bug complexo simultaneamente e debatem os resultados via mailbox.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
+                        <h4 class="font-bold text-stone-800 text-sm mb-2"><span>✅</span> <span data-i18n="sec.teams.usecase.3.title">Coordenação cross-layer</span></h4>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.teams.usecase.3.desc">Frontend, backend e DB trabalham em paralelo numa feature, coordenando interfaces via shared task list.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-amber-100 bg-amber-50">
+                        <h4 class="font-bold text-amber-700 text-sm mb-2"><span>⚠️</span> <span data-i18n="sec.teams.limitations.title">Limitações importantes</span></h4>
+                        <ul class="text-xs text-amber-800 space-y-1">
+                            <li data-i18n-html="sec.teams.limitations.li.1">• Sem <code>/resume</code> ou <code>/rewind</code> de teammates</li>
+                            <li data-i18n="sec.teams.limitations.li.2">• Apenas 1 team por sessão, sem teams aninhados</li>
+                            <li data-i18n="sec.teams.limitations.li.3">• Risco de conflito em arquivos editados por 2 teammates</li>
+                            <li data-i18n="sec.teams.limitations.li.4">• Split-pane requer tmux ou iTerm2</li>
+                        </ul>
                     </div>
                 </div>
             </section>
 
             <!-- ============================================================ -->
-            <!-- SECTION 4: Receitas Avançadas                                 -->
+            <!-- SECTION 5: Quando usar cada um                                -->
             <!-- ============================================================ -->
-            <section id="sec-receitas" class="hidden">
+            <section id="sec-comparacao" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📋</span> <span data-i18n="sec.receitas.h2">Receitas Avançadas</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.receitas.intro">
-                        Configurações prontas para copiar e adaptar. Cada receita combina pelo menos 3 ferramentas diferentes.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚖️</span> <span data-i18n="sec.comparacao.h2">Quando usar cada um</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.comparacao.intro">
+                        A escolha certa depende de três variáveis: complexidade da tarefa, se as partes são independentes, e se você precisa de coordenação entre agentes.
                     </p>
                 </div>
 
-                <!-- Recipe tabs -->
-                <div class="flex flex-wrap gap-2 mb-6">
-                    <button onclick="showRecipe('r1')" id="rectab-r1" class="scenario-tab active text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.receitas.tab.r1">Hook + Memory</button>
-                    <button onclick="showRecipe('r2')" id="rectab-r2" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.receitas.tab.r2">Agent + Skills</button>
-                    <button onclick="showRecipe('r3')" id="rectab-r3" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.receitas.tab.r3">MCP + Plan</button>
-                    <button onclick="showRecipe('r4')" id="rectab-r4" class="scenario-tab text-xs px-3 py-1.5 rounded-full border border-stone-200 bg-stone-100 text-stone-600" data-i18n="sec.receitas.tab.r4">CLAUDE.md evolutivo</button>
+                <!-- Comparison table -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6 overflow-x-auto">
+                    <table class="w-full text-xs">
+                        <thead>
+                            <tr class="border-b-2 border-stone-200">
+                                <th class="text-left py-3 pr-4 text-stone-500 font-semibold" data-i18n="sec.comparacao.th.aspect">Aspecto</th>
+                                <th class="text-center py-3 pr-4 text-stone-500 font-semibold" data-i18n="sec.comparacao.th.single">Agente Único</th>
+                                <th class="text-center py-3 pr-4 text-stone-500 font-semibold" data-i18n="sec.comparacao.th.sub">Subagentes</th>
+                                <th class="text-center py-3 text-stone-500 font-semibold" data-i18n="sec.comparacao.th.teams">Agent Teams</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-100">
+                            <tr>
+                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.comm.label">Comunicação</td>
+                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.comm.single">Única sessão</td>
+                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.comm.sub">Filho → pai apenas</td>
+                                <td class="py-2.5 text-center text-stone-600" data-i18n="sec.comparacao.row.comm.teams">Peer-to-peer direto</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.coord.label">Coordenação</td>
+                                <td class="py-2.5 pr-4 text-center text-stone-600">-</td>
+                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.coord.sub">Manual (pai define)</td>
+                                <td class="py-2.5 text-center text-stone-600" data-i18n="sec.comparacao.row.coord.teams">Automática (shared task list)</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.ctx.label">Contexto</td>
+                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.ctx.single">Único</td>
+                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.ctx.sub">Isolado por filho</td>
+                                <td class="py-2.5 text-center text-stone-600" data-i18n="sec.comparacao.row.ctx.teams">Isolado por teammate</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.cost.label">Custo de tokens</td>
+                                <td class="py-2.5 pr-4 text-center text-emerald-600 font-bold">1×</td>
+                                <td class="py-2.5 pr-4 text-center text-amber-600 font-bold">~4×</td>
+                                <td class="py-2.5 text-center text-red-600 font-bold" data-i18n="sec.comparacao.row.cost.teams">~15× (escala com teammates)</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.stability.label">Estabilidade</td>
+                                <td class="py-2.5 pr-4 text-center text-emerald-600 font-bold"><span>✅</span> <span data-i18n="sec.comparacao.row.stability.single">Estável</span></td>
+                                <td class="py-2.5 pr-4 text-center text-emerald-600 font-bold"><span>✅</span> <span data-i18n="sec.comparacao.row.stability.sub">Estável</span></td>
+                                <td class="py-2.5 text-center text-amber-600 font-bold"><span>⚗️</span> <span data-i18n="sec.comparacao.row.stability.teams">Experimental</span></td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.best.label">Melhor para</td>
+                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.best.single">Tarefas focadas e sequenciais</td>
+                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.best.sub">Workers isolados e rápidos</td>
+                                <td class="py-2.5 text-center text-stone-600" data-i18n="sec.comparacao.row.best.teams">Paralelismo com interdependências</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- Recipe 1: Self-healing hook -->
-                <div id="rec-r1" class="recipe-content">
-                    <div class="integration-card p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="flex items-center gap-3 mb-3">
-                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.receitas.r1.label">Receita</span>
-                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.receitas.r1.title">Hook de Auto-Correção + Memory de Padrões</h3>
+                <!-- Decision tree -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                    <h3 class="font-bold text-stone-800 text-sm mb-4" data-i18n="sec.comparacao.tree.title">Árvore de decisão</h3>
+                    <div class="flex flex-col gap-3 text-xs">
+                        <div class="flex gap-3 items-start">
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 text-xs" style="background:#c026d3">?</div>
+                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200" data-i18n-html="sec.comparacao.tree.q1">
+                                <strong>A tarefa cabe em ~30 arquivos e é sequencial?</strong>
+                                <span class="ml-2 text-emerald-600 font-semibold">→ Agente Único</span>
+                            </div>
                         </div>
-                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.receitas.r1.desc">
-                            O hook detecta erros de lint após cada Write/Edit. O Claude lê o erro e corrige. Se o mesmo tipo de erro aparece repetidamente na sessão, salva uma memory de feedback para evitar o padrão nas próximas sessões.
-                        </p>
-                        <div class="flex gap-2 flex-wrap mb-3">
-                            <span class="tag-badge bg-stone-100 text-stone-600">⚡ Hook</span>
-                            <span class="text-stone-400">+</span>
-                            <span class="tag-badge bg-stone-100 text-stone-600">🤖 Auto-correção</span>
-                            <span class="text-stone-400">+</span>
-                            <span class="tag-badge bg-stone-100 text-stone-600">🧠 Memory</span>
+                        <div class="flex gap-3 items-start">
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 text-xs" style="background:#c026d3">?</div>
+                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200" data-i18n-html="sec.comparacao.tree.q2">
+                                <strong>As sub-tarefas são independentes e sem necessidade de coordenação entre si?</strong>
+                                <span class="ml-2" style="color:#c026d3"><strong>→ Subagentes</strong></span>
+                            </div>
                         </div>
-                        <div class="flex gap-2 items-start">
-                            <pre class="flex-1 m-0" id="recipe1"><span class="text-stone-500">// .claude/settings.json</span>
-{
-  <span class="text-violet-400">"hooks"</span>: {
-    <span class="text-violet-400">"PostToolUse"</span>: [
-      {
-        <span class="text-violet-400">"matcher"</span>: <span class="text-emerald-400">"Write|Edit"</span>,
-        <span class="text-violet-400">"hooks"</span>: [{
-          <span class="text-violet-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
-          <span class="text-violet-400">"command"</span>: <span class="text-emerald-400">"npx eslint --no-warn-ignored \"$TOOL_INPUT\" 2>&1 | head -20"</span>
-        }]
-      }
-    ]
-  }
-}
-
-<span class="text-stone-500">// O Claude aprende com o padrão de erros:</span>
-<span class="text-stone-500">// Sessão 1: corrige 5x "missing semicolons"</span>
-<span class="text-stone-500">// → salva memory de feedback: "usar sempre semicolons"</span>
-<span class="text-stone-500">// Sessão 2: nunca mais gera código sem semicolons</span></pre>
-                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('recipe1')" data-i18n="sec.receitas.copy">copiar</button>
+                        <div class="flex gap-3 items-start">
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 text-xs" style="background:#c026d3">?</div>
+                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200" data-i18n-html="sec.comparacao.tree.q3">
+                                <strong>Os agentes precisam coordenar resultados entre si durante a execução?</strong>
+                                <span class="ml-2 text-amber-600 font-semibold">→ Agent Teams (experimental)</span>
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Recipe 2: Agent reusing skill -->
-                <div id="rec-r2" class="recipe-content hidden">
-                    <div class="integration-card p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="flex items-center gap-3 mb-3">
-                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.receitas.r2.label">Receita</span>
-                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.receitas.r2.title">Agent Orquestrador que reutiliza Skills</h3>
-                        </div>
-                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.receitas.r2.desc">
-                            Um agente customizado usa a tool Skill internamente para invocar skills existentes como /commit ou /review-pr. O agente decide qual skill chamar baseado no contexto, sem que você precise orquestrar manualmente.
-                        </p>
-                        <div class="flex gap-2 flex-wrap mb-3">
-                            <span class="tag-badge bg-stone-100 text-stone-600">🤖 Agent</span>
-                            <span class="text-stone-400">+</span>
-                            <span class="tag-badge bg-stone-100 text-stone-600">🎯 Skill</span>
-                            <span class="text-stone-400">+</span>
-                            <span class="tag-badge bg-stone-100 text-stone-600">⌨️ Command</span>
-                        </div>
-                        <div class="flex gap-2 items-start">
-                            <pre class="flex-1 m-0" id="recipe2"><span class="text-stone-500"># .claude/agents/orchestrator.md</span>
----
-description: Orquestrador que usa skills existentes
-allowed-tools: Agent, Skill, Read, Grep, Glob, Bash
----
-
-Você é um orquestrador de tarefas de desenvolvimento.
-
-## Workflow
-1. Analise a tarefa recebida
-2. Decida quais skills são necessários
-3. Execute-os na ordem correta
-
-## Skills disponíveis
-- Use `Skill: review-pr` para revisar código
-- Use `Skill: commit` para commitar alterações
-- Use `Agent` para tarefas de research ou implementação
-
-## Regra
-Nunca pule o review antes do commit.
-Se o review encontrar problemas, corrija antes de commitar.</pre>
-                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('recipe2')" data-i18n="sec.receitas.copy">copiar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recipe 3: MCP-informed planning -->
-                <div id="rec-r3" class="recipe-content hidden">
-                    <div class="integration-card p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="flex items-center gap-3 mb-3">
-                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.receitas.r3.label">Receita</span>
-                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.receitas.r3.title">MCP + Plan + Memory para Sprint Planning</h3>
-                        </div>
-                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.receitas.r3.desc">
-                            Um command consulta o tracker de tarefas via MCP, cruza com o estado da codebase, gera um plan de trabalho, e salva na memory o contexto da sprint para que todas as sessões subsequentes tenham consciência do que está em andamento.
-                        </p>
-                        <div class="flex gap-2 flex-wrap mb-3">
-                            <span class="tag-badge bg-stone-100 text-stone-600">🔌 MCP</span>
-                            <span class="text-stone-400">+</span>
-                            <span class="tag-badge bg-stone-100 text-stone-600">📐 Plan</span>
-                            <span class="text-stone-400">+</span>
-                            <span class="tag-badge bg-stone-100 text-stone-600">🧠 Memory</span>
-                        </div>
-                        <div class="flex gap-2 items-start">
-                            <pre class="flex-1 m-0" id="recipe3"><span class="text-stone-500"># .claude/commands/sprint-plan.md</span>
----
-description: Gera plan da sprint a partir do tracker
-allowed-tools: Agent, Read, Write, Grep, Glob
----
-
-## Sprint Planning Automatizado
-
-1. Use a MCP tool do tracker para buscar tickets
-   com status IN_PROGRESS e TODO
-
-2. Para cada ticket, use um Agent (subagent_type: Explore)
-   para mapear os arquivos afetados na codebase
-
-3. Gere um plan em `.claude/plans/sprint-YYYY-MM-DD.md`
-   com: ticket, arquivos, dependências, ordem de execução
-
-4. Salve uma memory do tipo "project" com:
-   - Tickets da sprint e seus status
-   - Decisões de priorização
-   - Bloqueios identificados
-
-5. Apresente um resumo para o humano validar</pre>
-                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('recipe3')" data-i18n="sec.receitas.copy">copiar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recipe 4: Evolving CLAUDE.md -->
-                <div id="rec-r4" class="recipe-content hidden">
-                    <div class="integration-card p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="flex items-center gap-3 mb-3">
-                            <span class="tag-badge" style="background:#fffbeb; color:#d97706" data-i18n="sec.receitas.r4.label">Receita</span>
-                            <h3 class="font-bold text-stone-800 text-sm" data-i18n="sec.receitas.r4.title">CLAUDE.md que evolui via Hook + Memory</h3>
-                        </div>
-                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.receitas.r4.desc">
-                            Um hook no evento Stop analisa os feedbacks da sessão. Se padrões recorrentes são detectados, sugere atualizações ao CLAUDE.md. Assim as regras do projeto evoluem organicamente baseadas no uso real — mas sempre com aprovação humana.
-                        </p>
-                        <div class="flex gap-2 flex-wrap mb-3">
-                            <span class="tag-badge bg-stone-100 text-stone-600">⚡ Hook (Stop)</span>
-                            <span class="text-stone-400">+</span>
-                            <span class="tag-badge bg-stone-100 text-stone-600">🧠 Memory</span>
-                            <span class="text-stone-400">+</span>
-                            <span class="tag-badge bg-stone-100 text-stone-600">📋 CLAUDE.md</span>
-                        </div>
-                        <div class="flex gap-2 items-start">
-                            <pre class="flex-1 m-0" id="recipe4"><span class="text-stone-500">// Hook no evento Stop</span>
-{
-  <span class="text-violet-400">"hooks"</span>: {
-    <span class="text-violet-400">"Stop"</span>: [
-      {
-        <span class="text-violet-400">"hooks"</span>: [{
-          <span class="text-violet-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
-          <span class="text-violet-400">"command"</span>: <span class="text-emerald-400">"echo 'Revise as memories de feedback desta sessão. Se algum padrão apareceu 3+ vezes, sugira uma adição ao CLAUDE.md.'"</span>
-        }]
-      }
-    ]
-  }
-}
-
-<span class="text-stone-500">// Ciclo de evolução:</span>
-<span class="text-stone-500">// 1. Você dá feedback durante a sessão</span>
-<span class="text-stone-500">// 2. Claude salva como memory de feedback</span>
-<span class="text-stone-500">// 3. No Stop, o hook sugere: "Adicionar ao CLAUDE.md?"</span>
-<span class="text-stone-500">// 4. Você aprova ou rejeita a alteração</span>
-<span class="text-stone-500">// 5. Regra agora vale para TODAS as sessões futuras</span></pre>
-                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('recipe4')" data-i18n="sec.receitas.copy">copiar</button>
+                        <div class="flex gap-3 items-start">
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-red-400 font-bold flex-shrink-0 text-xs border-2 border-red-200">!</div>
+                            <div class="flex-1 p-3 bg-red-50 rounded-lg border border-red-100" data-i18n-html="sec.comparacao.tree.q4">
+                                <strong class="text-red-700">As sub-tarefas têm alta interdependência ou precisam de contexto compartilhado?</strong>
+                                <span class="ml-2 text-red-600 font-semibold">→ Não use multi-agente, o overhead vai superar o ganho.</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             <!-- ============================================================ -->
-            <!-- SECTION 5: Métricas de Integração                             -->
+            <!-- SECTION 6: Economia de Tokens                                 -->
             <!-- ============================================================ -->
-            <section id="sec-metricas" class="hidden">
+            <section id="sec-tokens" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📊</span> <span data-i18n="sec.metricas.h2">Métricas de Integração</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.metricas.intro">
-                        A integração de ferramentas impacta diretamente a qualidade e a consistência do trabalho. Veja a comparação entre usar ferramentas isoladas versus o sistema integrado.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🪙</span> <span data-i18n="sec.tokens.h2">Economia de Tokens</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.tokens.intro">
+                        Multi-agentes são poderosos mas caros. Agent Teams usam ~15× mais tokens que um chat padrão. A pergunta não é "posso usar multi-agente?", é <strong>"a tarefa justifica esse custo?"</strong>
                     </p>
                 </div>
 
-                <!-- Chart -->
-                <div class="chart-container mb-6">
-                    <canvas id="integrationChart"></canvas>
-                </div>
-
-                <!-- Key metrics cards -->
+                <!-- Cost comparison -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
-                        <div class="text-2xl mb-1">🔄</div>
-                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.metricas.card.1.title">Retrabalho</div>
-                        <div class="text-2xl font-extrabold my-1" style="color:#d97706">-60%</div>
-                        <p class="text-xs text-stone-500" data-i18n="sec.metricas.card.1.desc">Hooks + Memory previnem erros recorrentes</p>
+                        <div class="text-2xl mb-1">💬</div>
+                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.tokens.card.1.title">Chat padrão</div>
+                        <div class="text-2xl font-extrabold text-stone-800 my-1">1×</div>
+                        <p class="text-xs text-stone-500" data-i18n="sec.tokens.card.1.desc">Agente único conversacional</p>
                     </div>
                     <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
-                        <div class="text-2xl mb-1">🧠</div>
-                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.metricas.card.2.title">Contexto entre sessões</div>
-                        <div class="text-2xl font-extrabold my-1" style="color:#d97706">+85%</div>
-                        <p class="text-xs text-stone-500" data-i18n="sec.metricas.card.2.desc">Memory + Plans mantêm continuidade</p>
+                        <div class="text-2xl mb-1">🔀</div>
+                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.tokens.card.2.title">Subagentes</div>
+                        <div class="text-2xl font-extrabold my-1" style="color:#c026d3">~4×</div>
+                        <p class="text-xs text-stone-500" data-i18n="sec.tokens.card.2.desc">Agente + 2–3 subagentes focados</p>
                     </div>
-                    <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
-                        <div class="text-2xl mb-1">⚡</div>
-                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.metricas.card.3.title">Automação de validação</div>
-                        <div class="text-2xl font-extrabold my-1" style="color:#d97706">90%</div>
-                        <p class="text-xs text-stone-500" data-i18n="sec.metricas.card.3.desc">Hooks automatizam checks pós-escrita</p>
+                    <div class="p-4 rounded-xl border-2 border-amber-200 bg-amber-50 text-center">
+                        <div class="text-2xl mb-1">👥</div>
+                        <div class="font-bold text-amber-800 text-sm" data-i18n="sec.tokens.card.3.title">Agent Teams</div>
+                        <div class="text-2xl font-extrabold text-amber-700 my-1">~15×</div>
+                        <p class="text-xs text-amber-700" data-i18n="sec.tokens.card.3.desc">Escala linearmente com teammates</p>
                     </div>
                 </div>
 
-                <!-- Insight -->
-                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
-                    <span class="text-2xl flex-shrink-0">💡</span>
-                    <div>
-                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.metricas.insight.title">O efeito composto</h4>
-                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.metricas.insight.desc">Cada ferramenta integrada reduz o atrito da seguinte. Memory reduz o onboarding de cada sessão. Hooks eliminam verificações manuais. Plans garantem que o agente não desvie do escopo. O ganho não é linear — é composto. 3 ferramentas integradas valem mais que 5 ferramentas isoladas.</p>
+                <!-- Patterns to save tokens -->
+                <h3 class="font-bold text-stone-800 text-sm mb-3" data-i18n="sec.tokens.patterns.title">Padrões que maximizam valor por token</h3>
+                <div class="flex flex-col gap-4 mb-6">
+                    <!-- Plan then build -->
+                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="tag-badge bg-fuchsia-100 text-fuchsia-700" style="background:#fdf4ff; color:#86198f" data-i18n="sec.tokens.pattern.1.label">Padrão</span>
+                            <h4 class="font-bold text-stone-800 text-sm" data-i18n="sec.tokens.pattern.1.title">Plan Then Build, Rocklin</h4>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n-html="sec.tokens.pattern.1.desc">Um agente <em>planejador</em> cria um blueprint detalhado. Um agente <em>fresco</em> recebe o plano e executa, sem o histórico e contexto poluído do planejador. O executor começa limpo, focado na entrega.</p>
+                        <pre class="text-xs">Agente 1 (planejador): "Analise o problema e produza
+  um plano de implementação em etapas numeradas."
+
+Agente 2 (executor, contexto zerado): "Implemente o
+  plano: [plano do agente 1 colado aqui]"</pre>
+                    </div>
+
+                    <!-- Ralph Loop -->
+                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="tag-badge bg-fuchsia-100 text-fuchsia-700" style="background:#fdf4ff; color:#86198f" data-i18n="sec.tokens.pattern.2.label">Padrão</span>
+                            <h4 class="font-bold text-stone-800 text-sm" data-i18n="sec.tokens.pattern.2.title">Ralph Loop, Osmani</h4>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.tokens.pattern.2.desc">Workflow atômico de 5 passos para evitar overflow de contexto mantendo o histórico no git:</p>
+                        <div class="flex gap-2 flex-wrap">
+                            <span class="tag-badge bg-stone-100 text-stone-700">1 Pick task</span>
+                            <span class="text-stone-400 self-center">→</span>
+                            <span class="tag-badge bg-stone-100 text-stone-700">2 Implement</span>
+                            <span class="text-stone-400 self-center">→</span>
+                            <span class="tag-badge bg-stone-100 text-stone-700">3 Validate</span>
+                            <span class="text-stone-400 self-center">→</span>
+                            <span class="tag-badge bg-emerald-100 text-emerald-700">4 Commit (se pass)</span>
+                            <span class="text-stone-400 self-center">→</span>
+                            <span class="tag-badge" style="background:#fdf4ff; color:#86198f">5 Reset context</span>
+                        </div>
+                        <p class="text-xs text-stone-500 mt-2" data-i18n="sec.tokens.pattern.2.note">O reset de contexto no passo 5 evita context fatigue, o agente começa a próxima tarefa com a janela limpa.</p>
+                    </div>
+
+                    <!-- Independent review -->
+                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="tag-badge bg-fuchsia-100 text-fuchsia-700" style="background:#fdf4ff; color:#86198f" data-i18n="sec.tokens.pattern.3.label">Padrão</span>
+                            <h4 class="font-bold text-stone-800 text-sm" data-i18n="sec.tokens.pattern.3.title">Independent Review, Rocklin</h4>
+                        </div>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.tokens.pattern.3.desc">"Um agente revisar seu próprio trabalho é passado." Um segundo agente, sem contexto do processo de geração, encontra mais bugs, o mesmo viés de criação que afeta humanos afeta IAs. Separe sempre gerador de revisor.</p>
                     </div>
                 </div>
             </section>
 
             <!-- ============================================================ -->
-            <!-- SECTION 6: Limites & Cuidados                                 -->
+            <!-- SECTION 7: Limites & Cuidados                                 -->
             <!-- ============================================================ -->
             <section id="sec-limites" class="hidden">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.limites.h2">Limites &amp; Cuidados</span></h2>
                     <p class="text-stone-600 leading-relaxed" data-i18n="sec.limites.intro">
-                        Integração adiciona poder, mas também complexidade. Nem toda combinação faz sentido. Saiba quando simplificar.
+                        Multi-agentes amplificam tudo, incluindo erros. Um erro pequeno de spec, que com um agente único seria um problema local, se multiplica por todos os agentes rodando em paralelo.
                     </p>
                 </div>
 
                 <div class="flex flex-col gap-4 mb-8">
                     <div class="antipattern-wrong p-4 bg-red-50 rounded-xl">
-                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.1.title">Integração por integração</span></h4>
-                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.1.desc">Conectar 6 ferramentas para uma tarefa que um agente único resolve em 30 segundos. O overhead de coordenação supera qualquer ganho. Se um agente único resolve, não escale.</p>
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.1.title">Spec vaga com múltiplos agentes</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.1.desc">"Quando você orquestra 50 agentes em paralelo, pensamento vago não te atrasa, te multiplica.", Osmani. Cada agente vai interpretar a ambiguidade de um jeito. O resultado é caótico e custoso de consertar.</p>
                     </div>
                     <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
-                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.2.title">Integre quando o problema exigir</span></h4>
-                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n="sec.limites.anti.2.desc">A integração deve surgir de uma necessidade real: erros recorrentes justificam hooks, perda de contexto entre sessões justifica memory, tarefas complexas justificam plan + agents. Comece simples, adicione peças conforme o atrito aparece.</p>
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.2.title">Spec precisa antes de escalar</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n="sec.limites.anti.2.desc">Invista tempo em especificar claramente: escopo, output esperado, dependências, o que NÃO fazer. Qualidade da spec é alavanca, o mesmo esforço que gera spec medíocre para 1 agente, gera spec excelente para 10.</p>
                     </div>
 
                     <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
-                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.3.title">Memory como banco de dados</span></h4>
-                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.3.desc">Salvar tudo na memory: logs, outputs de agentes, histórico completo de conversas. Memory tem limite de linhas no index. Guarde apenas o que o Claude precisa saber na próxima sessão e não consegue derivar do código ou git.</p>
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.3.title">Dois agentes editando o mesmo arquivo</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.3.desc">Em Agent Teams, se dois teammates editam o mesmo arquivo simultaneamente, o segundo sobrescreve o primeiro. Não há merge automático. Planeje ownership de arquivos antes de iniciar o team.</p>
                     </div>
                     <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
-                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.4.title">Memory seletiva e atualizada</span></h4>
-                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n="sec.limites.anti.4.desc">Salve decisões, preferências e contexto que não está no código. Atualize ou remova memories obsoletas. Uma memory precisa e enxuta vale mais que centenas de registros desatualizados.</p>
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.4.title">Ownership claro de arquivos por agente</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n-html="sec.limites.anti.4.desc">Atribua na spec: "Teammate A owns <code class="font-mono bg-emerald-100 px-1 rounded">src/auth/</code>. Teammate B owns <code class="font-mono bg-emerald-100 px-1 rounded">src/api/</code>." Git worktrees isolados por agente eliminam esse risco.</p>
                     </div>
 
                     <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
-                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.5.title">Hooks que fazem tudo automaticamente</span></h4>
-                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.5.desc">Um hook que detecta, corrige, commita e pusha sem intervenção humana. Se algo der errado, o dano já foi feito antes de você perceber. Hooks devem validar e reportar, não tomar ações irreversíveis sozinhos.</p>
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.5.title">Delegar julgamento arquitetural</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.5.desc">Decisões como "qual arquitetura usar", "o que não construir" e "quais tradeoffs aceitar" não devem ser delegadas. Agentes executam, mas você julga.</p>
                     </div>
                     <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
-                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.6.title">Hooks validam, humanos aprovam</span></h4>
-                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n="sec.limites.anti.6.desc">O hook verifica e reporta. O Claude propõe a correção. Você aceita ou rejeita. Ações irreversíveis (push, deploy, delete) sempre passam pelo humano. O sistema sugere, mas não decide sozinho.</p>
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.6.title">Delegar tarefas, não julgamento</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n="sec.limites.anti.6.desc">Mantenha decisões de arquitetura, escopo e priorização com humanos. Delegue implementação, boilerplate, migrations e tarefas com critérios bem definidos.</p>
                     </div>
                 </div>
 
-                <!-- Warning -->
+                <!-- Warning from Rocklin -->
                 <div class="p-5 rounded-xl border border-amber-200 bg-amber-50 flex gap-4 items-start">
                     <span class="text-2xl flex-shrink-0">🧠</span>
                     <div>
-                        <h4 class="font-bold text-amber-900 mb-1" data-i18n="sec.limites.warning.title">A regra dos 3 minutos</h4>
-                        <p class="text-sm text-amber-800 leading-relaxed" data-i18n="sec.limites.warning.desc">Se você não consegue explicar como as ferramentas se conectam no seu setup em 3 minutos, provavelmente tem complexidade desnecessária. Um setup integrado deve ser compreensível. Se nem você entende o fluxo, como vai debugar quando algo quebrar?</p>
+                        <h4 class="font-bold text-amber-900 mb-1" data-i18n="sec.limites.warning.title">Paralelo nem sempre é mais rápido, Rocklin</h4>
+                        <p class="text-sm text-amber-800 leading-relaxed" data-i18n-html="sec.limites.warning.desc">Em um estudo de caso real de desenvolvimento de software, execução sequencial com menos paralelismo produziu resultados melhores que execução paralela. O overhead de coordenação frequentemente supera o ganho de velocidade. <strong>Meça antes de assumir que mais agentes = mais rápido.</strong></p>
                     </div>
                 </div>
             </section>
 
             <!-- ============================================================ -->
-            <!-- SECTION 7: Próximos Passos                                    -->
+            <!-- SECTION 8: Próximos Passos                                    -->
             <!-- ============================================================ -->
             <section id="sec-proximos" class="hidden">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.proximos.h2">Próximos Passos</span></h2>
-                    <p class="text-stone-600" data-i18n="sec.proximos.intro">Comece com uma integração que resolva um problema real. Depois amplie gradualmente.</p>
+                    <p class="text-stone-600" data-i18n="sec.proximos.intro">Comece com o padrão mais simples. Escale apenas quando o problema exigir.</p>
                 </div>
 
                 <div class="flex flex-col gap-4 mb-8">
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">1</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.1.title">Configure um hook de lint + auto-correção</h4>
-                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.1.desc">Comece com a integração mais simples: um PostToolUse hook que roda ESLint ou Ruff após cada Write/Edit. O Claude lê os erros e corrige automaticamente.</p>
-                            <div class="flex gap-2 items-center">
-                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">cat .claude/settings.json | grep -A5 "PostToolUse"</pre>
-                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('cat .claude/settings.json | grep -A5 \"PostToolUse\"')" data-i18n="sec.proximos.step.1.copy">copiar</button>
-                            </div>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.1.title">Identifique uma tarefa que você já faz sequencialmente e poderia paralelizar</h4>
+                            <p class="text-sm text-stone-600" data-i18n="sec.proximos.step.1.desc">Exemplo clássico: review de PR. Em vez de pedir "revise meu código", use 3 subagentes com foco em segurança, performance e testes. Compare a qualidade do resultado.</p>
                         </div>
                     </div>
 
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">2</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.2.title">Crie um command que use Plan + Agent</h4>
-                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.2.desc">Escolha uma tarefa recorrente (ex: scaffold de feature) e crie um slash command que primeiro gera um plan e depois implementa com um agente fresco.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n-html="sec.proximos.step.2.title">Crie seu primeiro agente customizado em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/agents/</code></h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.2.desc">Comece com um agente de review focado no domínio do seu projeto. Defina papel, ferramentas e formato de output.</p>
                             <div class="flex gap-2 items-center">
-                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">touch .claude/commands/new-feature.md</pre>
-                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('touch .claude/commands/new-feature.md')" data-i18n="sec.proximos.step.2.copy">copiar</button>
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">mkdir -p .claude/agents && touch .claude/agents/reviewer.md</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('mkdir -p .claude/agents && touch .claude/agents/reviewer.md')" data-i18n="sec.proximos.step.2.copy">copiar</button>
                             </div>
                         </div>
                     </div>
@@ -897,28 +931,28 @@ allowed-tools: Agent, Read, Write, Grep, Glob
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">3</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.3.title">Configure memories de projeto e feedback</h4>
-                            <p class="text-sm text-stone-600" data-i18n="sec.proximos.step.3.desc">Comece a salvar decisões arquiteturais e feedbacks sobre o que funciona e o que não funciona. Em poucas sessões, o Claude vai ter um "onboarding" automático do seu projeto.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.3.title">Experimente o padrão "Plan Then Build" numa tarefa real</h4>
+                            <p class="text-sm text-stone-600" data-i18n="sec.proximos.step.3.desc">Use um agente para criar o plano, cole o resultado num segundo agente fresco para executar. Observe a diferença em precisão e qualidade versus fazer tudo numa sessão só.</p>
                         </div>
                     </div>
 
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">4</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.4.title">Monte seu primeiro pipeline integrado</h4>
-                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.4.desc">Combine tudo: um command que lê memory, gera plan, implementa com agent, valida com hook, e faz review com outro agent. Comece com 3 ferramentas e vá adicionando conforme a necessidade.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.4.title">Agent Teams: ative em modo experimental e teste com review paralelo</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.4.desc">Quando se sentir confortável com subagentes, experimente Agent Teams num PR real. Defina ownership claro de arquivos antes de iniciar.</p>
                             <div class="flex gap-2 items-center">
-                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">ls .claude/commands/ .claude/agents/ .claude/plans/</pre>
-                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('ls .claude/commands/ .claude/agents/ .claude/plans/')" data-i18n="sec.proximos.step.4.copy">copiar</button>
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1')" data-i18n="sec.proximos.step.4.copy">copiar</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Closing mantra -->
-                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl shadow-xl" style="border-left: 8px solid #d97706">
-                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#fbbf24" data-i18n="sec.proximos.mantra.label">Mantra da Parte 8:</h4>
-                    <p class="text-lg italic font-serif" data-i18n="sec.proximos.mantra.text">"Ferramentas isoladas são úteis. Ferramentas integradas são um sistema. A diferença entre usar IA e ter um workflow de IA está nas conexões que você constrói entre elas — sempre com você como o arquiteto que decide o que conectar e quando."</p>
+                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl shadow-xl" style="border-left: 8px solid #c026d3">
+                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#e879f9" data-i18n="sec.proximos.mantra.label">Mantra da Parte 8:</h4>
+                    <p class="text-lg italic font-serif" data-i18n="sec.proximos.mantra.text">"Em sistemas multi-agentes, sua contribuição mais valiosa não é escrever código, é especificar o problema com clareza suficiente para que vários agentes resolvam partes independentes sem se atrapalharem."</p>
                 </div>
             </section>
 
@@ -938,58 +972,75 @@ allowed-tools: Agent, Read, Write, Grep, Glob
     </div>
 
     <script>
-        // ── Scenario tabs ─────────────────────────────────────────────────
-        function showScenario(id) {
-            document.querySelectorAll('.scenario-content').forEach(function(el) { el.classList.add('hidden'); });
-            document.querySelectorAll('#sec-cenarios .scenario-tab').forEach(function(el) { el.classList.remove('active'); });
-            document.getElementById('scn-' + id).classList.remove('hidden');
-            document.getElementById('scntab-' + id).classList.add('active');
+        // ── Agent file selector ────────────────────────────────────────────
+        const agentPaths = {
+            'pm': 'project-manager',
+            'researcher': 'researcher',
+            'programmer': 'programmer',
+            'code-reviewer': 'code-reviewer',
+            'security-reviewer': 'security-reviewer',
+            'secretary': 'secretary'
+        };
+        let currentAgentKey = 'pm';
+        function showAgent(key) {
+            document.querySelectorAll('.agent-code').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.agent-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(`agentcode-${key}`).classList.remove('hidden');
+            document.getElementById(`agentbtn-${key}`).classList.add('active');
+            document.getElementById('agent-filepath').textContent = `.claude/agents/${agentPaths[key]}.md`;
+            currentAgentKey = key;
+        }
+        function copyCurrentAgent() {
+            const pre = document.getElementById(`agentcode-${currentAgentKey}`);
+            navigator.clipboard.writeText(pre.innerText);
         }
 
-        // ── Recipe tabs ──────────────────────────────────────────────────
-        function showRecipe(id) {
-            document.querySelectorAll('.recipe-content').forEach(function(el) { el.classList.add('hidden'); });
-            document.querySelectorAll('#sec-receitas .scenario-tab').forEach(function(el) { el.classList.remove('active'); });
-            document.getElementById('rec-' + id).classList.remove('hidden');
-            document.getElementById('rectab-' + id).classList.add('active');
+        // ── Subagentes tabs ────────────────────────────────────────────────
+        function showSubTab(tab) {
+            ['parallel', 'pipeline'].forEach(t => {
+                document.getElementById(`submode-${t}`).classList.add('hidden');
+                document.getElementById(`subtab-${t}`).classList.remove('active');
+            });
+            document.getElementById(`submode-${tab}`).classList.remove('hidden');
+            document.getElementById(`subtab-${tab}`).classList.add('active');
         }
 
         // ── Navigation hook (nav.js handles core logic) ─────────────
         window.onNavigate = function(sectionId) {
-            if (sectionId === 'metricas' && !window.chartInit) initChart();
+            if (sectionId === 'porque' && !window.perfChartInit) initPerfChart();
         };
 
-        // ── Integration chart ───────────────────────────────────────────────
-        function initChart() {
-            window.chartInit = true;
-            var ctx = document.getElementById('integrationChart').getContext('2d');
-            window.integrationChart = new Chart(ctx, {
-                type: 'radar',
+        // ── Performance chart ──────────────────────────────────────────────
+        function initPerfChart() {
+            window.perfChartInit = true;
+            const ctx = document.getElementById('perfChart').getContext('2d');
+            window.perfChart = new Chart(ctx, {
+                type: 'bar',
                 data: {
                     labels: [
-                        'Consistência de código',
-                        'Continuidade entre sessões',
-                        'Cobertura de validação',
-                        'Velocidade de onboarding',
-                        'Detecção de erros',
-                        'Reutilização de padrões'
+                        'Qualidade do\nResultado',
+                        'Cobertura de\nArquivos',
+                        'Detecção de\nBugs',
+                        'Research\nComplexo'
                     ],
                     datasets: [
                         {
-                            label: 'Ferramentas isoladas',
-                            data: [45, 20, 35, 30, 40, 25],
-                            borderColor: 'rgba(168, 162, 158, 0.8)',
-                            backgroundColor: 'rgba(168, 162, 158, 0.15)',
-                            pointBackgroundColor: '#a8a29e',
-                            borderWidth: 2,
+                            label: 'Agente Único',
+                            data: [52, 40, 48, 35],
+                            backgroundColor: 'rgba(214, 211, 209, 0.9)',
+                            borderRadius: 4,
                         },
                         {
-                            label: 'Sistema integrado',
-                            data: [85, 88, 90, 82, 87, 92],
-                            borderColor: '#d97706',
-                            backgroundColor: 'rgba(217, 119, 6, 0.12)',
-                            pointBackgroundColor: '#d97706',
-                            borderWidth: 2,
+                            label: 'Multi-Agente (Subagentes)',
+                            data: [78, 82, 79, 72],
+                            backgroundColor: 'rgba(192, 38, 211, 0.5)',
+                            borderRadius: 4,
+                        },
+                        {
+                            label: 'Multi-Agente (Orchestrator + Sonnet)',
+                            data: [99, 95, 97, 98],
+                            backgroundColor: '#c026d3',
+                            borderRadius: 4,
                         }
                     ]
                 },
@@ -997,17 +1048,18 @@ allowed-tools: Agent, Read, Write, Grep, Glob
                     maintainAspectRatio: false,
                     responsive: true,
                     scales: {
-                        r: {
+                        y: {
                             beginAtZero: true,
                             max: 100,
-                            ticks: { display: false },
-                            pointLabels: { font: { size: 11 } }
+                            title: { display: true, text: 'Score relativo (%)' }
                         }
                     },
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { boxWidth: 12, font: { size: 11 } }
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}%`
+                            }
                         }
                     }
                 }
@@ -1017,25 +1069,24 @@ allowed-tools: Agent, Read, Write, Grep, Glob
         // copyCode() provided by nav.js
 
         // ── i18n: update chart labels on language change ─────────────────
-        window.addEventListener('i18n:applied', function(e) {
-            var t = function(k) { return e.detail.t(k); };
-            if (window.integrationChart) {
-                var chart = window.integrationChart;
+        window.addEventListener('i18n:applied', ({ detail: { t } }) => {
+            if (window.perfChart) {
+                const chart = window.perfChart;
                 chart.data.labels = [
-                    t('chart.integration.label.consistency') || 'Consistência de código',
-                    t('chart.integration.label.continuity') || 'Continuidade entre sessões',
-                    t('chart.integration.label.validation') || 'Cobertura de validação',
-                    t('chart.integration.label.onboarding') || 'Velocidade de onboarding',
-                    t('chart.integration.label.detection') || 'Detecção de erros',
-                    t('chart.integration.label.reuse') || 'Reutilização de padrões'
+                    t('chart.label.quality') || 'Qualidade do\nResultado',
+                    t('chart.label.coverage') || 'Cobertura de\nArquivos',
+                    t('chart.label.bugs') || 'Detecção de\nBugs',
+                    t('chart.label.research') || 'Research\nComplexo'
                 ];
-                chart.data.datasets[0].label = t('chart.integration.dataset.isolated') || 'Ferramentas isoladas';
-                chart.data.datasets[1].label = t('chart.integration.dataset.integrated') || 'Sistema integrado';
+                chart.data.datasets[0].label = t('chart.dataset.single') || 'Agente Único';
+                chart.data.datasets[1].label = t('chart.dataset.subagents') || 'Multi-Agente (Subagentes)';
+                chart.data.datasets[2].label = t('chart.dataset.orchestrator') || 'Multi-Agente (Orchestrator + Sonnet)';
+                chart.options.scales.y.title.text = t('chart.yAxis') || 'Score relativo (%)';
                 chart.update();
             }
         });
 
-        // Init and hash navigation handled by nav.js
+        // Init handled by nav.js (auto-navigates to hash or first section)
     </script>
 
     <!-- Footer -->

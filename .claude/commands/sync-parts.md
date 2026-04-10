@@ -10,11 +10,11 @@ Read all existing part files and identify inconsistencies in:
 
 **2. Step card style**
 - Should be: `flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm`
-- Step badge: `.step-number` class — circular, accent background, white bold text
+- Step badge: `.step-number` class: circular, accent background, white bold text
 - Parts still using old `timeline-item::before` CSS pseudo-element need updating
 
 **3. Copy buttons**
-- Must use `navigator.clipboard.writeText()` — not `document.execCommand` or simulated-only
+- Must use `navigator.clipboard.writeText()`, not `document.execCommand` or simulated-only
 
 **4. Code block colors**
 - Dark background `bg-stone-900` / `#1c1917`
@@ -48,7 +48,7 @@ Read all existing part files and identify inconsistencies in:
 - No shared keys (footer, complete, header) duplicated in per-page JSON
 
 **10. No Ubivis references**
-- No mention of "Ubivis" in any content — this is a personal project
+- No mention of "Ubivis" in any content, this is a personal project
 
 ## Output
 A table listing each part file, what's consistent ✅, and what needs fixing ⚠️.

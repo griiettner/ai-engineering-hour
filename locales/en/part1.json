@@ -13,12 +13,12 @@
   "nav.nextsteps": "Next Steps",
 
   "sec.tools.h2": "IDE vs. CLI vs. Web",
-  "sec.tools.intro": "The first step to boosting productivity with AI is to <strong>leave the browser chat</strong>. Each interface has a different purpose — using the wrong one creates unnecessary friction and ignores the guardrails you defined for your project.",
+  "sec.tools.intro": "The first step to boosting productivity with AI is to <strong>leave the browser chat</strong>. Each interface has a different purpose, and using the wrong one creates unnecessary friction and ignores the guardrails you defined for your project.",
 
   "sec.tools.card.ide.title": "IDE",
   "sec.tools.card.ide.subtitle": "Cursor / VS Code + Copilot",
   "sec.tools.card.ide.li.1": "Generated code already follows your standards",
-  "sec.tools.card.ide.li.2": "No copy/paste — edits directly in the file",
+  "sec.tools.card.ide.li.2": "No copy/paste, edits directly in the file",
   "sec.tools.card.ide.li.3": "Autocomplete aware of the entire codebase",
   "sec.tools.card.ide.usewhen": "<strong class=\"text-accent-green\">Use when:</strong> day-to-day development, incremental features, quick edits.",
 
@@ -37,43 +37,43 @@
   "sec.tools.card.web.usewhen": "<strong class=\"text-accent-red\">Use when:</strong> conceptual exploration, non-code questions, initial architecture brainstorm.",
 
   "sec.tools.rule3.title": "The Rule of 3 Environments",
-  "sec.tools.rule3.desc": "Experienced devs use all three. <strong class=\"text-white\">Web</strong> for thinking, <strong class=\"text-white\">IDE</strong> for building, <strong class=\"text-white\">CLI</strong> for automating. The most common mistake is trying to write production code in Web — no context, no guardrails, no traceability.",
+  "sec.tools.rule3.desc": "Experienced devs use all three. <strong class=\"text-white\">Web</strong> for thinking, <strong class=\"text-white\">IDE</strong> for building, <strong class=\"text-white\">CLI</strong> for automating. The most common mistake is trying to write production code in Web: no context, no guardrails, no traceability.",
 
   "sec.context.h2": "AI Anatomy: Context Window",
-  "sec.context.intro": "Why does AI \"start talking nonsense\" in long conversations? Because it has a <strong>finite short-term memory</strong>, measured in tokens. When that space runs out, it discards the oldest information — including your guardrails.",
+  "sec.context.intro": "Why does AI \"start talking nonsense\" in long conversations? Because it has a <strong>finite short-term memory</strong>, measured in tokens. When that space runs out, it discards the oldest information, including your guardrails.",
 
   "sec.context.token.title": "What is a Token?",
-  "sec.context.token.desc": "Chunks of words processed by the model. On average, <strong>1,000 tokens ≈ 750 words</strong>. Claude has a <strong>200k token</strong> window — but selective attention matters more than raw size.",
+  "sec.context.token.desc": "Chunks of words processed by the model. On average, <strong>1,000 tokens ≈ 750 words</strong>. Claude has a <strong>200k token</strong> window, but selective attention matters more than raw size.",
 
   "sec.context.memory.title": "The \"Short-Term Memory\"",
-  "sec.context.memory.desc": "When the project + conversation history exceeds the window, the AI starts <strong>discarding instructions from the beginning</strong> — exactly where your guardrails and project rules live.",
+  "sec.context.memory.desc": "When the project + conversation history exceeds the window, the AI starts <strong>discarding instructions from the beginning</strong>, exactly where your guardrails and project rules live.",
 
   "sec.context.warning": "<strong>The Distraction Risk:</strong> Sending <code>node_modules</code>, <code>dist</code>, or huge logs consumes valuable tokens and \"distracts\" the AI's attention from what actually matters.",
   "sec.context.solution": "<strong>The Solution:</strong> Create a <code class=\"bg-emerald-100 font-mono px-1 rounded text-xs\">.claudeignore</code> (Claude Code) or <code class=\"bg-emerald-100 font-mono px-1 rounded text-xs\">.cursorignore</code> (Cursor) file to automatically exclude noisy folders from context.",
 
   "sec.context.btn.dirty": "Polluted Context",
   "sec.context.btn.clean": "Clean Context",
-  "sec.context.caption.dirty": "65% of tokens wasted on noise — the AI can barely \"see\" the code that matters.",
+  "sec.context.caption.dirty": "65% of tokens wasted on noise. The AI can barely \"see\" the code that matters.",
   "sec.context.caption.clean": "With .claudeignore configured: 90% of tokens focused on what matters.",
 
   "sec.context.chart.dirty.useful": "Useful Code (15%)",
   "sec.context.chart.dirty.relevant": "Relevant History (20%)",
-  "sec.context.chart.dirty.noise": "Noise — logs/dist/node_modules (65%)",
+  "sec.context.chart.dirty.noise": "Noise: logs/dist/node_modules (65%)",
   "sec.context.chart.clean.useful": "Useful Code (55%)",
   "sec.context.chart.clean.relevant": "Relevant History (35%)",
   "sec.context.chart.clean.noise": "Residual noise (10%)",
   "sec.context.chart.tooltip": "% of Context Window",
 
   "sec.guardrails.h2": "Guardrails per Tool",
-  "sec.guardrails.intro": "Each tool reads project rules from a different file — but the goal is always the same: give the AI a <strong>compass</strong> so that generated code already comes aligned with your team's standards.",
+  "sec.guardrails.intro": "Each tool reads project rules from a different file, but the goal is always the same: give the AI a <strong>compass</strong> so that generated code already comes aligned with your team's standards.",
   "sec.guardrails.copy": "Copy",
   "sec.guardrails.claude.note": "Automatically read by Claude Code at every session. Place it at the project root and version it with the team.",
-  "sec.guardrails.cursor.note": "Cursor also supports per-folder rules in <code class=\"font-mono bg-stone-100 px-1 rounded text-xs\">.cursor/rules/*.mdc</code> — useful for domain-specific rules.",
+  "sec.guardrails.cursor.note": "Cursor also supports per-folder rules in <code class=\"font-mono bg-stone-100 px-1 rounded text-xs\">.cursor/rules/*.mdc</code>, useful for domain-specific rules.",
   "sec.guardrails.copilot.note": "Works with Copilot Chat and autocompletion. Must be at <code class=\"font-mono bg-stone-100 px-1 rounded text-xs\">.github/copilot-instructions.md</code> in the repository root.",
   "sec.guardrails.principle": "<strong>The principle is the same for all:</strong> define <em>who</em> the AI is in your project and <em>how</em> it should behave. The tool changes, the concept doesn't. Always version these files alongside your code.",
 
   "sec.trio.h2": "Basic Planning: The Essential Trio",
-  "sec.trio.intro": "Before asking the AI to write the first line of code, make sure it knows the terrain. Three simple files serve as a <strong>context anchor</strong> — preventing off-pattern suggestions, wrong library versions, and structures incompatible with the project.",
+  "sec.trio.intro": "Before asking the AI to write the first line of code, make sure it knows the terrain. Three simple files serve as a <strong>context anchor</strong>, preventing off-pattern suggestions, wrong library versions, and structures incompatible with the project.",
   "sec.trio.advanced": "Advanced",
 
   "sec.trio.tech.desc": "Exact list of libraries, frameworks, and versions used.",
@@ -98,7 +98,7 @@
 
   "sec.antipatterns.label.2": "Anti-pattern #2",
   "sec.antipatterns.2.wrong.title": "Fix Only in Chat",
-  "sec.antipatterns.2.wrong.desc": "When the AI uses <code>axios</code> and you want <code>ky</code>, you tell it in chat — and in the next session it uses <code>axios</code> again.",
+  "sec.antipatterns.2.wrong.desc": "When the AI uses <code>axios</code> and you want <code>ky</code>, you tell it in chat, and in the next session it uses <code>axios</code> again.",
   "sec.antipatterns.2.wrong.example": "\"No, use ky instead of axios\" <span class=\"block mt-1 text-red-500 font-semibold\">→ Correct only for this message.</span>",
   "sec.antipatterns.2.right.title": "Fix at the Root",
   "sec.antipatterns.2.right.desc": "Go to <code>CLAUDE.md</code> and add the rule. The behavior changes permanently for the entire team.",
@@ -114,7 +114,7 @@
 
   "sec.antipatterns.label.4": "Anti-pattern #4",
   "sec.antipatterns.4.wrong.title": "Accept Without Reading",
-  "sec.antipatterns.4.wrong.desc": "Approving generated code without understanding the intent — creating hidden tech debt nobody can maintain later.",
+  "sec.antipatterns.4.wrong.desc": "Approving generated code without understanding the intent, creating hidden tech debt nobody can maintain later.",
   "sec.antipatterns.4.wrong.example": "\"Looks right, accept all.\" → 3 weeks later nobody knows why that code exists.",
   "sec.antipatterns.4.right.title": "Intent Review",
   "sec.antipatterns.4.right.desc": "You don't need to check every comma (the hook does that). But you need to understand <em>why</em> that solution was chosen.",
@@ -126,7 +126,7 @@
   "sec.workflow.step.1.title": "IDE Indexing",
   "sec.workflow.step.1.desc": "When opening the project, wait for (or force) the IDE to index the repository. The AI can only query what it knows exists. Without indexing, it operates in the dark.",
 
-  "sec.workflow.step.2.title": "The \"Check-in\" — First Prompt",
+  "sec.workflow.step.2.title": "The \"Check-in\": First Prompt",
   "sec.workflow.step.2.desc": "Always contextualize the AI with the anchor files <em>before</em> asking for the task. Don't assume it remembers the previous session.",
   "sec.workflow.step.2.example": "\"Read the files TECH_STACK.md, ARCHITECTURE.md, and CLAUDE.md at the root. Confirm that you understood the patterns before we proceed.\"",
 
@@ -139,7 +139,7 @@
   "sec.workflow.step.4.example": "\"The login endpoint is working and tests pass. Now add the refresh token mechanism as per REQUIREMENTS.md.\"",
 
   "sec.workflow.step.5.title": "Closing the Session",
-  "sec.workflow.step.5.desc": "Long sessions degrade. Detect the signs — AI repeating already-corrected errors, ignoring rules, generating inconsistent code — and end it. Open a new session with a <strong>handoff prompt</strong>:",
+  "sec.workflow.step.5.desc": "Long sessions degrade. Detect the signs: AI repeating already-corrected errors, ignoring rules, generating inconsistent code. End it. Open a new session with a <strong>handoff prompt</strong>:",
   "sec.workflow.step.5.example": "\"Resuming context: we implemented login + refresh token. Tests pass. Next task: rate limit per IP (see REQUIREMENTS.md, Edge Cases section).\"",
 
   "sec.nextsteps.h2": "How to start today",
@@ -162,6 +162,6 @@
   "sec.nextsteps.refs.claude": "Claude Code Documentation",
   "sec.nextsteps.refs.cursor": "Cursor Rules (Docs)",
   "sec.nextsteps.refs.copilot": "GitHub Copilot Instructions",
-  "sec.nextsteps.refs.next": "Next module: Prompts & Advanced Context",
-  "sec.nextsteps.refs.next.sub": "Engineering Hour — Part 2"
+  "sec.nextsteps.refs.next": "Next module: AI Memory",
+  "sec.nextsteps.refs.next.sub": "Engineering Hour · Part 2"
 }

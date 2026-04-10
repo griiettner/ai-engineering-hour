@@ -1,26 +1,28 @@
-# Engineering Hour — AI-Augmented Developer Series
+# Engineering Hour | AI-Augmented Developer Series
 
 ## Projeto
 Série de apresentações interativas sobre uso de IA no desenvolvimento.
 Cada `partN.html` é uma SPA standalone em HTML + Tailwind CSS + Chart.js.
 
 ## Arquivos
-- `part1.html` — Setup & Regras de Ouro (IDE vs CLI, Contexto, Guardrails, Trio, Anti-patterns)
-- `part2.html` — Prompts & Contexto Avançado
-- `part3.html` — Claude Hooks & Confiança Automatizada
-- `part4-13.html` — módulos seguintes
+- `part1.html` · Setup & Regras de Ouro (IDE vs CLI, Contexto, Guardrails, Trio, Anti-patterns)
+- `part2.html` · Memória de IA (tipos de memória, MEMORY.md, auto-memory no Claude Code)
+- `part3.html` · Planejamento Avançado & Governança
+- `part4.html` · Claude Hooks & Confiança Automatizada
+- `part5-15.html` · módulos seguintes
 
 ## Stack
 - **CSS**: Tailwind CSS via CDN (tailwindcss.com)
 - **Charts**: Chart.js via CDN
-- **Fontes**: Inter (sans), Fira Code (mono) — carregadas pelo sistema
+- **Fontes**: Inter (sans), Fira Code (mono), carregadas pelo sistema
 - **Sem build**: arquivos abertos direto no browser, sem bundler
 
 ## Paleta de Cores
 | Módulo    | Cor primária       | Classe Tailwind      |
 |-----------|--------------------|----------------------|
 | Part 1    | Sky Blue `#0284c7` | `accent-blue`        |
-| Part 3    | Violet `#6d28d9`   | `auto-violet`        |
+| Part 2    | Cyan `#0891b2`     | `accent-cyan`        |
+| Part 4    | Violet `#6d28d9`   | `auto-violet`        |
 | Base      | Warm Stone         | `stone-*`            |
 
 Fundo body sempre `stone-50 (#fafaf9)`. Texto principal `stone-800 (#292524)`.
@@ -79,10 +81,16 @@ Cores: violet = chaves, emerald = strings/valores, blue = propriedades, orange =
 - CLI card: "Claude Code / Gemini CLI" (Codex era API deprecated, não CLI agente)
 - Guardrails em 3 tabs: CLAUDE.md / .cursorrules / copilot-instructions.md
 
-### Part 3
+### Part 2
+- Toggle "Sem Memória" vs "Com Memória" com código simulado
+- Chart.js: barras comparando tokens de contexto por conversa (com vs sem memória)
+- 4 tabs para tipos de memória: User, Feedback, Project, Reference
+- Mantra: "A memória da IA é tão boa quanto a curadoria humana por trás dela."
+
+### Part 4
 - Mantra: "A máquina valida o que é verificável. Você julga o que é intencional."
 - Config real: `PostToolUse` com `matcher` e `hooks[]` em `.claude/settings.json`
-- Não existe `autoFix: true` na API real dos hooks — remover se aparecer
+- Não existe `autoFix: true` na API real dos hooks, remover se aparecer
 - Setas `→` entre nós do ciclo + indicador de loop abaixo
 - Badges dos nodes: "PostToolUse → Write|Edit", "Loop até exit 0"
 
@@ -94,7 +102,8 @@ Cores: violet = chaves, emerald = strings/valores, blue = propriedades, orange =
 - **Arquivo de config**: `.claude/settings.json` (por projeto) ou `~/.claude/settings.json` (global)
 
 ## O que NÃO fazer
+- **Nunca usar em dash** em nenhum arquivo (HTML, JSON, MD). Usar vírgula, dois-pontos, ponto, pipe (|) ou middle dot (·) conforme o contexto
 - Não inventar chaves de config que não existem na API real
-- Não usar `opacity-60/80` em cards apenas para "parecer desabilitado" — use cores semânticas
+- Não usar `opacity-60/80` em cards apenas para "parecer desabilitado", use cores semânticas
 - Não criar seções sem exemplos concretos de código ou casos de uso reais
-- Não usar labels genéricas em gráficos ("Task 1, Task 2") — usar cenários reais
+- Não usar labels genéricas em gráficos ("Task 1, Task 2"), usar cenários reais

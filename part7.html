@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Hour P7: Agentes & Sub-Agentes</title>
+    <title>Engineering Hour P7: Skills no Claude Code</title>
 
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="nav.js" defer></script>
     <script src="i18n.js" defer></script>
@@ -19,10 +22,10 @@
                             50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
                             300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
                         },
-                        agent: {
-                            fuchsia: '#c026d3',
-                            light: '#fdf4ff',
-                            border: '#e879f9',
+                        skill: {
+                            indigo: '#4f46e5',
+                            light: '#eef2ff',
+                            border: '#c7d2fe',
                         }
                     },
                     fontFamily: {
@@ -36,19 +39,20 @@
 
     <link rel="stylesheet" href="shared.css">
     <style>
-        :root { --accent: #c026d3; }
-        .agent-node {
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-        }
-        .agent-bubble {
-            border-radius: 9999px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.25rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-        .compare-tab, .agent-tab { transition: all 0.15s; }
-        .compare-tab.active, .agent-tab.active { background: #c026d3; color: white; font-weight: 600; }
+        :root { --accent: #4f46e5; }
+        .chart-container { height: 300px; }
+        .skill-card { transition: all 0.2s; }
+        .skill-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px -4px rgba(79,70,229,0.15); }
+        .skill-card.selected { border-color: #4f46e5 !important; background: #eef2ff; }
+        .fm-line { cursor: pointer; transition: background 0.1s; border-radius: 3px; padding: 0 2px; }
+        .fm-line:hover { background: rgba(165,180,252,0.15); }
+        .fm-line.active { background: rgba(165,180,252,0.2); }
+        .invoke-row { transition: all 0.2s; }
+        .invoke-row:hover { background: #f5f5f4; }
+        .bundled-card { transition: all 0.15s; }
+        .bundled-card:hover { background: #eef2ff; border-color: #c7d2fe; }
+        .tab-btn { transition: all 0.15s; }
+        .tab-btn.active { background: #4f46e5; color: white; font-weight: 600; }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
@@ -57,52 +61,58 @@
     <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="text-2xl">🤖</span>
+                <span class="text-2xl">⚡</span>
                 <h1 class="text-xl font-bold text-stone-800 tracking-tight">
-                    Engineering Hour <span style="color:#c026d3">P7</span>
+                    Engineering Hour <span style="color:#4f46e5">P7</span>
                 </h1>
             </div>
             <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
-                Módulo 7: Agentes, Sub-Agentes &amp; Agent Teams
+                Módulo 7: Skills | Ferramentas que o Claude usa por você
             </div>
         </div>
     </header>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
 
-        <!-- Sidebar -->
+        <!-- Sidebar Navigation -->
         <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
 
-            <p class="nav-group-label" data-i18n="nav.group.concept">O Conceito</p>
-            <button onclick="navigate('single')" id="nav-single" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🤖</span> <span data-i18n="nav.single">Agente Único</span>
-            </button>
-            <button onclick="navigate('porque')" id="nav-porque" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🧩</span> <span data-i18n="nav.porque">Por que Multi-Agente</span>
-            </button>
-
-            <p class="nav-group-label mt-2" data-i18n="nav.group.patterns">Os Padrões</p>
-            <button onclick="navigate('subagentes')" id="nav-subagentes" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🔀</span> <span data-i18n="nav.subagentes">Subagentes</span>
-            </button>
-            <button onclick="navigate('teams')" id="nav-teams" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>👥</span> <span data-i18n="nav.teams">Agent Teams</span>
+            <p class="nav-group-label" data-i18n="nav.group.conceito">O Conceito</p>
+            <button onclick="navigate('conceito')" id="nav-conceito" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🎯</span> <span data-i18n="nav.conceito">O que são Skills</span>
             </button>
             <button onclick="navigate('comparacao')" id="nav-comparacao" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚖️</span> <span data-i18n="nav.comparacao">Quando usar cada um</span>
+                <span>⚖️</span> <span data-i18n="nav.comparacao">Commands vs Skills</span>
+            </button>
+            <button onclick="navigate('anatomia')" id="nav-anatomia" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔬</span> <span data-i18n="nav.anatomia">Anatomia: SKILL.md</span>
             </button>
 
-            <p class="nav-group-label mt-2" data-i18n="nav.group.impact">Impacto</p>
-            <button onclick="navigate('tokens')" id="nav-tokens" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🪙</span> <span data-i18n="nav.tokens">Economia de Tokens</span>
+            <p class="nav-group-label mt-2" data-i18n="nav.group.pratica">Na Prática</p>
+            <button onclick="navigate('bundled')" id="nav-bundled" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📦</span> <span data-i18n="nav.bundled">Skills Nativas</span>
+            </button>
+            <button onclick="navigate('invocacao')" id="nav-invocacao" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🕹️</span> <span data-i18n="nav.invocacao">Modos de Invocação</span>
+            </button>
+            <button onclick="navigate('criando')" id="nav-criando" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🛠️</span> <span data-i18n="nav.criando">Criando sua Skill</span>
+            </button>
+            <button onclick="navigate('subskills')" id="nav-subskills" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🗃️</span> <span data-i18n="nav.subskills">Sub-Skills &amp; Índice</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.impacto">Impacto</p>
+            <button onclick="navigate('avancado')" id="nav-avancado" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> <span data-i18n="nav.avancado">Padrões Avançados</span>
             </button>
             <button onclick="navigate('limites')" id="nav-limites" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
                 <span>⚠️</span> <span data-i18n="nav.limites">Limites &amp; Cuidados</span>
             </button>
 
-            <p class="nav-group-label mt-2" data-i18n="nav.group.action">Ação</p>
+            <p class="nav-group-label mt-2" data-i18n="nav.group.acao">Ação</p>
             <button onclick="navigate('proximos')" id="nav-proximos" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🚀</span> <span data-i18n="nav.proximos">Próximos Passos</span>
+                <span>📋</span> <span data-i18n="nav.proximos">Próximos Passos</span>
             </button>
         </nav>
 
@@ -110,820 +120,909 @@
         <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
 
             <!-- ============================================================ -->
-            <!-- SECTION 1: Agente Único                                       -->
+            <!-- SECTION 1: O que são Skills                                   -->
             <!-- ============================================================ -->
-            <section id="sec-single" class="block">
+            <section id="sec-conceito" class="block">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🤖</span> <span data-i18n="sec.single.h2">Agente Único</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.single.intro">
-                        O ponto de partida. Um único Claude com uma única janela de contexto processa tudo em sequência. Para a maioria das tarefas do dia a dia, é exatamente o que você precisa, e a forma mais barata e previsível de trabalhar.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🎯</span> <span data-i18n="sec.conceito.h2">O que são Skills?</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.conceito.intro">
+                        Skills estendem o que o Claude consegue fazer. Você cria um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> com instruções e o Claude passa a ter essa ferramenta disponível. Você pode invocar diretamente com <code class="font-mono bg-stone-100 px-1 rounded text-xs">/nome-da-skill</code>, mas a parte poderosa é outra: <strong>o Claude pode decidir usar a skill sozinho</strong> quando percebe que ela é relevante para o que você pediu.
                     </p>
                 </div>
 
-                <!-- What it is -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
-                        <h3 class="font-bold text-stone-800 text-sm mb-3"><span>✅</span> <span data-i18n="sec.single.ideal.title">Ideal para</span></h3>
-                        <ul class="text-sm text-stone-600 space-y-2 leading-relaxed">
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.ideal.li.1">Tarefas com escopo claro e delimitado</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.ideal.li.2">Arquivos que cabem dentro da janela de contexto</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.ideal.li.3">Trabalho sequencial onde cada passo depende do anterior</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.ideal.li.4">Iterações rápidas com feedback imediato</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.ideal.li.5">Custo controlado e comportamento previsível</span></li>
-                        </ul>
+                <!-- The key insight: two-sided -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div class="p-5 rounded-2xl border-2 border-stone-200 bg-stone-50">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">🧑‍💻</span>
+                            <h3 class="font-bold text-stone-800" data-i18n="sec.conceito.card.invoke.title">Você invoca</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 leading-relaxed mb-3" data-i18n-html="sec.conceito.card.invoke.desc">Digita <code class="font-mono bg-white px-1 rounded text-xs">/deploy</code> quando quer executar o deploy. Você controla o timing, útil para workflows com efeitos colaterais.</p>
+                        <pre class="text-xs">$ /review-pr 142</pre>
                     </div>
-                    <div class="bg-red-50 rounded-xl border border-red-100 p-5">
-                        <h3 class="font-bold text-red-700 text-sm mb-3"><span>❌</span> <span data-i18n="sec.single.wall.title">Onde bate na parede</span></h3>
-                        <ul class="text-sm text-red-800 space-y-2 leading-relaxed">
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.wall.li.1">Repositórios grandes com centenas de arquivos relevantes</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.wall.li.2">Tarefas independentes que poderiam rodar em paralelo</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n-html="sec.single.wall.li.3"><strong>Context fatigue</strong>: a partir de ~60–70% da janela, a qualidade cai</span></li>
-                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.single.wall.li.4">Research que exigiria explorar muitos caminhos ao mesmo tempo</span></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Context fatigue visual -->
-                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
-                    <h3 class="font-bold text-stone-800 text-sm mb-4" data-i18n="sec.single.fatigue.title">A Degradação do Contexto (Context Fatigue)</h3>
-                    <div class="flex items-end gap-1 h-20 mb-3">
-                        <div class="flex flex-col items-center gap-1 flex-1">
-                            <div class="w-full rounded-t" style="height:80px; background:#c026d3; opacity:1.0"></div>
-                            <span class="text-xs text-stone-500">0%</span>
+                    <div class="p-5 rounded-2xl border-2 border-indigo-200 bg-indigo-50">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">🤖</span>
+                            <h3 class="font-bold text-indigo-900" data-i18n="sec.conceito.card.auto.title">O Claude invoca</h3>
                         </div>
-                        <div class="flex flex-col items-center gap-1 flex-1">
-                            <div class="w-full rounded-t" style="height:78px; background:#c026d3; opacity:0.9"></div>
-                            <span class="text-xs text-stone-500">20%</span>
-                        </div>
-                        <div class="flex flex-col items-center gap-1 flex-1">
-                            <div class="w-full rounded-t" style="height:72px; background:#c026d3; opacity:0.75"></div>
-                            <span class="text-xs text-stone-500">40%</span>
-                        </div>
-                        <div class="flex flex-col items-center gap-1 flex-1">
-                            <div class="w-full rounded-t" style="height:60px; background:#c026d3; opacity:0.6"></div>
-                            <span class="text-xs text-stone-500">60%</span>
-                        </div>
-                        <div class="flex flex-col items-center gap-1 flex-1">
-                            <div class="w-full rounded-t" style="height:38px; background:#e11d48; opacity:0.8"></div>
-                            <span class="text-xs text-red-500 font-bold">70%</span>
-                        </div>
-                        <div class="flex flex-col items-center gap-1 flex-1">
-                            <div class="w-full rounded-t" style="height:22px; background:#e11d48; opacity:0.9"></div>
-                            <span class="text-xs text-red-500 font-bold">85%</span>
-                        </div>
-                        <div class="flex flex-col items-center gap-1 flex-1">
-                            <div class="w-full rounded-t" style="height:10px; background:#e11d48"></div>
-                            <span class="text-xs text-red-500 font-bold">100%</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between text-xs text-stone-400 border-t border-stone-200 pt-2">
-                        <span data-i18n="sec.single.fatigue.start">Início da sessão</span>
-                        <span class="text-red-500 font-semibold"><span>⚠️</span> <span data-i18n="sec.single.fatigue.risk">Zona de risco, respostas degradam</span></span>
-                        <span data-i18n="sec.single.fatigue.full">Contexto cheio</span>
-                    </div>
-                    <p class="text-xs text-stone-500 mt-3 leading-relaxed" data-i18n="sec.single.fatigue.desc">A partir de ~70% da janela de contexto, agentes comecem a esquecer instruções anteriores, repetir trabalho e produzir respostas menos precisas. Reconhecer esse limite é o primeiro passo para saber quando escalar.</p>
-                </div>
-
-                <div class="p-4 rounded-xl border border-fuchsia-200 bg-fuchsia-50 flex gap-3 items-start" style="border-color:#e879f9; background:#fdf4ff">
-                    <span class="text-xl flex-shrink-0">💡</span>
-                    <p class="text-sm leading-relaxed" style="color:#86198f" data-i18n-html="sec.single.tip"><strong>Regra prática:</strong> Se você consegue descrever a tarefa em um parágrafo e ela não exige explorar mais de ~30 arquivos, um agente único é suficiente. Quando a tarefa começa a pedir paralelismo ou o contexto fica lotado, é hora de escalar.</p>
-                </div>
-            </section>
-
-            <!-- ============================================================ -->
-            <!-- SECTION 2: Por que Multi-Agente                               -->
-            <!-- ============================================================ -->
-            <section id="sec-porque" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🧩</span> <span data-i18n="sec.porque.h2">Por que Multi-Agente?</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.porque.intro">
-                        Sistemas multi-agentes funcionam principalmente porque <strong>permitem gastar tokens suficientes para resolver o problema</strong>. A pesquisa da Anthropic é direta: o uso de tokens explica 80% da variância de desempenho. Mais agentes = mais processamento paralelo = melhores resultados.
-                    </p>
-                </div>
-
-                <!-- Performance chart -->
-                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
-                    <p class="text-xs font-bold text-stone-400 uppercase mb-4" data-i18n="sec.porque.chart.label">Dados de pesquisa, Anthropic Multi-Agent Research System</p>
-                    <div class="chart-container">
-                        <canvas id="perfChart"></canvas>
+                        <p class="text-sm text-indigo-800 leading-relaxed mb-3" data-i18n-html="sec.conceito.card.auto.desc">Você pede "como este código funciona?" e o Claude detecta que a skill <code class="font-mono bg-white px-1 rounded text-xs">explain-code</code> é relevante e a carrega automaticamente.</p>
+                        <pre class="text-xs"><span style="color:#a5b4fc"># A description da skill diz:</span>
+"Use quando o usuário perguntar
+ como algo funciona."</pre>
                     </div>
                 </div>
 
-                <!-- Key stats -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="p-5 rounded-2xl border-2 border-stone-200 bg-white text-center">
-                        <div class="text-3xl font-extrabold mb-1" style="color:#c026d3">90.2%</div>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.porque.stat.1.desc">melhoria de desempenho com multi-agente vs agente único em tarefas de research</p>
-                    </div>
-                    <div class="p-5 rounded-2xl border-2 border-stone-200 bg-white text-center">
-                        <div class="text-3xl font-extrabold mb-1" style="color:#c026d3">80%</div>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n-html="sec.porque.stat.2.desc">da variância de desempenho explicada pelo <strong>volume de tokens</strong> utilizados</p>
-                    </div>
-                    <div class="p-5 rounded-2xl border-2 border-stone-200 bg-white text-center">
-                        <div class="text-3xl font-extrabold mb-1" style="color:#c026d3">90%</div>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.porque.stat.3.desc">de redução no tempo com tool calling paralelo em vez de sequencial</p>
+                <!-- Skills vs Commands legacy -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6 flex gap-3 items-start">
+                    <span class="text-xl flex-shrink-0">🗂️</span>
+                    <div>
+                        <h4 class="font-bold text-amber-900 text-sm mb-1" data-i18n-html="sec.conceito.legacy.title">Já existe outro formato: <code class="font-mono bg-amber-100 px-1 rounded">.claude/commands/</code></h4>
+                        <p class="text-sm text-amber-800 leading-relaxed" data-i18n-html="sec.conceito.legacy.desc">Antes das Skills, o Claude Code usava <strong>Commands</strong>, arquivos <code class="font-mono bg-amber-100 px-1 rounded text-xs">.md</code> simples em <code class="font-mono bg-amber-100 px-1 rounded text-xs">.claude/commands/</code>. Ambos criam comandos slash e continuam funcionando. Skills são o formato evoluído: suportam frontmatter YAML, invocação automática pelo Claude, arquivos de suporte e execução em subagentes. Veja o comparativo completo na seção <button onclick="navigate('comparacao')" class="underline font-semibold">Commands vs Skills</button>.</p>
                     </div>
                 </div>
 
-                <!-- The analogy -->
-                <div class="bg-stone-900 rounded-xl p-5 text-stone-200 mb-6">
-                    <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#e879f9" data-i18n="sec.porque.analogy.label">Por que isso funciona, a analogia da Anthropic</p>
-                    <p class="text-sm leading-relaxed italic" data-i18n="sec.porque.analogy.quote">"Humanos individualmente não ficaram muito mais inteligentes nos últimos 100.000 anos, mas sociedades se tornaram exponencialmente mais capazes através de inteligência coletiva e coordenação. Multi-agentes fazem o mesmo com IA."</p>
-                </div>
-
-                <!-- Three cases for multi-agent -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
-                        <div class="text-2xl mb-2">⏱️</div>
-                        <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.porque.case.1.title">Paralelismo</h4>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.porque.case.1.desc">Tarefas que podem rodar simultaneamente: 5 agentes revisam 5 módulos ao mesmo tempo em vez de sequencialmente.</p>
-                    </div>
-                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
-                        <div class="text-2xl mb-2">🔭</div>
-                        <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.porque.case.2.title">Escala</h4>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.porque.case.2.desc">Repositórios grandes que não cabem em um contexto só. Cada agente explora uma área sem poluir os outros.</p>
-                    </div>
-                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
-                        <div class="text-2xl mb-2">🎭</div>
-                        <h4 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.porque.case.3.title">Especialização</h4>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.porque.case.3.desc">Um agente revisor de segurança com contexto focado em OWASP produz resultado melhor que um generalista sobrecarregado.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ============================================================ -->
-            <!-- SECTION 3: Subagentes                                         -->
-            <!-- ============================================================ -->
-            <section id="sec-subagentes" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔀</span> <span data-i18n="sec.subagentes.h2">Subagentes</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.subagentes.intro">
-                        Cada subagente tem <strong>contexto isolado</strong> e reporta de volta ao orquestrador. Mas o que a maioria das descrições simplifica: subagentes <strong>não precisam rodar em paralelo</strong>. Você pode — e muitas vezes deve — orquestrar um <strong>pipeline sequencial com dependências</strong>, onde o output de um agente vira o input do próximo. Toda a arquitetura é definida por você nas instruções do agente orquestrador.
-                    </p>
-                </div>
-
-                <!-- Two modes tabs -->
-                <div class="flex gap-2 mb-5">
-                    <button onclick="showSubTab('parallel')" id="subtab-parallel" class="compare-tab active text-sm px-4 py-2 rounded-lg border border-stone-200" data-i18n="sec.subagentes.tab.parallel">Paralelo (independente)</button>
-                    <button onclick="showSubTab('pipeline')" id="subtab-pipeline" class="compare-tab text-sm px-4 py-2 rounded-lg border border-stone-200" data-i18n="sec.subagentes.tab.pipeline">Pipeline (sequencial)</button>
-                </div>
-
-                <!-- Parallel mode -->
-                <div id="submode-parallel" class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
-                    <p class="text-xs text-stone-500 mb-4 leading-relaxed" data-i18n="sec.subagentes.parallel.desc">O orquestrador spawna vários subagentes ao mesmo tempo para tarefas independentes. Cada um trabalha isolado e reporta ao pai. Bom para exploração, research e revisões que não dependem umas das outras.</p>
-                    <div class="flex flex-col items-center gap-3">
-                        <div class="agent-node">
-                            <div class="agent-bubble w-14 h-14 text-white text-xl" style="background:#c026d3">👑</div>
-                            <span class="text-xs font-bold text-stone-700" data-i18n="sec.subagentes.parallel.orchestrator">Orquestrador</span>
-                        </div>
-                        <div class="flex gap-8 text-stone-400 text-xs">
-                            <span>↙ <span data-i18n="sec.subagentes.parallel.delegates">delega</span></span><span>↓ <span data-i18n="sec.subagentes.parallel.delegates">delega</span></span><span>↘ <span data-i18n="sec.subagentes.parallel.delegates">delega</span></span>
-                        </div>
-                        <div class="flex gap-6 flex-wrap justify-center">
-                            <div class="agent-node">
-                                <div class="agent-bubble w-11 h-11 bg-white border-2 text-lg" style="border-color:#c026d3">🔍</div>
-                                <span class="text-xs text-stone-600 font-bold">Researcher A</span>
-                                <span class="text-xs text-stone-400" data-i18n="sec.subagentes.parallel.researcher.a.scope">módulo auth</span>
-                            </div>
-                            <div class="agent-node">
-                                <div class="agent-bubble w-11 h-11 bg-white border-2 text-lg" style="border-color:#c026d3">🔍</div>
-                                <span class="text-xs text-stone-600 font-bold">Researcher B</span>
-                                <span class="text-xs text-stone-400" data-i18n="sec.subagentes.parallel.researcher.b.scope">módulo payments</span>
-                            </div>
-                            <div class="agent-node">
-                                <div class="agent-bubble w-11 h-11 bg-white border-2 text-lg" style="border-color:#c026d3">🔍</div>
-                                <span class="text-xs text-stone-600 font-bold">Researcher C</span>
-                                <span class="text-xs text-stone-400" data-i18n="sec.subagentes.parallel.researcher.c.scope">módulo notifications</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-4 text-stone-400 text-xs">
-                            <span>↗ <span data-i18n="sec.subagentes.parallel.returns">retorna relatório</span></span><span>↑ <span data-i18n="sec.subagentes.parallel.returns">retorna relatório</span></span><span>↖ <span data-i18n="sec.subagentes.parallel.returns">retorna relatório</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pipeline mode -->
-                <div id="submode-pipeline" class="hidden bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
-                    <p class="text-xs text-stone-500 mb-4 leading-relaxed" data-i18n-html="sec.subagentes.pipeline.desc">O orquestrador define uma cadeia: cada agente recebe o output do anterior e passa para o próximo. Permite loops de feedback (ex: Programador ↔ Revisor até passar). <strong>O humano escreve toda esta lógica no arquivo de instruções do orquestrador.</strong></p>
-
-                    <!-- Pipeline steps -->
-                    <div class="flex flex-col gap-2">
-                        <!-- Human -->
-                        <div class="flex items-center gap-3">
-                            <div class="agent-bubble w-10 h-10 bg-stone-800 text-white text-base flex-shrink-0">🧑</div>
-                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs" data-i18n-html="sec.subagentes.pipeline.human.desc">
-                                <strong class="text-stone-700">Humano</strong> — entrega a tarefa e aprova o plano antes da execução
-                            </div>
-                        </div>
-                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.human.arrow">tarefa</span></div>
-
-                        <!-- Project Owner -->
-                        <div class="flex items-center gap-3">
-                            <div class="agent-bubble w-10 h-10 text-white text-base flex-shrink-0" style="background:#c026d3">👑</div>
-                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs" data-i18n-html="sec.subagentes.pipeline.po.desc">
-                                <strong style="color:#c026d3">Project Owner</strong> — sintetiza a tarefa e passa para o PM
-                            </div>
-                        </div>
-                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.po.arrow">briefing</span></div>
-
-                        <!-- Project Manager -->
-                        <div class="flex items-center gap-3">
-                            <div class="agent-bubble w-10 h-10 text-white text-base flex-shrink-0" style="background:#7c3aed">🗂️</div>
-                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs" data-i18n-html="sec.subagentes.pipeline.pm.desc">
-                                <strong class="text-violet-700">Project Manager</strong> — orquestra toda a sequência, distribui tarefas e recebe reports
-                            </div>
-                        </div>
-                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.pm.arrow">tarefa de pesquisa (pode dividir em N researchers)</span></div>
-
-                        <!-- Researcher -->
-                        <div class="flex items-center gap-3">
-                            <div class="agent-bubble w-10 h-10 bg-blue-100 text-base flex-shrink-0 border-2 border-blue-300">🔍</div>
-                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs" data-i18n-html="sec.subagentes.pipeline.researcher.desc">
-                                <strong class="text-blue-700">Researcher</strong> <span class="text-stone-400">(Read Only)</span> — explora código, docs e dependências. PM pode spawnar múltiplos em paralelo se necessário
-                            </div>
-                        </div>
-                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.researcher.arrow">discovery report → PM → Secretary</span></div>
-
-                        <!-- Secretary -->
-                        <div class="flex items-center gap-3">
-                            <div class="agent-bubble w-10 h-10 bg-amber-100 text-base flex-shrink-0 border-2 border-amber-300">📝</div>
-                            <div class="flex-1 p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-xs" data-i18n-html="sec.subagentes.pipeline.secretary1.desc">
-                                <strong class="text-amber-700">Secretary</strong> — debate o plano com PM, Researcher e PO. Se houver dúvidas sem resposta, o PO pergunta ao humano. Quando consenso atingido, escreve <code class="font-mono bg-amber-100 px-0.5 rounded">plan.md</code> para aprovação humana
-                            </div>
-                        </div>
-                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.secretary1.arrow">humano aprova plan.md → PM delega ao Programador</span></div>
-
-                        <!-- Programmer -->
-                        <div class="flex items-center gap-3">
-                            <div class="agent-bubble w-10 h-10 bg-emerald-100 text-base flex-shrink-0 border-2 border-emerald-300">💻</div>
-                            <div class="flex-1 p-2.5 bg-white rounded-lg border border-stone-200 text-xs" data-i18n-html="sec.subagentes.pipeline.programmer.desc">
-                                <strong class="text-emerald-700">Programador</strong> — implementa exatamente o que está no plano aprovado, reporta ao PM
-                            </div>
-                        </div>
-                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.programmer.arrow">código → PM → Revisor</span></div>
-
-                        <!-- Revisor loop -->
-                        <div class="flex items-center gap-3">
-                            <div class="agent-bubble w-10 h-10 bg-orange-100 text-base flex-shrink-0 border-2 border-orange-300">🔄</div>
-                            <div class="flex-1 p-2.5 bg-orange-50 rounded-lg border border-orange-200 text-xs" data-i18n-html="sec.subagentes.pipeline.reviewer.desc">
-                                <strong class="text-orange-700">Revisor</strong> — revisa o código e reporta ao PM. Se houver bugs, PM devolve ao Programador. <span class="font-semibold">Loop até "pass".</span>
-                            </div>
-                        </div>
-                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.reviewer.arrow">pass → PM → Security Review</span></div>
-
-                        <!-- Security Review loop -->
-                        <div class="flex items-center gap-3">
-                            <div class="agent-bubble w-10 h-10 bg-red-100 text-base flex-shrink-0 border-2 border-red-300">🛡️</div>
-                            <div class="flex-1 p-2.5 bg-red-50 rounded-lg border border-red-200 text-xs" data-i18n-html="sec.subagentes.pipeline.security.desc">
-                                <strong class="text-red-700">Security Review</strong> — auditoria de segurança. Mesmo loop: falhas voltam ao Programador via PM até aprovação.
-                            </div>
-                        </div>
-                        <div class="ml-5 text-stone-300 text-xs pl-2">↓ <span data-i18n="sec.subagentes.pipeline.security.arrow">aprovado → PM → Secretary</span></div>
-
-                        <!-- Secretary docs -->
-                        <div class="flex items-center gap-3">
-                            <div class="agent-bubble w-10 h-10 bg-amber-100 text-base flex-shrink-0 border-2 border-amber-300">📚</div>
-                            <div class="flex-1 p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-xs" data-i18n-html="sec.subagentes.pipeline.secretary2.desc">
-                                <strong class="text-amber-700">Secretary</strong> — atualiza <code class="font-mono bg-amber-100 px-0.5 rounded">CHANGELOG.md</code>, <code class="font-mono bg-amber-100 px-0.5 rounded">MEMORY.md</code> e documentação final
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 p-3 rounded-lg border text-xs leading-relaxed" style="background:#fdf4ff; border-color:#e879f9; color:#86198f">
-                        <span data-i18n-html="sec.subagentes.pipeline.note"><strong>O humano define toda esta arquitetura</strong> nas instruções do agente orquestrador (CLAUDE.md ou o arquivo do PM). O Claude não inventa a hierarquia — ele executa o workflow que você especificou.</span>
-                    </div>
-                </div>
-
-                <!-- Custom agents -->
-                <div class="mb-6">
-                    <h3 class="font-bold text-stone-800 text-sm mb-3" data-i18n-html="sec.subagentes.agents.title">Definindo cada agente em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/agents/</code></h3>
-                    <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n-html="sec.subagentes.agents.desc">Cada papel do pipeline vira um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">.md</code> com frontmatter, ferramentas permitidas e instruções de tarefa.</p>
-
-                    <!-- Agent file selector -->
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        <button onclick="showAgent('pm')" id="agentbtn-pm" class="agent-tab active text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">project-manager</button>
-                        <button onclick="showAgent('researcher')" id="agentbtn-researcher" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">researcher</button>
-                        <button onclick="showAgent('programmer')" id="agentbtn-programmer" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">programmer</button>
-                        <button onclick="showAgent('code-reviewer')" id="agentbtn-code-reviewer" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">code-reviewer</button>
-                        <button onclick="showAgent('security-reviewer')" id="agentbtn-security-reviewer" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">security-reviewer</button>
-                        <button onclick="showAgent('secretary')" id="agentbtn-secretary" class="agent-tab text-xs px-3 py-1.5 rounded-lg border border-stone-200 font-mono">secretary</button>
-                    </div>
-
-                    <div id="agent-filename" class="flex items-center justify-between mb-2">
-                        <p id="agent-filepath" class="text-xs font-bold text-stone-400 uppercase">.claude/agents/project-manager.md</p>
-                        <button class="copy-btn" onclick="copyCurrentAgent()" data-i18n="sec.subagentes.agents.copy">copiar</button>
-                    </div>
-
-                    <!-- PM -->
-                    <pre id="agentcode-pm" class="agent-code text-xs leading-relaxed">---
-<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">project-manager</span>
-<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Orquestra o pipeline completo de uma feature: research,</span>
-<span style="color:#6ee7b7">  planejamento, implementação, revisão de código, segurança e docs.</span>
-<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Task, Read, Write</span>
----
-
-Você é o Project Manager. Ao receber uma tarefa do Project Owner:
-
-1. **Research**: use Task para delegar ao `researcher`. Consolide o relatório.
-2. **Plano**: use Task para delegar ao `secretary` (escreve plan.md).
-   Aguarde aprovação humana antes de prosseguir.
-3. **Implementação**: use Task para delegar ao `programmer` com plan.md aprovado.
-4. **Revisão**: use Task para delegar ao `code-reviewer`.
-   Se issues → retorne ao `programmer` com feedback. Repita até pass.
-5. **Segurança**: use Task para delegar ao `security-reviewer`.
-   Se findings → retorne ao `programmer`. Repita até aprovado.
-6. **Docs**: use Task para delegar ao `secretary` (CHANGELOG.md e docs finais).
-
-Reporte o resultado final ao Project Owner.</pre>
-
-                    <!-- Researcher -->
-                    <pre id="agentcode-researcher" class="agent-code hidden text-xs leading-relaxed">---
-<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">researcher</span>
-<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Explora o código-base, lê docs e dependências para gerar um</span>
-<span style="color:#6ee7b7">  discovery report antes de qualquer implementação.</span>
-<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Grep, Glob, WebFetch</span>
----
-
-Você é um researcher read-only. Não edite arquivos.
-
-Dada a tarefa recebida do Project Manager:
-- Mapeie os arquivos e módulos relevantes
-- Leia dependências externas e docs de API envolvidas
-- Identifique riscos, acoplamentos e pontos de atenção
-
-Entregue um **Discovery Report** estruturado:
-- Arquivos-chave (paths + propósito)
-- Dependências envolvidas
-- Riscos identificados
-- Perguntas em aberto para o PM resolver antes do plano</pre>
-
-                    <!-- Programmer -->
-                    <pre id="agentcode-programmer" class="agent-code hidden text-xs leading-relaxed">---
-<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">programmer</span>
-<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Implementa exatamente o que está no plan.md aprovado pelo humano.</span>
-<span style="color:#6ee7b7">  Não toma decisões de design por conta própria.</span>
-<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Write, Edit, Bash, Glob, Grep</span>
----
-
-Você é um programador de implementação. Seu único input é o plan.md aprovado
-(ou o feedback do code-reviewer / security-reviewer).
-
-Regras:
-- Implemente exatamente o que está no plano — sem features extras
-- Se receber feedback de revisão, corrija apenas os pontos apontados
-- Não refatore código fora do escopo da tarefa
-- Reporte ao PM quando concluído, listando arquivos alterados</pre>
-
-                    <!-- Code Reviewer -->
-                    <pre id="agentcode-code-reviewer" class="agent-code hidden text-xs leading-relaxed">---
-<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">code-reviewer</span>
-<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisa qualidade de código: lógica, cobertura de edge cases,</span>
-<span style="color:#6ee7b7">  padrões do projeto e clareza. Não toca em segurança.</span>
-<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Grep, Glob</span>
----
-
-Você é um revisor de código sênior. Analise o código implementado:
-
-- Lógica e corretude (edge cases, condições de erro)
-- Aderência aos padrões do projeto (naming, estrutura)
-- Clareza e manutenibilidade
-- Cobertura de testes (se aplicável)
-
-Responda com:
-**Resultado**: ✅ Pass | ❌ Fail
-**Issues** (se Fail): lista numerada com arquivo, linha e descrição
-**Não toque em**: análise de segurança (responsabilidade do security-reviewer)</pre>
-
-                    <!-- Security Reviewer -->
-                    <pre id="agentcode-security-reviewer" class="agent-code hidden text-xs leading-relaxed">---
-<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">security-reviewer</span>
-<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Auditoria de segurança OWASP Top 10. Chamado pelo PM após o</span>
-<span style="color:#6ee7b7">  code-reviewer aprovar. Não revisa qualidade de código.</span>
-<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Grep, Glob</span>
----
-
-Você é um auditor de segurança. Analise o código em busca de:
-
-- Injection (SQL, Command, LDAP) — A03
-- Autenticação e sessão quebradas — A07
-- Exposição de dados sensíveis — A02
-- Inputs sem sanitização ou validação
-- Dependências com vulnerabilidades conhecidas
-
-Responda com:
-**Resultado**: ✅ Aprovado | ❌ Reprovado
-**Severidade geral**: Alta / Média / Baixa
-**Findings** (se Reprovado): arquivo, linha, OWASP ref e correção sugerida</pre>
-
-                    <!-- Secretary -->
-                    <pre id="agentcode-secretary" class="agent-code hidden text-xs leading-relaxed">---
-<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">secretary</span>
-<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Consolida debates em documentos (plan.md, CHANGELOG.md, MEMORY.md).</span>
-<span style="color:#6ee7b7">  Chamado duas vezes: antes da implementação e após aprovação final.</span>
-<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Read, Write, Edit</span>
----
-
-Você é o secretary do pipeline. Você tem duas responsabilidades:
-
-**Fase 1 — Planejamento**:
-Dada a conversa entre PM, Researcher e PO, consolide o consenso em plan.md.
-Se houver dúvidas sem resposta, sinalize ao PO para consultar o humano.
-O plan.md só é finalizado quando o humano aprovar.
-
-**Fase 2 — Documentação final**:
-Após aprovação do security-reviewer, atualize:
-- CHANGELOG.md (o que mudou, por quê)
-- MEMORY.md (decisões de arquitetura, contexto para o futuro)
-- Qualquer doc técnico relevante ao que foi implementado</pre>
-
-                </div>
-
-                <!-- Built-in agent types -->
+                <!-- Where skills live -->
                 <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
-                    <h3 class="font-bold text-stone-800 text-sm mb-3" data-i18n-html="sec.subagentes.builtin.title">Tipos de agente built-in (campo <code class="font-mono bg-stone-100 px-1 rounded text-xs">agent:</code>)</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                        <div class="bg-white p-3 rounded-lg border border-stone-200">
-                            <code class="font-mono font-bold text-stone-700">general-purpose</code>
-                            <p class="text-stone-500 mt-1" data-i18n="sec.subagentes.builtin.gp.desc">Ferramentas completas. Padrão quando nenhum tipo é especificado.</p>
-                        </div>
-                        <div class="bg-white p-3 rounded-lg border border-stone-200">
-                            <code class="font-mono font-bold text-stone-700">Explore</code>
-                            <p class="text-stone-500 mt-1" data-i18n="sec.subagentes.builtin.explore.desc">Ferramentas read-only otimizadas para explorar codebases. Não edita arquivos.</p>
-                        </div>
-                        <div class="bg-white p-3 rounded-lg border border-stone-200">
-                            <code class="font-mono font-bold text-stone-700">Plan</code>
-                            <p class="text-stone-500 mt-1" data-i18n="sec.subagentes.builtin.plan.desc">Focado em arquitetura e planejamento. Sem execução direta de código.</p>
-                        </div>
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm"><span>📁</span> <span data-i18n="sec.conceito.where.title">Onde as Skills vivem</span></h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b border-stone-200">
+                                    <th class="text-left py-2 pr-4 text-stone-500 font-semibold" data-i18n="sec.conceito.where.th.level">Nível</th>
+                                    <th class="text-left py-2 pr-4 text-stone-500 font-semibold" data-i18n="sec.conceito.where.th.path">Caminho</th>
+                                    <th class="text-left py-2 text-stone-500 font-semibold" data-i18n="sec.conceito.where.th.scope">Escopo</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100">
+                                <tr class="invoke-row">
+                                    <td class="py-2 pr-4 font-medium text-stone-700" data-i18n="sec.conceito.where.enterprise.level">Enterprise</td>
+                                    <td class="py-2 pr-4 font-mono text-stone-500" data-i18n="sec.conceito.where.enterprise.path">managed settings</td>
+                                    <td class="py-2 text-stone-600" data-i18n="sec.conceito.where.enterprise.scope">Todos os usuários da org</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2 pr-4 font-medium text-stone-700" data-i18n="sec.conceito.where.personal.level">Pessoal</td>
+                                    <td class="py-2 pr-4 font-mono text-stone-500">~/.claude/skills/&lt;nome&gt;/</td>
+                                    <td class="py-2 text-stone-600" data-i18n="sec.conceito.where.personal.scope">Todos os seus projetos</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2 pr-4 font-medium" style="color:#4f46e5" data-i18n="sec.conceito.where.project.level">Projeto</td>
+                                    <td class="py-2 pr-4 font-mono text-stone-500">.claude/skills/&lt;nome&gt;/</td>
+                                    <td class="py-2 text-stone-600" data-i18n="sec.conceito.where.project.scope">Apenas este projeto</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2 pr-4 font-medium text-stone-700" data-i18n="sec.conceito.where.plugin.level">Plugin</td>
+                                    <td class="py-2 pr-4 font-mono text-stone-500">&lt;plugin&gt;/skills/&lt;nome&gt;/</td>
+                                    <td class="py-2 text-stone-600" data-i18n="sec.conceito.where.plugin.scope">Onde o plugin está ativo</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
+                    <p class="text-xs text-stone-500 mt-3" data-i18n="sec.conceito.where.priority">Quando skills têm o mesmo nome em níveis diferentes, a prioridade é: enterprise &gt; pessoal &gt; projeto.</p>
                 </div>
             </section>
 
             <!-- ============================================================ -->
-            <!-- SECTION 4: Agent Teams                                        -->
-            <!-- ============================================================ -->
-            <section id="sec-teams" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>👥</span> <span data-i18n="sec.teams.h2">Agent Teams</span></h2>
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="tag-badge bg-amber-100 text-amber-700"><span>⚗️</span> <span data-i18n="sec.teams.experimental">Experimental</span></span>
-                        <span class="text-xs text-stone-500" data-i18n-html="sec.teams.requires">Requer <code class="font-mono bg-stone-100 px-1 rounded">CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code></span>
-                    </div>
-                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.teams.intro">
-                        Agent Teams vai além dos subagentes: os integrantes <strong>se comunicam diretamente entre si</strong> via um sistema de mailbox compartilhado. Um team lead coordena, mas os teammates não são subordinados, são colegas que colaboram.
-                    </p>
-                </div>
-
-                <!-- Communication flow - teams -->
-                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
-                    <h3 class="font-bold text-stone-800 text-sm mb-5" data-i18n="sec.teams.flow.title">Fluxo de comunicação: rede peer-to-peer</h3>
-                    <div class="flex flex-col items-center gap-4">
-                        <!-- Lead -->
-                        <div class="agent-node">
-                            <div class="agent-bubble w-16 h-16 text-white text-2xl" style="background:#c026d3">🎯</div>
-                            <span class="text-xs font-bold text-stone-700" data-i18n="sec.teams.flow.lead">Team Lead</span>
-                            <span class="text-xs text-stone-400" data-i18n="sec.teams.flow.lead.desc">coordena + shared task list</span>
-                        </div>
-                        <!-- Shared task list indicator -->
-                        <div class="w-full max-w-xs bg-white border-2 rounded-lg p-2 text-center text-xs" style="border-color:#c026d3">
-                            <span class="font-bold" style="color:#c026d3"><span>📋</span> <span data-i18n="sec.teams.flow.tasklist">Shared Task List</span></span>
-                            <span class="text-stone-400 ml-1">+ mailbox</span>
-                        </div>
-                        <!-- Teammates with peer arrows -->
-                        <div class="flex gap-4 flex-wrap justify-center items-center">
-                            <div class="agent-node">
-                                <div class="agent-bubble w-12 h-12 bg-white border-2 text-xl" style="border-color:#c026d3">🔍</div>
-                                <span class="text-xs font-bold text-stone-600">Teammate A</span>
-                            </div>
-                            <div class="flex flex-col gap-1 text-stone-400 text-xs items-center">
-                                <span>←→</span>
-                                <span class="text-stone-300" data-i18n="sec.teams.flow.peer">peer msg</span>
-                            </div>
-                            <div class="agent-node">
-                                <div class="agent-bubble w-12 h-12 bg-white border-2 text-xl" style="border-color:#c026d3">🛡️</div>
-                                <span class="text-xs font-bold text-stone-600">Teammate B</span>
-                            </div>
-                            <div class="flex flex-col gap-1 text-stone-400 text-xs items-center">
-                                <span>←→</span>
-                                <span class="text-stone-300" data-i18n="sec.teams.flow.peer">peer msg</span>
-                            </div>
-                            <div class="agent-node">
-                                <div class="agent-bubble w-12 h-12 bg-white border-2 text-xl" style="border-color:#c026d3">🧪</div>
-                                <span class="text-xs font-bold text-stone-600">Teammate C</span>
-                            </div>
-                        </div>
-                        <p class="text-xs text-stone-500 text-center" data-i18n="sec.teams.flow.note">Teammates se comunicam diretamente, não só com o lead</p>
-                    </div>
-                </div>
-
-                <!-- Setup -->
-                <div class="mb-6">
-                    <h3 class="font-bold text-stone-800 text-sm mb-3" data-i18n="sec.teams.config.title">Configuração</h3>
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-xs font-bold text-stone-400 uppercase">~/.claude/teams/code-review/config.json</p>
-                        <button class="copy-btn" onclick="copyCode('team-config')" data-i18n="sec.teams.config.copy">copiar</button>
-                    </div>
-                    <pre id="team-config" class="text-xs">{
-  <span style="color:#a5b4fc">"name"</span>: <span style="color:#6ee7b7">"code-review"</span>,
-  <span style="color:#a5b4fc">"teammates"</span>: [
-    {
-      <span style="color:#a5b4fc">"name"</span>: <span style="color:#6ee7b7">"security"</span>,
-      <span style="color:#a5b4fc">"agent"</span>: <span style="color:#6ee7b7">"security-reviewer"</span>
-    },
-    {
-      <span style="color:#a5b4fc">"name"</span>: <span style="color:#6ee7b7">"performance"</span>,
-      <span style="color:#a5b4fc">"agent"</span>: <span style="color:#6ee7b7">"perf-analyst"</span>
-    },
-    {
-      <span style="color:#a5b4fc">"name"</span>: <span style="color:#6ee7b7">"tests"</span>,
-      <span style="color:#a5b4fc">"agent"</span>: <span style="color:#6ee7b7">"test-coverage"</span>
-    }
-  ]
-}</pre>
-                </div>
-
-                <!-- Real use cases from docs -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
-                        <h4 class="font-bold text-stone-800 text-sm mb-2"><span>✅</span> <span data-i18n="sec.teams.usecase.1.title">Code review paralelo</span></h4>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.teams.usecase.1.desc">3 teammates revisam simultaneamente: segurança, performance e cobertura de testes. Cada um com contexto focado no seu domínio.</p>
-                    </div>
-                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
-                        <h4 class="font-bold text-stone-800 text-sm mb-2"><span>✅</span> <span data-i18n="sec.teams.usecase.2.title">Hipóteses concorrentes</span></h4>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.teams.usecase.2.desc">5 teammates investigam 5 teorias diferentes para um bug complexo simultaneamente e debatem os resultados via mailbox.</p>
-                    </div>
-                    <div class="p-4 rounded-xl border border-stone-200 bg-stone-50">
-                        <h4 class="font-bold text-stone-800 text-sm mb-2"><span>✅</span> <span data-i18n="sec.teams.usecase.3.title">Coordenação cross-layer</span></h4>
-                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n="sec.teams.usecase.3.desc">Frontend, backend e DB trabalham em paralelo numa feature, coordenando interfaces via shared task list.</p>
-                    </div>
-                    <div class="p-4 rounded-xl border border-amber-100 bg-amber-50">
-                        <h4 class="font-bold text-amber-700 text-sm mb-2"><span>⚠️</span> <span data-i18n="sec.teams.limitations.title">Limitações importantes</span></h4>
-                        <ul class="text-xs text-amber-800 space-y-1">
-                            <li data-i18n-html="sec.teams.limitations.li.1">• Sem <code>/resume</code> ou <code>/rewind</code> de teammates</li>
-                            <li data-i18n="sec.teams.limitations.li.2">• Apenas 1 team por sessão, sem teams aninhados</li>
-                            <li data-i18n="sec.teams.limitations.li.3">• Risco de conflito em arquivos editados por 2 teammates</li>
-                            <li data-i18n="sec.teams.limitations.li.4">• Split-pane requer tmux ou iTerm2</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ============================================================ -->
-            <!-- SECTION 5: Quando usar cada um                                -->
+            <!-- SECTION 1.5: Commands vs Skills                              -->
             <!-- ============================================================ -->
             <section id="sec-comparacao" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚖️</span> <span data-i18n="sec.comparacao.h2">Quando usar cada um</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.comparacao.intro">
-                        A escolha certa depende de três variáveis: complexidade da tarefa, se as partes são independentes, e se você precisa de coordenação entre agentes.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚖️</span> <span data-i18n="sec.comparacao.h2">Commands vs Skills</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.comparacao.intro">
+                        Ambos criam comandos slash invocáveis com <code class="font-mono bg-stone-100 px-1 rounded text-xs">/nome</code>. A diferença está em <strong>como são definidos</strong> e no que conseguem fazer. Skills são o formato recomendado. Commands continuam funcionando e seguem suportados.
                     </p>
                 </div>
 
-                <!-- Comparison table -->
-                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6 overflow-x-auto">
-                    <table class="w-full text-xs">
-                        <thead>
-                            <tr class="border-b-2 border-stone-200">
-                                <th class="text-left py-3 pr-4 text-stone-500 font-semibold" data-i18n="sec.comparacao.th.aspect">Aspecto</th>
-                                <th class="text-center py-3 pr-4 text-stone-500 font-semibold" data-i18n="sec.comparacao.th.single">Agente Único</th>
-                                <th class="text-center py-3 pr-4 text-stone-500 font-semibold" data-i18n="sec.comparacao.th.sub">Subagentes</th>
-                                <th class="text-center py-3 text-stone-500 font-semibold" data-i18n="sec.comparacao.th.teams">Agent Teams</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-stone-100">
-                            <tr>
-                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.comm.label">Comunicação</td>
-                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.comm.single">Única sessão</td>
-                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.comm.sub">Filho → pai apenas</td>
-                                <td class="py-2.5 text-center text-stone-600" data-i18n="sec.comparacao.row.comm.teams">Peer-to-peer direto</td>
-                            </tr>
-                            <tr>
-                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.coord.label">Coordenação</td>
-                                <td class="py-2.5 pr-4 text-center text-stone-600">—</td>
-                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.coord.sub">Manual (pai define)</td>
-                                <td class="py-2.5 text-center text-stone-600" data-i18n="sec.comparacao.row.coord.teams">Automática (shared task list)</td>
-                            </tr>
-                            <tr>
-                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.ctx.label">Contexto</td>
-                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.ctx.single">Único</td>
-                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.ctx.sub">Isolado por filho</td>
-                                <td class="py-2.5 text-center text-stone-600" data-i18n="sec.comparacao.row.ctx.teams">Isolado por teammate</td>
-                            </tr>
-                            <tr>
-                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.cost.label">Custo de tokens</td>
-                                <td class="py-2.5 pr-4 text-center text-emerald-600 font-bold">1×</td>
-                                <td class="py-2.5 pr-4 text-center text-amber-600 font-bold">~4×</td>
-                                <td class="py-2.5 text-center text-red-600 font-bold" data-i18n="sec.comparacao.row.cost.teams">~15× (escala com teammates)</td>
-                            </tr>
-                            <tr>
-                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.stability.label">Estabilidade</td>
-                                <td class="py-2.5 pr-4 text-center text-emerald-600 font-bold"><span>✅</span> <span data-i18n="sec.comparacao.row.stability.single">Estável</span></td>
-                                <td class="py-2.5 pr-4 text-center text-emerald-600 font-bold"><span>✅</span> <span data-i18n="sec.comparacao.row.stability.sub">Estável</span></td>
-                                <td class="py-2.5 text-center text-amber-600 font-bold"><span>⚗️</span> <span data-i18n="sec.comparacao.row.stability.teams">Experimental</span></td>
-                            </tr>
-                            <tr>
-                                <td class="py-2.5 pr-4 text-stone-700 font-medium" data-i18n="sec.comparacao.row.best.label">Melhor para</td>
-                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.best.single">Tarefas focadas e sequenciais</td>
-                                <td class="py-2.5 pr-4 text-center text-stone-600" data-i18n="sec.comparacao.row.best.sub">Workers isolados e rápidos</td>
-                                <td class="py-2.5 text-center text-stone-600" data-i18n="sec.comparacao.row.best.teams">Paralelismo com interdependências</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Decision tree -->
-                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
-                    <h3 class="font-bold text-stone-800 text-sm mb-4" data-i18n="sec.comparacao.tree.title">Árvore de decisão</h3>
-                    <div class="flex flex-col gap-3 text-xs">
-                        <div class="flex gap-3 items-start">
-                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 text-xs" style="background:#c026d3">?</div>
-                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200" data-i18n-html="sec.comparacao.tree.q1">
-                                <strong>A tarefa cabe em ~30 arquivos e é sequencial?</strong>
-                                <span class="ml-2 text-emerald-600 font-semibold">→ Agente Único</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 items-start">
-                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 text-xs" style="background:#c026d3">?</div>
-                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200" data-i18n-html="sec.comparacao.tree.q2">
-                                <strong>As sub-tarefas são independentes e sem necessidade de coordenação entre si?</strong>
-                                <span class="ml-2" style="color:#c026d3"><strong>→ Subagentes</strong></span>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 items-start">
-                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 text-xs" style="background:#c026d3">?</div>
-                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200" data-i18n-html="sec.comparacao.tree.q3">
-                                <strong>Os agentes precisam coordenar resultados entre si durante a execução?</strong>
-                                <span class="ml-2 text-amber-600 font-semibold">→ Agent Teams (experimental)</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 items-start">
-                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-red-400 font-bold flex-shrink-0 text-xs border-2 border-red-200">!</div>
-                            <div class="flex-1 p-3 bg-red-50 rounded-lg border border-red-100" data-i18n-html="sec.comparacao.tree.q4">
-                                <strong class="text-red-700">As sub-tarefas têm alta interdependência ou precisam de contexto compartilhado?</strong>
-                                <span class="ml-2 text-red-600 font-semibold">→ Não use multi-agente, o overhead vai superar o ganho.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ============================================================ -->
-            <!-- SECTION 6: Economia de Tokens                                 -->
-            <!-- ============================================================ -->
-            <section id="sec-tokens" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🪙</span> <span data-i18n="sec.tokens.h2">Economia de Tokens</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.tokens.intro">
-                        Multi-agentes são poderosos mas caros. Agent Teams usam ~15× mais tokens que um chat padrão. A pergunta não é "posso usar multi-agente?", é <strong>"a tarefa justifica esse custo?"</strong>
-                    </p>
-                </div>
-
-                <!-- Cost comparison -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
-                        <div class="text-2xl mb-1">💬</div>
-                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.tokens.card.1.title">Chat padrão</div>
-                        <div class="text-2xl font-extrabold text-stone-800 my-1">1×</div>
-                        <p class="text-xs text-stone-500" data-i18n="sec.tokens.card.1.desc">Agente único conversacional</p>
-                    </div>
-                    <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
-                        <div class="text-2xl mb-1">🔀</div>
-                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.tokens.card.2.title">Subagentes</div>
-                        <div class="text-2xl font-extrabold my-1" style="color:#c026d3">~4×</div>
-                        <p class="text-xs text-stone-500" data-i18n="sec.tokens.card.2.desc">Agente + 2–3 subagentes focados</p>
-                    </div>
-                    <div class="p-4 rounded-xl border-2 border-amber-200 bg-amber-50 text-center">
-                        <div class="text-2xl mb-1">👥</div>
-                        <div class="font-bold text-amber-800 text-sm" data-i18n="sec.tokens.card.3.title">Agent Teams</div>
-                        <div class="text-2xl font-extrabold text-amber-700 my-1">~15×</div>
-                        <p class="text-xs text-amber-700" data-i18n="sec.tokens.card.3.desc">Escala linearmente com teammates</p>
-                    </div>
-                </div>
-
-                <!-- Patterns to save tokens -->
-                <h3 class="font-bold text-stone-800 text-sm mb-3" data-i18n="sec.tokens.patterns.title">Padrões que maximizam valor por token</h3>
-                <div class="flex flex-col gap-4 mb-6">
-                    <!-- Plan then build -->
-                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="tag-badge bg-fuchsia-100 text-fuchsia-700" style="background:#fdf4ff; color:#86198f" data-i18n="sec.tokens.pattern.1.label">Padrão</span>
-                            <h4 class="font-bold text-stone-800 text-sm" data-i18n="sec.tokens.pattern.1.title">Plan Then Build, Rocklin</h4>
-                        </div>
-                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n-html="sec.tokens.pattern.1.desc">Um agente <em>planejador</em> cria um blueprint detalhado. Um agente <em>fresco</em> recebe o plano e executa, sem o histórico e contexto poluído do planejador. O executor começa limpo, focado na entrega.</p>
-                        <pre class="text-xs">Agente 1 (planejador): "Analise o problema e produza
-  um plano de implementação em etapas numeradas."
-
-Agente 2 (executor, contexto zerado): "Implemente o
-  plano: [plano do agente 1 colado aqui]"</pre>
-                    </div>
-
-                    <!-- Ralph Loop -->
-                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="tag-badge bg-fuchsia-100 text-fuchsia-700" style="background:#fdf4ff; color:#86198f" data-i18n="sec.tokens.pattern.2.label">Padrão</span>
-                            <h4 class="font-bold text-stone-800 text-sm" data-i18n="sec.tokens.pattern.2.title">Ralph Loop, Osmani</h4>
-                        </div>
-                        <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.tokens.pattern.2.desc">Workflow atômico de 5 passos para evitar overflow de contexto mantendo o histórico no git:</p>
-                        <div class="flex gap-2 flex-wrap">
-                            <span class="tag-badge bg-stone-100 text-stone-700">1 Pick task</span>
-                            <span class="text-stone-400 self-center">→</span>
-                            <span class="tag-badge bg-stone-100 text-stone-700">2 Implement</span>
-                            <span class="text-stone-400 self-center">→</span>
-                            <span class="tag-badge bg-stone-100 text-stone-700">3 Validate</span>
-                            <span class="text-stone-400 self-center">→</span>
-                            <span class="tag-badge bg-emerald-100 text-emerald-700">4 Commit (se pass)</span>
-                            <span class="text-stone-400 self-center">→</span>
-                            <span class="tag-badge" style="background:#fdf4ff; color:#86198f">5 Reset context</span>
-                        </div>
-                        <p class="text-xs text-stone-500 mt-2" data-i18n="sec.tokens.pattern.2.note">O reset de contexto no passo 5 evita context fatigue, o agente começa a próxima tarefa com a janela limpa.</p>
-                    </div>
-
-                    <!-- Independent review -->
-                    <div class="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="tag-badge bg-fuchsia-100 text-fuchsia-700" style="background:#fdf4ff; color:#86198f" data-i18n="sec.tokens.pattern.3.label">Padrão</span>
-                            <h4 class="font-bold text-stone-800 text-sm" data-i18n="sec.tokens.pattern.3.title">Independent Review, Rocklin</h4>
-                        </div>
-                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.tokens.pattern.3.desc">"Um agente revisar seu próprio trabalho é passado." Um segundo agente, sem contexto do processo de geração, encontra mais bugs, o mesmo viés de criação que afeta humanos afeta IAs. Separe sempre gerador de revisor.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ============================================================ -->
-            <!-- SECTION 7: Limites & Cuidados                                 -->
-            <!-- ============================================================ -->
-            <section id="sec-limites" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.limites.h2">Limites &amp; Cuidados</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.limites.intro">
-                        Multi-agentes amplificam tudo, incluindo erros. Um erro pequeno de spec, que com um agente único seria um problema local, se multiplica por todos os agentes rodando em paralelo.
-                    </p>
-                </div>
-
-                <div class="flex flex-col gap-4 mb-8">
-                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl">
-                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.1.title">Spec vaga com múltiplos agentes</span></h4>
-                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.1.desc">"Quando você orquestra 50 agentes em paralelo, pensamento vago não te atrasa, te multiplica.", Osmani. Cada agente vai interpretar a ambiguidade de um jeito. O resultado é caótico e custoso de consertar.</p>
-                    </div>
-                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
-                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.2.title">Spec precisa antes de escalar</span></h4>
-                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n="sec.limites.anti.2.desc">Invista tempo em especificar claramente: escopo, output esperado, dependências, o que NÃO fazer. Qualidade da spec é alavanca, o mesmo esforço que gera spec medíocre para 1 agente, gera spec excelente para 10.</p>
-                    </div>
-
-                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
-                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.3.title">Dois agentes editando o mesmo arquivo</span></h4>
-                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.3.desc">Em Agent Teams, se dois teammates editam o mesmo arquivo simultaneamente, o segundo sobrescreve o primeiro. Não há merge automático. Planeje ownership de arquivos antes de iniciar o team.</p>
-                    </div>
-                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
-                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.4.title">Ownership claro de arquivos por agente</span></h4>
-                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n-html="sec.limites.anti.4.desc">Atribua na spec: "Teammate A owns <code class="font-mono bg-emerald-100 px-1 rounded">src/auth/</code>. Teammate B owns <code class="font-mono bg-emerald-100 px-1 rounded">src/api/</code>." Git worktrees isolados por agente eliminam esse risco.</p>
-                    </div>
-
-                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
-                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.5.title">Delegar julgamento arquitetural</span></h4>
-                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.limites.anti.5.desc">Decisões como "qual arquitetura usar", "o que não construir" e "quais tradeoffs aceitar" não devem ser delegadas. Agentes executam, mas você julga.</p>
-                    </div>
-                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
-                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.anti.6.title">Delegar tarefas, não julgamento</span></h4>
-                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n="sec.limites.anti.6.desc">Mantenha decisões de arquitetura, escopo e priorização com humanos. Delegue implementação, boilerplate, migrations e tarefas com critérios bem definidos.</p>
-                    </div>
-                </div>
-
-                <!-- Warning from Rocklin -->
-                <div class="p-5 rounded-xl border border-amber-200 bg-amber-50 flex gap-4 items-start">
-                    <span class="text-2xl flex-shrink-0">🧠</span>
+                <!-- Side-by-side files -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                        <h4 class="font-bold text-amber-900 mb-1" data-i18n="sec.limites.warning.title">Paralelo nem sempre é mais rápido, Rocklin</h4>
-                        <p class="text-sm text-amber-800 leading-relaxed" data-i18n-html="sec.limites.warning.desc">Em um estudo de caso real de desenvolvimento de software, execução sequencial com menos paralelismo produziu resultados melhores que execução paralela. O overhead de coordenação frequentemente supera o ganho de velocidade. <strong>Meça antes de assumir que mais agentes = mais rápido.</strong></p>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-base">📄</span>
+                            <p class="text-xs font-bold text-stone-500 uppercase" data-i18n="sec.comparacao.label.command">Command (legado)</p>
+                        </div>
+                        <pre class="text-xs"><span style="color:#78716c"># .claude/commands/review-pr.md</span>
+<span style="color:#78716c"># (arquivo único, sem frontmatter obrigatório)</span>
+
+Revise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
+
+- Segurança: inputs não validados
+- Performance: N+1 queries
+- Testes: casos de borda
+
+Responda com Status + lista de Issues.</pre>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-base">📁</span>
+                            <p class="text-xs font-bold text-stone-500 uppercase" data-i18n="sec.comparacao.label.skill">Skill (recomendado)</p>
+                        </div>
+                        <pre class="text-xs"><span style="color:#78716c"># .claude/skills/review-pr/SKILL.md</span>
+<span style="color:#78716c"># (diretório + frontmatter YAML)</span>
+
+<span style="color:#78716c">---</span>
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">review-pr</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisa PRs. Use ao analisar</span>
+<span style="color:#6ee7b7">  um pull request ou diff.</span>
+<span style="color:#a5b4fc">disable-model-invocation</span>: <span style="color:#fb923c">true</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Bash(gh *), Read</span>
+<span style="color:#78716c">---</span>
+
+Revise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
+<span style="color:#78716c"># ... mesmo conteúdo do command ...</span></pre>
+                    </div>
+                </div>
+
+                <!-- Feature comparison table -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm" data-i18n="sec.comparacao.table.title">Comparativo de recursos</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b-2 border-stone-200">
+                                    <th class="text-left py-2 pr-6 text-stone-500 font-semibold" data-i18n="sec.comparacao.table.th.feature">Recurso</th>
+                                    <th class="text-center py-2 pr-6 text-stone-500 font-semibold">Command</th>
+                                    <th class="text-center py-2 text-stone-500 font-semibold">Skill</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100">
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.slash">Cria comando <code class="font-mono bg-stone-100 px-1 rounded">/nome</code></td>
+                                    <td class="py-2.5 pr-6 text-center text-emerald-600 font-bold">✅</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.arguments">Suporte a <code class="font-mono bg-stone-100 px-1 rounded">$ARGUMENTS</code></td>
+                                    <td class="py-2.5 pr-6 text-center text-emerald-600 font-bold">✅</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n="sec.comparacao.table.row.git">Versionável no git</td>
+                                    <td class="py-2.5 pr-6 text-center text-emerald-600 font-bold">✅</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n="sec.comparacao.table.row.frontmatter">Frontmatter YAML (controle de comportamento)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">-</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n="sec.comparacao.table.row.autoinvoke">Claude invoca automaticamente (por description)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">-</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.disable">Controle de invocação (<code class="font-mono bg-stone-100 px-1 rounded">disable-model-invocation</code>)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">-</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n="sec.comparacao.table.row.support">Arquivos de suporte no diretório</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">-</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.fork">Execução em subagente (<code class="font-mono bg-stone-100 px-1 rounded">context: fork</code>)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">-</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.tools">Restrição de ferramentas (<code class="font-mono bg-stone-100 px-1 rounded">allowed-tools</code>)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">-</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-2.5 pr-6 text-stone-700" data-i18n-html="sec.comparacao.table.row.injection">Injeção de contexto dinâmico (<code class="font-mono bg-stone-100 px-1 rounded">!`cmd`</code>)</td>
+                                    <td class="py-2.5 pr-6 text-center text-stone-400">-</td>
+                                    <td class="py-2.5 text-center text-emerald-600 font-bold">✅</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Migration tip -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 rounded-xl bg-stone-50 border border-stone-200">
+                        <h4 class="font-bold text-stone-700 text-sm mb-2"><span>🔄</span> <span data-i18n="sec.comparacao.migrate.title">Migrar ou não migrar?</span></h4>
+                        <p class="text-xs text-stone-600 leading-relaxed" data-i18n-html="sec.comparacao.migrate.desc">Commands existentes <strong>não precisam ser migrados</strong>. Continue usando-os se atendem à necessidade. Migre para Skills quando quiser auto-invocação, arquivos de suporte, ou controle de quando o Claude pode acionar.</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+                        <h4 class="font-bold text-indigo-800 text-sm mb-2"><span>⚡</span> <span data-i18n="sec.comparacao.when.title">Quando usar cada um</span></h4>
+                        <ul class="text-xs text-indigo-800 space-y-1 leading-relaxed">
+                            <li data-i18n-html="sec.comparacao.when.li.1"><strong>Command:</strong> instrução simples, sem controle de invocação necessário</li>
+                            <li data-i18n-html="sec.comparacao.when.li.2"><strong>Skill:</strong> quando você quer que o Claude saiba usar por conta própria, ou precisa de frontmatter, arquivos de suporte ou subagente isolado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Precedence note -->
+                <div class="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 flex gap-3 items-start">
+                    <span class="text-lg flex-shrink-0">⚠️</span>
+                    <p class="text-xs text-amber-800 leading-relaxed" data-i18n-html="sec.comparacao.precedence">
+                        <strong>Conflito de nomes:</strong> se existir um Command e uma Skill com o mesmo nome, a Skill tem precedência. Evite nomes duplicados entre <code class="font-mono bg-amber-100 px-1 rounded">.claude/commands/</code> e <code class="font-mono bg-amber-100 px-1 rounded">.claude/skills/</code>.</p>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 2: Anatomia do SKILL.md                              -->
+            <!-- ============================================================ -->
+            <section id="sec-anatomia" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔬</span> <span data-i18n="sec.anatomia.h2">Anatomia: SKILL.md</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.anatomia.intro">
+                        Cada skill é um <strong>diretório</strong> com um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> obrigatório. O arquivo tem duas partes: frontmatter YAML entre <code class="font-mono bg-stone-100 px-1 rounded text-xs">---</code> que configura o comportamento, e o corpo Markdown com as instruções. Clique em cada campo para entender o que faz.
+                    </p>
+                </div>
+
+                <!-- File structure -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <p class="text-xs font-bold text-stone-400 uppercase mb-3" data-i18n="sec.anatomia.structure.label">Estrutura do diretório</p>
+                    <pre class="text-xs">.claude/skills/
+└── <span style="color:#a5b4fc">review-pr/</span>
+    ├── <span style="color:#6ee7b7">SKILL.md</span>          <span style="color:#78716c"># obrigatório · instruções e frontmatter</span>
+    ├── <span style="color:#fbbf24">checklist.md</span>      <span style="color:#78716c"># opcional · referência carregada quando necessário</span>
+    └── scripts/
+        └── <span style="color:#fbbf24">validate.sh</span>   <span style="color:#78716c"># opcional · script que o Claude pode executar</span></pre>
+                </div>
+
+                <!-- Interactive frontmatter viewer -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs font-bold text-stone-400 uppercase">.claude/skills/review-pr/SKILL.md</p>
+                            <button class="copy-btn" onclick="copyCode('skill-anatomy')" data-i18n="common.copy">copiar</button>
+                        </div>
+                        <pre id="skill-anatomy" class="text-xs leading-relaxed"><span style="color:#78716c">---</span>
+<span class="fm-line" id="fm-name" onclick="showFm('name')"><span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">review-pr</span></span>
+<span class="fm-line" id="fm-desc" onclick="showFm('desc')"><span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisa PRs buscando problemas</span>
+<span style="color:#6ee7b7">  de segurança e performance. Use</span>
+<span style="color:#6ee7b7">  quando revisar um pull request.</span></span>
+<span class="fm-line" id="fm-dim" onclick="showFm('dim')"><span style="color:#a5b4fc">disable-model-invocation</span>: <span style="color:#fb923c">true</span></span>
+<span class="fm-line" id="fm-tools" onclick="showFm('tools')"><span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Bash(gh *), Read</span></span>
+<span class="fm-line" id="fm-hint" onclick="showFm('hint')"><span style="color:#a5b4fc">argument-hint</span>: <span style="color:#6ee7b7">[número-do-pr]</span></span>
+<span style="color:#78716c">---</span>
+
+Você é um revisor sênior deste projeto.
+Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
+
+- Segurança: inputs não validados
+- Performance: N+1 queries
+- Testes: casos de borda descobertos
+
+<span class="fm-line" id="fm-ref" onclick="showFm('ref')">Para critérios completos, veja
+[checklist.md](checklist.md).</span>
+
+## Output Format
+**Status**: ✅ Aprovado / ⚠️ Ajustes
+**Issues**: ordenados por severidade</pre>
+                    </div>
+
+                    <!-- Annotation panel -->
+                    <div id="fm-panel" class="bg-stone-900 rounded-xl p-5 text-stone-200 flex flex-col justify-center min-h-56">
+                        <div id="fm-default">
+                            <p class="text-stone-400 text-sm text-center"><span>👆</span> <span data-i18n="sec.anatomia.panel.default">Clique em qualquer linha do frontmatter para entender o que ela controla.</span></p>
+                        </div>
+                        <div id="fm-content" class="hidden">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span id="fm-icon" class="text-2xl"></span>
+                                <h4 id="fm-title" class="font-bold" style="color:#a5b4fc"></h4>
+                            </div>
+                            <p id="fm-desc-text" class="text-sm text-stone-300 leading-relaxed"></p>
+                            <div id="fm-tip" class="mt-3 p-3 bg-stone-800 rounded-lg text-xs text-stone-400 leading-relaxed"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- $ARGUMENTS -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                    <h3 class="font-bold text-stone-800 mb-3 text-sm"><span>📥</span> <span data-i18n="sec.anatomia.vars.title">Variáveis de Substituição</span></h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono text-indigo-600">$ARGUMENTS</code>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.anatomia.vars.arguments.desc">Tudo que foi passado após o nome da skill.</p>
+                            <p class="text-stone-400 mt-1"><code>/fix-issue 123</code> → <code>$ARGUMENTS</code> = <code>123</code></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono text-indigo-600">$ARGUMENTS[0], $0</code>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.anatomia.vars.positional.desc">Argumento por posição (índice 0).</p>
+                            <p class="text-stone-400 mt-1"><code>/migrate SearchBar React Vue</code> → <code>$0</code> = <code>SearchBar</code></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono text-indigo-600">${CLAUDE_SKILL_DIR}</code>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.anatomia.vars.skilldir.desc">Diretório da skill. Útil para referenciar scripts bundled.</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-stone-200">
+                            <code class="font-mono text-indigo-600">${CLAUDE_SESSION_ID}</code>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.anatomia.vars.sessionid.desc">ID da sessão atual. Útil para logs por sessão.</p>
+                        </div>
                     </div>
                 </div>
             </section>
 
             <!-- ============================================================ -->
-            <!-- SECTION 8: Próximos Passos                                    -->
+            <!-- SECTION 3: Skills Nativas (Bundled)                          -->
             <!-- ============================================================ -->
-            <section id="sec-proximos" class="hidden">
+            <section id="sec-bundled" class="hidden">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.proximos.h2">Próximos Passos</span></h2>
-                    <p class="text-stone-600" data-i18n="sec.proximos.intro">Comece com o padrão mais simples. Escale apenas quando o problema exigir.</p>
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📦</span> <span data-i18n="sec.bundled.h2">Skills Nativas do Claude Code</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.bundled.intro">
+                        Skills nativas já vêm com o Claude Code e estão disponíveis em qualquer sessão. Diferente dos comandos built-in que executam lógica fixa, essas skills são <strong>orientadas por prompt</strong>: o Claude orquestra o trabalho usando suas ferramentas, podendo criar agentes paralelos e adaptar a execução ao seu projeto.
+                    </p>
                 </div>
 
-                <div class="flex flex-col gap-4 mb-8">
+                <div class="flex flex-col gap-3">
+                    <!-- /batch -->
+                    <div onclick="showBundled('batch')" class="bundled-card cursor-pointer p-5 rounded-2xl border-2 border-stone-100 bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-sm font-bold" style="color:#4f46e5">/batch</code>
+                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold" data-i18n="sec.bundled.batch.badge">Agente Paralelo</span>
+                            </div>
+                            <span id="toggle-batch" class="text-stone-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2" data-i18n="sec.bundled.batch.desc">Orquestra mudanças em larga escala no codebase em paralelo. Decompõe em 5–30 unidades independentes e abre um PR por unidade.</p>
+                        <div id="detail-batch" class="hidden mt-4 pt-4 border-t border-stone-100">
+                            <pre class="text-xs">/batch migrate src/ de Solid para React</pre>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n="sec.bundled.batch.detail">Pesquisa o codebase, apresenta o plano para aprovação, e só então spawna os agentes. Requer repositório git.</p>
+                        </div>
+                    </div>
+
+                    <!-- /simplify -->
+                    <div onclick="showBundled('simplify')" class="bundled-card cursor-pointer p-5 rounded-2xl border-2 border-stone-100 bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-sm font-bold" style="color:#4f46e5">/simplify</code>
+                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold" data-i18n="sec.bundled.simplify.badge">3 Agentes em Paralelo</span>
+                            </div>
+                            <span id="toggle-simplify" class="text-stone-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2" data-i18n="sec.bundled.simplify.desc">Revisa arquivos alterados recentemente em busca de problemas de reuso, qualidade e eficiência, e os corrige.</p>
+                        <div id="detail-simplify" class="hidden mt-4 pt-4 border-t border-stone-100">
+                            <pre class="text-xs">/simplify focus on memory efficiency</pre>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n="sec.bundled.simplify.detail">Spawna 3 agentes de review em paralelo, agrega os achados e aplica as correções. Pode receber foco opcional.</p>
+                        </div>
+                    </div>
+
+                    <!-- /loop -->
+                    <div onclick="showBundled('loop')" class="bundled-card cursor-pointer p-5 rounded-2xl border-2 border-stone-100 bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-sm font-bold" style="color:#4f46e5">/loop</code>
+                                <span class="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-semibold">Polling</span>
+                            </div>
+                            <span id="toggle-loop" class="text-stone-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2" data-i18n="sec.bundled.loop.desc">Executa um prompt repetidamente em um intervalo enquanto a sessão estiver aberta.</p>
+                        <div id="detail-loop" class="hidden mt-4 pt-4 border-t border-stone-100">
+                            <pre class="text-xs">/loop 5m verificar se o deploy terminou</pre>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n="sec.bundled.loop.detail">Útil para monitorar deploys, babysit de PRs, ou re-executar outra skill periodicamente.</p>
+                        </div>
+                    </div>
+
+                    <!-- /debug -->
+                    <div onclick="showBundled('debug')" class="bundled-card cursor-pointer p-5 rounded-2xl border-2 border-stone-100 bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-sm font-bold" style="color:#4f46e5">/debug</code>
+                                <span class="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-semibold" data-i18n="sec.bundled.debug.badge">Diagnóstico</span>
+                            </div>
+                            <span id="toggle-debug" class="text-stone-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2" data-i18n="sec.bundled.debug.desc">Ativa logging de debug para a sessão atual e analisa o log para diagnosticar problemas.</p>
+                        <div id="detail-debug" class="hidden mt-4 pt-4 border-t border-stone-100">
+                            <pre class="text-xs">/debug o Claude parou de responder corretamente</pre>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n-html="sec.bundled.debug.detail">Debug está desligado por padrão. Executar <code>/debug</code> no meio de uma sessão começa a capturar logs a partir daquele ponto.</p>
+                        </div>
+                    </div>
+
+                    <!-- /claude-api -->
+                    <div onclick="showBundled('api')" class="bundled-card cursor-pointer p-5 rounded-2xl border-2 border-stone-100 bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-sm font-bold" style="color:#4f46e5">/claude-api</code>
+                                <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold" data-i18n="sec.bundled.api.badge">Auto-invocada</span>
+                            </div>
+                            <span id="toggle-api" class="text-stone-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2" data-i18n-html="sec.bundled.api.desc">Carrega referência da API Anthropic e Agent SDK. Ativa automaticamente quando o código importa <code class="font-mono bg-stone-100 px-1 rounded text-xs">anthropic</code> ou <code class="font-mono bg-stone-100 px-1 rounded text-xs">@anthropic-ai/sdk</code>.</p>
+                        <div id="detail-api" class="hidden mt-4 pt-4 border-t border-stone-100">
+                            <p class="text-xs text-stone-500" data-i18n="sec.bundled.api.detail">Exemplo clássico de invocação automática: você abre um arquivo que importa o SDK Anthropic e o Claude já sabe a documentação da API sem você precisar pedir.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 4: Modos de Invocação                               -->
+            <!-- ============================================================ -->
+            <section id="sec-invocacao" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🕹️</span> <span data-i18n="sec.invocacao.h2">Modos de Invocação</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.invocacao.intro">
+                        Dois campos de frontmatter controlam quem pode acionar uma skill. Entendê-los é fundamental para criar skills que se comportam como você espera.
+                    </p>
+                </div>
+
+                <!-- Invocation matrix -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm" data-i18n="sec.invocacao.matrix.title">Matriz de Invocação</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b-2 border-stone-200">
+                                    <th class="text-left py-3 pr-4 text-stone-500 font-semibold">Frontmatter</th>
+                                    <th class="text-center py-3 pr-4 text-stone-500 font-semibold" data-i18n="sec.invocacao.matrix.th.you">Você invoca</th>
+                                    <th class="text-center py-3 pr-4 text-stone-500 font-semibold" data-i18n="sec.invocacao.matrix.th.claude">Claude invoca</th>
+                                    <th class="text-left py-3 text-stone-500 font-semibold" data-i18n="sec.invocacao.matrix.th.when">Quando usar</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100">
+                                <tr class="invoke-row">
+                                    <td class="py-3 pr-4 font-mono text-stone-600" data-i18n="sec.invocacao.matrix.default.fm">(padrão)</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold" data-i18n="sec.invocacao.matrix.default.you">✅ Sim</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold" data-i18n="sec.invocacao.matrix.default.claude">✅ Sim</td>
+                                    <td class="py-3 text-stone-600" data-i18n="sec.invocacao.matrix.default.when">Skills de referência ou conhecimento que Claude deve aplicar quando relevante.</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-3 pr-4 font-mono" style="color:#4f46e5">disable-model-invocation: true</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold" data-i18n="sec.invocacao.matrix.disable.you">✅ Sim</td>
+                                    <td class="py-3 pr-4 text-center text-red-500 font-bold" data-i18n="sec.invocacao.matrix.disable.claude">❌ Não</td>
+                                    <td class="py-3 text-stone-600" data-i18n-html="sec.invocacao.matrix.disable.when">Workflows com efeitos colaterais: <code class="font-mono bg-stone-100 px-1 rounded">/deploy</code>, <code class="font-mono bg-stone-100 px-1 rounded">/commit</code>, <code class="font-mono bg-stone-100 px-1 rounded">/send-slack</code>. Você controla quando rodar.</td>
+                                </tr>
+                                <tr class="invoke-row">
+                                    <td class="py-3 pr-4 font-mono" style="color:#4f46e5">user-invocable: false</td>
+                                    <td class="py-3 pr-4 text-center text-red-500 font-bold" data-i18n="sec.invocacao.matrix.userinv.you">❌ Não</td>
+                                    <td class="py-3 pr-4 text-center text-emerald-600 font-bold" data-i18n="sec.invocacao.matrix.userinv.claude">✅ Sim</td>
+                                    <td class="py-3 text-stone-600" data-i18n-html="sec.invocacao.matrix.userinv.when">Conhecimento de contexto que Claude usa internamente. Ex: <code class="font-mono bg-stone-100 px-1 rounded">legacy-system-context</code>, não faz sentido como ação para o dev.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Examples side by side -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs font-bold text-stone-400 uppercase mb-2" data-i18n="sec.invocacao.example.manual.label">Skill manual: apenas você aciona</p>
+                        <pre class="text-xs">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">deploy</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Deploy para produção</span>
+<span style="color:#a5b4fc">disable-model-invocation</span>: <span style="color:#fb923c">true</span>
+---
+
+Deploy <span style="color:#fb923c">$ARGUMENTS</span> para produção:
+1. Rode os testes
+2. Build da aplicação
+3. Push para o target
+4. Verifique a saúde</pre>
+                        <p class="text-xs text-stone-500 mt-2" data-i18n-html="sec.invocacao.example.manual.note">O Claude <strong>nunca decide fazer um deploy por conta</strong> mesmo que o código pareça pronto.</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-stone-400 uppercase mb-2" data-i18n="sec.invocacao.example.context.label">Skill de contexto: apenas Claude usa</p>
+                        <pre class="text-xs">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">legacy-context</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Contexto do sistema legado.</span>
+<span style="color:#6ee7b7">  Use quando editar módulos de</span>
+<span style="color:#6ee7b7">  pagamento ou integração com SAP.</span>
+<span style="color:#a5b4fc">user-invocable</span>: <span style="color:#fb923c">false</span>
+---
+
+O módulo de pagamento usa SOAP
+porque o banco parceiro não suporta
+REST. Não tente refatorar para HTTP
+sem falar com o time de integração.</pre>
+                        <p class="text-xs text-stone-500 mt-2" data-i18n-html="sec.invocacao.example.context.note">O Claude carrega esse contexto ao trabalhar em pagamentos. <code>/legacy-context</code> não aparece no menu.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 5: Criando sua Skill                                 -->
+            <!-- ============================================================ -->
+            <section id="sec-criando" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🛠️</span> <span data-i18n="sec.criando.h2">Criando sua Skill</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.criando.intro">Do zero a uma skill funcional compartilhada com o time em 4 passos.</p>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-6">
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">1</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.1.title">Identifique uma tarefa que você já faz sequencialmente e poderia paralelizar</h4>
-                            <p class="text-sm text-stone-600" data-i18n="sec.proximos.step.1.desc">Exemplo clássico: review de PR. Em vez de pedir "revise meu código", use 3 subagentes com foco em segurança, performance e testes. Compare a qualidade do resultado.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.criando.step.1.title">Crie o diretório da skill</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.criando.step.1.desc">O nome do diretório vira o comando slash. <code class="font-mono bg-stone-100 px-1 rounded text-xs">review-pr/</code> → <code class="font-mono bg-stone-100 px-1 rounded text-xs">/review-pr</code>.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">mkdir -p .claude/skills/review-pr</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('mkdir -p .claude/skills/review-pr')" data-i18n="common.copy">copiar</button>
+                            </div>
                         </div>
                     </div>
 
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">2</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n-html="sec.proximos.step.2.title">Crie seu primeiro agente customizado em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/agents/</code></h4>
-                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.2.desc">Comece com um agente de review focado no domínio do seu projeto. Defina papel, ferramentas e formato de output.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n-html="sec.criando.step.2.title">Escreva o <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> com frontmatter</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.criando.step.2.desc">A <code class="font-mono bg-stone-100 px-1 rounded text-xs">description</code> é o campo mais importante: é ela que diz ao Claude quando usar a skill automaticamente.</p>
+                            <pre class="text-xs">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">review-pr</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Revisa PRs com foco em segurança</span>
+<span style="color:#6ee7b7">  e performance. Use ao revisar um</span>
+<span style="color:#6ee7b7">  pull request ou diff de código.</span>
+<span style="color:#a5b4fc">disable-model-invocation</span>: <span style="color:#fb923c">true</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Bash(gh *), Read</span>
+<span style="color:#a5b4fc">argument-hint</span>: <span style="color:#6ee7b7">[número-do-pr]</span>
+---
+
+Você é um revisor sênior deste projeto (NestJS + Prisma).
+Analise o PR <span style="color:#fb923c">$ARGUMENTS</span> verificando:
+
+- Segurança: inputs sem validação, segredos expostos
+- Performance: N+1 queries, loops custosos
+- Testes: casos de borda descobertos
+
+**Status**: ✅ Aprovado / ⚠️ Ajustes
+**Issues**: por severidade (Alta / Média / Baixa)</pre>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.criando.step.3.title">Teste e refine</h4>
+                            <p class="text-sm text-stone-600" data-i18n="sec.criando.step.3.desc">Execute com um PR real do time. Avalie se o output é preciso e específico para o seu stack. Itere 2–3 vezes na description e nas instruções até o resultado ser confiável.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.criando.step.4.title">Versione e compartilhe</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.criando.step.4.desc">Comite o diretório <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/skills/</code>. Ao clonar o repositório, todo dev já tem a skill disponível. Trate skills como documentação executável, atualize junto com o código.</p>
                             <div class="flex gap-2 items-center">
-                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">mkdir -p .claude/agents && touch .claude/agents/reviewer.md</pre>
-                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('mkdir -p .claude/agents && touch .claude/agents/reviewer.md')" data-i18n="sec.proximos.step.2.copy">copiar</button>
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">git add .claude/skills/review-pr/
+git commit -m "feat: add /review-pr skill"</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('git add .claude/skills/review-pr/\ngit commit -m \"feat: add /review-pr skill\"')" data-i18n="common.copy">copiar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- ============================================================ -->
+            <!-- SECTION 5.5: Sub-Skills & Índice                             -->
+            <!-- ============================================================ -->
+            <section id="sec-subskills" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🗃️</span> <span data-i18n="sec.subskills.h2">Sub-Skills &amp; o Padrão Índice</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.subskills.intro">
+                        Uma skill não precisa saber tudo de uma vez. Quando o domínio é grande (uma biblioteca UI, um sistema de design, uma API com dezenas de endpoints) carregar tudo no contexto seria desperdício. O <strong>Padrão Índice</strong> resolve isso: o <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> vira um mapa leve que aponta para arquivos detalhados. O Claude carrega apenas o que a tarefa requer.
+                    </p>
+                </div>
+
+                <!-- The problem -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div class="p-5 rounded-2xl border-2 border-red-100 bg-red-50">
+                        <h3 class="font-bold text-red-700 text-sm mb-3"><span>❌</span> <span data-i18n="sec.subskills.without.title">Sem o padrão índice</span></h3>
+                        <pre class="text-xs mb-3">.claude/skills/
+├── button/SKILL.md      <span style="color:#f87171"># 300 linhas</span>
+├── modal/SKILL.md       <span style="color:#f87171"># 280 linhas</span>
+├── table/SKILL.md       <span style="color:#f87171"># 420 linhas</span>
+├── data-grid/SKILL.md   <span style="color:#f87171"># 500 linhas</span>
+├── form/SKILL.md        <span style="color:#f87171"># 350 linhas</span>
+└── tooltip/SKILL.md     <span style="color:#f87171"># 180 linhas</span></pre>
+                        <p class="text-xs text-red-800 leading-relaxed" data-i18n="sec.subskills.without.desc">Todas as descriptions são carregadas no contexto ao iniciar a sessão. Com 6 skills detalhadas, você consome centenas de tokens antes de digitar uma linha.</p>
+                    </div>
+                    <div class="p-5 rounded-2xl border-2 border-emerald-200 bg-emerald-50">
+                        <h3 class="font-bold text-emerald-700 text-sm mb-3"><span>✅</span> <span data-i18n="sec.subskills.with.title">Com o padrão índice</span></h3>
+                        <pre class="text-xs mb-3">.claude/skills/
+└── <span style="color:#6ee7b7">ui-library/</span>
+    ├── <span style="color:#6ee7b7">SKILL.md</span>         <span style="color:#a7f3d0"># ~30 linhas · índice</span>
+    ├── button.md        <span style="color:#a7f3d0"># carregado sob demanda</span>
+    ├── modal.md         <span style="color:#a7f3d0"># carregado sob demanda</span>
+    ├── table.md         <span style="color:#a7f3d0"># carregado sob demanda</span>
+    ├── data-grid.md     <span style="color:#a7f3d0"># carregado sob demanda</span>
+    ├── form.md          <span style="color:#a7f3d0"># carregado sob demanda</span>
+    └── tooltip.md       <span style="color:#a7f3d0"># carregado sob demanda</span></pre>
+                        <p class="text-xs text-emerald-800 leading-relaxed" data-i18n-html="sec.subskills.with.desc">Apenas a description da skill <code class="font-mono bg-emerald-100 px-1 rounded">ui-library</code> entra no contexto inicial. O conteúdo detalhado de cada componente só é lido quando o Claude precisa.</p>
+                    </div>
+                </div>
+
+                <!-- How it works: flow diagram -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <h3 class="font-bold text-stone-800 mb-4 text-sm" data-i18n="sec.subskills.flow.title">Como funciona em runtime</h3>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#4f46e5">1</div>
+                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200 text-xs text-stone-700" data-i18n-html="sec.subskills.flow.step.1">
+                                <strong>Sessão inicia</strong>: apenas a description de <code class="font-mono bg-stone-100 px-1 rounded">ui-library</code> é carregada: <em>"Guia da biblioteca UI. Use ao trabalhar com Button, Modal, Table, DataGrid, Form, Tooltip."</em>
+                            </div>
+                        </div>
+                        <div class="ml-4 border-l-2 border-dashed border-stone-300 h-4"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#4f46e5">2</div>
+                            <div class="flex-1 p-3 bg-white rounded-lg border border-stone-200 text-xs text-stone-700" data-i18n-html="sec.subskills.flow.step.2">
+                                <strong>Você pede:</strong> <em>"Cria um DataGrid com seleção múltipla e ordenação por coluna"</em>
+                            </div>
+                        </div>
+                        <div class="ml-4 border-l-2 border-dashed border-stone-300 h-4"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#4f46e5">3</div>
+                            <div class="flex-1 p-3 bg-indigo-50 rounded-lg border border-indigo-100 text-xs text-indigo-800" data-i18n-html="sec.subskills.flow.step.3">
+                                <strong>Claude invoca a skill</strong> e lê o <code class="font-mono bg-indigo-100 px-1 rounded">SKILL.md</code> (índice). Identifica que a tarefa é sobre DataGrid → lê apenas <code class="font-mono bg-indigo-100 px-1 rounded">data-grid.md</code>.
+                            </div>
+                        </div>
+                        <div class="ml-4 border-l-2 border-dashed border-stone-300 h-4"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#059669">4</div>
+                            <div class="flex-1 p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-xs text-emerald-800" data-i18n-html="sec.subskills.flow.step.4">
+                                <strong>Executa a tarefa</strong> com conhecimento completo sobre DataGrid, sem ter carregado Button, Modal, Form ou qualquer outro componente.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The SKILL.md index template -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs font-bold text-stone-400 uppercase">.claude/skills/ui-library/SKILL.md · o índice</p>
+                        <button class="copy-btn" onclick="copyCode('subskill-index')" data-i18n="common.copy">copiar</button>
+                    </div>
+                    <pre id="subskill-index" class="text-xs leading-relaxed">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">ui-library</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Guia completo da biblioteca de componentes UI</span>
+<span style="color:#6ee7b7">  deste projeto. Use ao criar, editar ou entender</span>
+<span style="color:#6ee7b7">  qualquer componente: Button, Modal, Table,</span>
+<span style="color:#6ee7b7">  DataGrid, Form ou Tooltip.</span>
+---
+
+<span style="color:#78716c"># Esta skill é um índice. Leia o arquivo do componente</span>
+<span style="color:#78716c"># relevante antes de executar qualquer tarefa.</span>
+
+## Componentes disponíveis
+
+| Componente | Arquivo          | Quando carregar                          |
+|------------|-----------------|------------------------------------------|
+| Button     | [button.md](button.md)     | Props, variantes, acessibilidade         |
+| Modal      | [modal.md](modal.md)       | Portais, animações, foco trap            |
+| Table      | [table.md](table.md)       | Ordenação, paginação, seleção de linhas  |
+| DataGrid   | [data-grid.md](data-grid.md)  | Virtualização, edição inline, filtros    |
+| Form       | [form.md](form.md)         | Validação, campos controlados, submit    |
+| Tooltip    | [tooltip.md](tooltip.md)     | Posicionamento, delays, acessibilidade   |
+
+## Instruções
+
+1. Identifique qual componente é relevante para a tarefa
+2. Leia o arquivo correspondente da tabela acima
+3. Siga rigorosamente as convenções documentadas
+4. Se a tarefa envolver múltiplos componentes, leia cada arquivo
+
+<span style="color:#78716c"># Nunca assuma convenções, sempre leia o arquivo antes.</span></pre>
+                </div>
+
+                <!-- One sub-skill example -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs font-bold text-stone-400 uppercase">.claude/skills/ui-library/data-grid.md · sub-skill detalhada</p>
+                        <button class="copy-btn" onclick="copyCode('subskill-detail')" data-i18n="common.copy">copiar</button>
+                    </div>
+                    <pre id="subskill-detail" class="text-xs leading-relaxed"><span style="color:#78716c"># DataGrid · Guia completo</span>
+
+## Instalação e import
+<span style="color:#6ee7b7">import</span> { DataGrid } <span style="color:#6ee7b7">from</span> <span style="color:#fb923c">'@acme/ui/data-grid'</span>
+
+## Props obrigatórias
+- <span style="color:#a5b4fc">rows</span>: Row[]           <span style="color:#78716c">· dados da grade</span>
+- <span style="color:#a5b4fc">columns</span>: ColDef[]     <span style="color:#78716c">· definição de colunas</span>
+- <span style="color:#a5b4fc">rowId</span>: keyof Row      <span style="color:#78716c">· campo único por linha</span>
+
+## Seleção múltipla
+Ative com <span style="color:#a5b4fc">selectionMode="multiple"</span>.
+Use <span style="color:#a5b4fc">onSelectionChange</span> para capturar linhas selecionadas.
+<span style="color:#78716c">Não use selectedRows como state externo, o componente</span>
+<span style="color:#78716c">gerencia internamente. Use selectedRowIds para seed inicial.</span>
+
+## Ordenação
+Ative com <span style="color:#a5b4fc">sortable</span> em cada ColDef.
+Ordenação server-side: use <span style="color:#a5b4fc">onSortChange</span> + <span style="color:#a5b4fc">externalSort=true</span>.
+
+## Padrão obrigatório: loading state
+Sempre passe <span style="color:#a5b4fc">loading={isLoading}</span>.
+Nunca renderize DataGrid sem dados, use o esqueleto nativo.
+
+## Anti-patterns conhecidos
+- ❌ Não use índice de array como rowId, quebrará seleção
+- ❌ Não mute rows diretamente, sempre passe novo array</pre>
+                </div>
+
+                <!-- Insight box -->
+                <div class="p-5 rounded-xl border border-indigo-200 bg-indigo-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">💡</span>
+                    <div>
+                        <h4 class="font-bold text-indigo-900 mb-1" data-i18n="sec.subskills.insight.title">O ganho não é só tokens, é qualidade</h4>
+                        <p class="text-sm text-indigo-800 leading-relaxed" data-i18n-html="sec.subskills.insight.desc">Quando o Claude foca apenas no sub-skill relevante, ele lê o documento <em>inteiro e com atenção</em>, sem dividir atenção com 5 outros componentes que não têm nada a ver com a tarefa. O resultado é mais preciso, menos alucinação de props, e convenções seguidas corretamente.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 6: Padrões Avançados                                 -->
+            <!-- ============================================================ -->
+            <section id="sec-avancado" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.avancado.h2">Padrões Avançados</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.avancado.intro">Recursos que ampliam o que skills conseguem fazer além de instruções simples.</p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex gap-2 mb-6">
+                    <button onclick="showAdvTab('injection')" id="tab-injection" class="tab-btn active text-sm px-4 py-2 rounded-lg border border-stone-200" data-i18n="sec.avancado.tab.injection">Injeção de Contexto</button>
+                    <button onclick="showAdvTab('fork')" id="tab-fork" class="tab-btn text-sm px-4 py-2 rounded-lg border border-stone-200" data-i18n="sec.avancado.tab.fork">Subagente Isolado</button>
+                    <button onclick="showAdvTab('files')" id="tab-files" class="tab-btn text-sm px-4 py-2 rounded-lg border border-stone-200" data-i18n="sec.avancado.tab.files">Arquivos de Suporte</button>
+                </div>
+
+                <!-- Injection tab -->
+                <div id="adv-injection" class="block">
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n-html="sec.avancado.injection.intro">
+                        A sintaxe <code class="font-mono bg-stone-100 px-1 rounded text-xs">!`comando`</code> executa um shell command <strong>antes</strong> do conteúdo ser enviado ao Claude. O output substitui o placeholder. O Claude recebe dados reais, não o comando em si.
+                    </p>
+                    <pre class="text-xs mb-4">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">pr-summary</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Resume mudanças de um PR com contexto real</span>
+<span style="color:#a5b4fc">context</span>: <span style="color:#6ee7b7">fork</span>
+<span style="color:#a5b4fc">agent</span>: <span style="color:#6ee7b7">Explore</span>
+<span style="color:#a5b4fc">allowed-tools</span>: <span style="color:#6ee7b7">Bash(gh *)</span>
+---
+
+## Contexto do PR
+- Diff: <span style="color:#fb923c">!`gh pr diff`</span>
+- Comentários: <span style="color:#fb923c">!`gh pr view --comments`</span>
+- Arquivos mudados: <span style="color:#fb923c">!`gh pr diff --name-only`</span>
+
+## Tarefa
+Resuma este PR: o que mudou, por que,
+e quais riscos existem.</pre>
+                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 text-xs text-stone-600" data-i18n-html="sec.avancado.injection.how">
+                        <strong>Como funciona:</strong> Cada <code class="font-mono bg-white px-1 rounded">!`comando`</code> executa imediatamente (pré-processamento). O output é injetado no prompt. O Claude recebe o resultado final com dados reais, não vê os comandos em si.
+                    </div>
+                </div>
+
+                <!-- Fork tab -->
+                <div id="adv-fork" class="hidden">
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n-html="sec.avancado.fork.intro">
+                        <code class="font-mono bg-stone-100 px-1 rounded text-xs">context: fork</code> executa a skill em um <strong>subagente isolado</strong>. O conteúdo do <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> vira o prompt que direciona o subagente, sem acesso ao histórico da conversa principal.
+                    </p>
+                    <pre class="text-xs mb-4">---
+<span style="color:#a5b4fc">name</span>: <span style="color:#6ee7b7">deep-research</span>
+<span style="color:#a5b4fc">description</span>: <span style="color:#6ee7b7">Pesquisa profunda em um tópico do codebase</span>
+<span style="color:#a5b4fc">context</span>: <span style="color:#6ee7b7">fork</span>
+<span style="color:#a5b4fc">agent</span>: <span style="color:#6ee7b7">Explore</span>
+---
+
+Pesquise <span style="color:#fb923c">$ARGUMENTS</span> em profundidade:
+
+1. Use Glob e Grep para encontrar arquivos relevantes
+2. Leia e analise o código
+3. Resuma os achados com referências de arquivo</pre>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                            <strong class="text-indigo-700 block mb-1" data-i18n="sec.avancado.fork.card.1.title">1. Contexto isolado</strong>
+                            <p class="text-indigo-800" data-i18n="sec.avancado.fork.card.1.desc">Subagente não tem acesso ao histórico da sessão principal.</p>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                            <strong class="text-indigo-700 block mb-1" data-i18n="sec.avancado.fork.card.2.title">2. Agent define ferramentas</strong>
+                            <p class="text-indigo-800" data-i18n-html="sec.avancado.fork.card.2.desc"><code>agent: Explore</code> → ferramentas de leitura otimizadas para exploração.</p>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                            <strong class="text-indigo-700 block mb-1" data-i18n="sec.avancado.fork.card.3.title">3. Resultado retorna</strong>
+                            <p class="text-indigo-800" data-i18n="sec.avancado.fork.card.3.desc">O output do subagente é resumido e devolvido para a conversa principal.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Files tab -->
+                <div id="adv-files" class="hidden">
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n-html="sec.avancado.files.intro">
+                        O diretório da skill pode ter arquivos de suporte. O <code class="font-mono bg-stone-100 px-1 rounded text-xs">SKILL.md</code> referencia eles, e o Claude os carrega <strong>somente quando necessário</strong>, mantendo o contexto enxuto.
+                    </p>
+                    <pre class="text-xs mb-4">.claude/skills/review-pr/
+├── <span style="color:#6ee7b7">SKILL.md</span>           <span style="color:#78716c"># instrução principal (máx. 500 linhas recomendado)</span>
+├── <span style="color:#fbbf24">security-rules.md</span>  <span style="color:#78716c"># OWASP Top 10 detalhado · carregado quando necessário</span>
+├── <span style="color:#fbbf24">examples.md</span>        <span style="color:#78716c"># exemplos de output esperado</span>
+└── scripts/
+    └── <span style="color:#fbbf24">fetch-pr.sh</span>    <span style="color:#78716c"># script executável · não carregado, executado</span></pre>
+                    <p class="text-xs font-bold text-stone-400 uppercase mb-2" data-i18n="sec.avancado.files.ref.label">Referenciando em SKILL.md</p>
+                    <pre class="text-xs">## Recursos adicionais
+
+Para regras completas de segurança, veja
+[security-rules.md](security-rules.md).
+
+Para exemplos de output esperado, veja
+[examples.md](examples.md).</pre>
+                    <p class="text-xs text-stone-500 mt-3" data-i18n="sec.avancado.files.note">Documentação detalhada, specs de API, ou coleções de exemplos não precisam ser carregados toda vez que a skill roda. Isso evita consumo desnecessário de contexto.</p>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 7: Limites & Cuidados                                -->
+            <!-- ============================================================ -->
+            <section id="sec-limites" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.limites.h2">Limites &amp; Cuidados</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.limites.intro">Skills mal configuradas criam comportamentos inesperados, especialmente com invocação automática.</p>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-8">
+                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl">
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.limites.anti.1.title">Description vaga → Claude usa quando não deve</span></h4>
+                        <pre class="text-xs">description: Analisa código.</pre>
+                        <p class="text-xs text-red-800 mt-2" data-i18n="sec.limites.anti.1.desc">O Claude vai interpretar isso como relevante para qualquer coisa envolvendo código, e a skill dispara em contextos que você não previa.</p>
+                    </div>
+                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.fix.1.title">Description com gatilhos específicos</span></h4>
+                        <pre class="text-xs">description: Revisa PRs de APIs REST em busca de problemas de
+  segurança e performance. Use ao revisar um pull request ou
+  quando o usuário pedir para analisar um diff.</pre>
+                    </div>
+
+                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
+                        <h4 class="font-bold text-red-700 text-sm mb-2" data-i18n-html="sec.limites.anti.2.title"><span>❌</span> Skill de deploy sem <code class="font-mono bg-red-100 px-1 rounded">disable-model-invocation</code></h4>
+                        <p class="text-xs text-red-800" data-i18n-html="sec.limites.anti.2.desc">O Claude pode decidir executar um deploy por conta própria ao detectar que "o código parece pronto". Workflows com efeitos colaterais irreversíveis <strong>sempre</strong> precisam de <code class="font-mono bg-red-100 px-1 rounded text-xs">disable-model-invocation: true</code>.</p>
+                    </div>
+                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.limites.fix.2.title">Separar skills de conhecimento de skills de ação</span></h4>
+                        <p class="text-xs text-emerald-800" data-i18n-html="sec.limites.fix.2.desc">Skills que <em>informam</em> (convenções, contexto legado) → deixe o Claude invocar. Skills que <em>agem</em> (deploy, commit, enviar mensagem) → <code class="font-mono bg-emerald-100 px-1 rounded text-xs">disable-model-invocation: true</code>.</p>
+                    </div>
+
+                    <div class="antipattern-wrong p-4 bg-red-50 rounded-xl mt-2">
+                        <h4 class="font-bold text-red-700 text-sm mb-2" data-i18n-html="sec.limites.anti.3.title"><span>❌</span> Skill com <code class="font-mono bg-red-100 px-1 rounded">context: fork</code> sem tarefa clara</h4>
+                        <p class="text-xs text-red-800" data-i18n-html="sec.limites.anti.3.desc">Um <code class="font-mono bg-red-100 px-1 rounded text-xs">context: fork</code> em uma skill de guias de estilo ("use estas convenções…") faz o subagente receber diretrizes mas nenhuma tarefa acionável. Retorna sem fazer nada.</p>
+                    </div>
+                    <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2" data-i18n-html="sec.limites.fix.3.title"><span>✅</span> <code class="font-mono bg-emerald-100 px-1 rounded">context: fork</code> apenas para tarefas com instruções explícitas</h4>
+                        <p class="text-xs text-emerald-800" data-i18n="sec.limites.fix.3.desc">Use fork para skills que têm uma tarefa clara: pesquisa, geração de relatório, execução de script. Para conhecimento de referência, use o modo padrão (inline).</p>
+                    </div>
+                </div>
+
+                <!-- Warning -->
+                <div class="p-5 rounded-xl border border-amber-200 bg-amber-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">🧠</span>
+                    <div>
+                        <h4 class="font-bold text-amber-900 mb-1" data-i18n="sec.limites.budget.title">Budget de contexto de skills</h4>
+                        <p class="text-sm text-amber-800 leading-relaxed" data-i18n-html="sec.limites.budget.desc">As descriptions das skills são carregadas no contexto para o Claude saber o que está disponível. Com muitas skills, elas podem exceder o budget (2% da janela de contexto, máx. ~16.000 chars). Execute <code class="font-mono bg-amber-100 px-1 rounded text-xs">/context</code> para verificar se há skills sendo excluídas.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 8: Próximos Passos                                   -->
+            <!-- ============================================================ -->
+            <section id="sec-proximos" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📋</span> <span data-i18n="sec.proximos.h2">Próximos Passos</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.proximos.intro">Uma skill simples esta semana. Um catálogo do time no próximo mês.</p>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-8">
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.1.title">Explore as skills nativas que já estão disponíveis</h4>
+                            <p class="text-sm text-stone-600 mb-2" data-i18n-html="sec.proximos.step.1.desc">Antes de criar qualquer coisa, teste <code class="font-mono bg-stone-100 px-1 rounded text-xs">/simplify</code> no seu projeto atual. Veja como o padrão de skill funciona na prática.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">/simplify</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('/simplify')" data-i18n="common.copy">copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.2.title">Crie sua primeira skill de conhecimento</h4>
+                            <p class="text-sm text-stone-600 mb-2" data-i18n="sec.proximos.step.2.desc">Comece com uma skill de contexto sem efeitos colaterais. Ex: convenções do seu projeto que o Claude deve sempre respeitar ao editar código.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">mkdir -p .claude/skills/project-conventions
+touch .claude/skills/project-conventions/SKILL.md</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('mkdir -p .claude/skills/project-conventions\ntouch .claude/skills/project-conventions/SKILL.md')" data-i18n="common.copy">copiar</button>
                             </div>
                         </div>
                     </div>
@@ -931,28 +1030,24 @@ Agente 2 (executor, contexto zerado): "Implemente o
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">3</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.3.title">Experimente o padrão "Plan Then Build" numa tarefa real</h4>
-                            <p class="text-sm text-stone-600" data-i18n="sec.proximos.step.3.desc">Use um agente para criar o plano, cole o resultado num segundo agente fresco para executar. Observe a diferença em precisão e qualidade versus fazer tudo numa sessão só.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n-html="sec.proximos.step.3.title">Crie uma skill de ação com <code class="font-mono bg-stone-100 px-1 rounded text-xs">disable-model-invocation: true</code></h4>
+                            <p class="text-sm text-stone-600" data-i18n-html="sec.proximos.step.3.desc">Escolha uma tarefa que você repete manualmente: review de PR, mensagem de commit, checklist de deploy. Configure <code class="font-mono bg-stone-100 px-1 rounded text-xs">disable-model-invocation: true</code> para manter controle total.</p>
                         </div>
                     </div>
 
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">4</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.4.title">Agent Teams: ative em modo experimental e teste com review paralelo</h4>
-                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.4.desc">Quando se sentir confortável com subagentes, experimente Agent Teams num PR real. Defina ownership claro de arquivos antes de iniciar.</p>
-                            <div class="flex gap-2 items-center">
-                                <pre class="flex-1 m-0 rounded text-xs" style="background:#1c1917">export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</pre>
-                                <button class="copy-btn flex-shrink-0" onclick="navigator.clipboard.writeText('export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1')" data-i18n="sec.proximos.step.4.copy">copiar</button>
-                            </div>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.4.title">Construa o catálogo com o time</h4>
+                            <p class="text-sm text-stone-600" data-i18n-html="sec.proximos.step.4.desc">Faça uma sessão de 30 min: "Qual tarefa repetitiva você quer delegar?" Cada resposta é uma skill em potencial. Distribua a criação, faça commit de <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/skills/</code> e compartilhe via git.</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Closing mantra -->
-                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl shadow-xl" style="border-left: 8px solid #c026d3">
-                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#e879f9" data-i18n="sec.proximos.mantra.label">Mantra da Parte 7:</h4>
-                    <p class="text-lg italic font-serif" data-i18n="sec.proximos.mantra.text">"Em sistemas multi-agentes, sua contribuição mais valiosa não é escrever código, é especificar o problema com clareza suficiente para que vários agentes resolvam partes independentes sem se atrapalharem."</p>
+                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl shadow-xl" style="border-left: 8px solid #4f46e5">
+                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#a5b4fc" data-i18n="sec.proximos.mantra.label">Mantra da Parte 7:</h4>
+                    <p class="text-lg italic font-serif" data-i18n="sec.proximos.mantra.text">"Uma skill bem descrita não é um atalho. É o Claude aprendendo quando e como ajudar, sem você precisar pedir."</p>
                 </div>
             </section>
 
@@ -972,119 +1067,87 @@ Agente 2 (executor, contexto zerado): "Implemente o
     </div>
 
     <script>
-        // ── Agent file selector ────────────────────────────────────────────
-        const agentPaths = {
-            'pm': 'project-manager',
-            'researcher': 'researcher',
-            'programmer': 'programmer',
-            'code-reviewer': 'code-reviewer',
-            'security-reviewer': 'security-reviewer',
-            'secretary': 'secretary'
+        // Navigation handled by nav.js, no page-specific hook needed
+
+        // ── Frontmatter annotation data ───────────────────────────────────
+        const fmData = {
+            name: {
+                icon: '🏷️',
+                title: 'name',
+                desc: 'Define o nome da skill e o comando slash. Se omitido, usa o nome do diretório. Aceita letras minúsculas, números e hífens (máx. 64 caracteres).',
+                tip: 'O nome do diretório e o campo name devem ser iguais. review-pr/ → name: review-pr → /review-pr.'
+            },
+            desc: {
+                icon: '🎯',
+                title: 'description',
+                desc: 'O campo mais crítico. É com base nele que o Claude decide carregar a skill automaticamente quando é relevante para o que você pediu.',
+                tip: 'Inclua gatilhos explícitos: "Use quando o usuário perguntar X" ou "Ative ao editar arquivos em src/payments/". Quanto mais específico, menos falsos positivos.'
+            },
+            dim: {
+                icon: '🔒',
+                title: 'disable-model-invocation',
+                desc: 'Quando true, o Claude nunca invoca esta skill por conta própria. Apenas você pode acioná-la com /nome-da-skill.',
+                tip: 'Use sempre em skills com efeitos colaterais: /deploy, /commit, /send-slack. Você não quer que o Claude decida fazer um deploy porque o código "parece pronto".'
+            },
+            tools: {
+                icon: '🔧',
+                title: 'allowed-tools',
+                desc: 'Ferramentas que o Claude pode usar sem pedir permissão quando esta skill está ativa. Restringe o escopo de acesso.',
+                tip: 'Use Bash(gh *) para permitir apenas comandos GitHub CLI. Use Read, Grep para skills de análise somente leitura. Princípio do menor privilégio.'
+            },
+            hint: {
+                icon: '💬',
+                title: 'argument-hint',
+                desc: 'Texto exibido no autocomplete quando o dev digita / para mostrar quais argumentos a skill espera.',
+                tip: 'Exemplos: [número-do-pr], [filename] [format], [issue-number]. Ajuda devs que não memorizam os argumentos.'
+            },
+            ref: {
+                icon: '📎',
+                title: 'Arquivos de suporte referenciados',
+                desc: 'Links para arquivos no diretório da skill. O Claude os carrega somente quando necessário, mantendo o contexto principal enxuto.',
+                tip: 'Mantenha SKILL.md abaixo de 500 linhas. Mova documentação detalhada, specs e exemplos para arquivos separados e referencie aqui.'
+            }
         };
-        let currentAgentKey = 'pm';
-        function showAgent(key) {
-            document.querySelectorAll('.agent-code').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.agent-tab').forEach(el => el.classList.remove('active'));
-            document.getElementById(`agentcode-${key}`).classList.remove('hidden');
-            document.getElementById(`agentbtn-${key}`).classList.add('active');
-            document.getElementById('agent-filepath').textContent = `.claude/agents/${agentPaths[key]}.md`;
-            currentAgentKey = key;
-        }
-        function copyCurrentAgent() {
-            const pre = document.getElementById(`agentcode-${currentAgentKey}`);
-            navigator.clipboard.writeText(pre.innerText);
+
+        function showFm(key) {
+            const data = fmData[key];
+            document.querySelectorAll('.fm-line').forEach(l => l.classList.remove('active'));
+            document.getElementById(`fm-${key}`)?.classList.add('active');
+            document.getElementById('fm-default').classList.add('hidden');
+            document.getElementById('fm-content').classList.remove('hidden');
+            document.getElementById('fm-icon').textContent = data.icon;
+            document.getElementById('fm-title').textContent = data.title;
+            document.getElementById('fm-desc-text').textContent = data.desc;
+            document.getElementById('fm-tip').textContent = '💡 ' + data.tip;
         }
 
-        // ── Subagentes tabs ────────────────────────────────────────────────
-        function showSubTab(tab) {
-            ['parallel', 'pipeline'].forEach(t => {
-                document.getElementById(`submode-${t}`).classList.add('hidden');
-                document.getElementById(`subtab-${t}`).classList.remove('active');
+        // ── Bundled skills accordion ──────────────────────────────────────
+        const openBundled = new Set();
+        function showBundled(key) {
+            const detail = document.getElementById(`detail-${key}`);
+            const toggle = document.getElementById(`toggle-${key}`);
+            if (openBundled.has(key)) {
+                detail.classList.add('hidden');
+                toggle.textContent = '▼';
+                openBundled.delete(key);
+            } else {
+                detail.classList.remove('hidden');
+                toggle.textContent = '▲';
+                openBundled.add(key);
+            }
+        }
+
+        // ── Advanced tabs ─────────────────────────────────────────────────
+        function showAdvTab(tab) {
+            ['injection', 'fork', 'files'].forEach(t => {
+                document.getElementById(`adv-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('active');
             });
-            document.getElementById(`submode-${tab}`).classList.remove('hidden');
-            document.getElementById(`subtab-${tab}`).classList.add('active');
-        }
-
-        // ── Navigation hook (nav.js handles core logic) ─────────────
-        window.onNavigate = function(sectionId) {
-            if (sectionId === 'porque' && !window.perfChartInit) initPerfChart();
-        };
-
-        // ── Performance chart ──────────────────────────────────────────────
-        function initPerfChart() {
-            window.perfChartInit = true;
-            const ctx = document.getElementById('perfChart').getContext('2d');
-            window.perfChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: [
-                        'Qualidade do\nResultado',
-                        'Cobertura de\nArquivos',
-                        'Detecção de\nBugs',
-                        'Research\nComplexo'
-                    ],
-                    datasets: [
-                        {
-                            label: 'Agente Único',
-                            data: [52, 40, 48, 35],
-                            backgroundColor: 'rgba(214, 211, 209, 0.9)',
-                            borderRadius: 4,
-                        },
-                        {
-                            label: 'Multi-Agente (Subagentes)',
-                            data: [78, 82, 79, 72],
-                            backgroundColor: 'rgba(192, 38, 211, 0.5)',
-                            borderRadius: 4,
-                        },
-                        {
-                            label: 'Multi-Agente (Orchestrator + Sonnet)',
-                            data: [99, 95, 97, 98],
-                            backgroundColor: '#c026d3',
-                            borderRadius: 4,
-                        }
-                    ]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: { display: true, text: 'Score relativo (%)' }
-                        }
-                    },
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}%`
-                            }
-                        }
-                    }
-                }
-            });
+            document.getElementById(`adv-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('active');
         }
 
         // copyCode() provided by nav.js
-
-        // ── i18n: update chart labels on language change ─────────────────
-        window.addEventListener('i18n:applied', ({ detail: { t } }) => {
-            if (window.perfChart) {
-                const chart = window.perfChart;
-                chart.data.labels = [
-                    t('chart.label.quality') || 'Qualidade do\nResultado',
-                    t('chart.label.coverage') || 'Cobertura de\nArquivos',
-                    t('chart.label.bugs') || 'Detecção de\nBugs',
-                    t('chart.label.research') || 'Research\nComplexo'
-                ];
-                chart.data.datasets[0].label = t('chart.dataset.single') || 'Agente Único';
-                chart.data.datasets[1].label = t('chart.dataset.subagents') || 'Multi-Agente (Subagentes)';
-                chart.data.datasets[2].label = t('chart.dataset.orchestrator') || 'Multi-Agente (Orchestrator + Sonnet)';
-                chart.options.scales.y.title.text = t('chart.yAxis') || 'Score relativo (%)';
-                chart.update();
-            }
-        });
 
         // Init handled by nav.js (auto-navigates to hash or first section)
     </script>

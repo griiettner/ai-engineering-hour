@@ -114,7 +114,7 @@
                     </h2>
                     <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.tools.intro">
                         O primeiro passo para aumentar a produtividade com IA é <strong>sair do chat do navegador</strong>.
-                        Cada interface tem um propósito diferente — usar a errada cria fricção desnecessária e ignora os
+                        Cada interface tem um propósito diferente, e usar a errada cria fricção desnecessária e ignora os
                         guardrails que você definiu para o projeto.
                     </p>
                 </div>
@@ -128,7 +128,7 @@
                         <p class="text-xs text-stone-500 font-mono mb-3" data-i18n="sec.tools.card.ide.subtitle">Cursor / VS Code + Copilot</p>
                         <ul class="text-sm text-stone-700 space-y-2 flex-1">
                             <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> <span data-i18n="sec.tools.card.ide.li.1">Código gerado já respeita seu padrão</span></li>
-                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> <span data-i18n="sec.tools.card.ide.li.2">Sem copiar/colar — edita direto no arquivo</span></li>
+                            <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> <span data-i18n="sec.tools.card.ide.li.2">Sem copiar/colar, edita direto no arquivo</span></li>
                             <li class="flex items-start gap-2"><span class="text-accent-green">✅</span> <span data-i18n="sec.tools.card.ide.li.3">Autocomplete ciente de todo o codebase</span></li>
                         </ul>
                         <div class="mt-4 pt-3 border-t border-stone-200 text-[11px] text-stone-500" data-i18n-html="sec.tools.card.ide.usewhen">
@@ -178,7 +178,7 @@
                             Devs experientes usam os três. <strong class="text-white">Web</strong> para pensar,
                             <strong class="text-white">IDE</strong> para construir,
                             <strong class="text-white">CLI</strong> para automatizar.
-                            O erro mais comum é tentar construir código de produção no Web — sem contexto, sem guardrails, sem rastreabilidade.
+                            O erro mais comum é tentar construir código de produção no Web: sem contexto, sem guardrails, sem rastreabilidade.
                         </p>
                     </div>
                 </div>
@@ -193,7 +193,7 @@
                     <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.context.intro">
                         Por que a IA "começa a falar bobagem" em conversas longas? Porque ela tem uma
                         <strong>memória de curto prazo finita</strong>, medida em tokens. Quando esse espaço se esgota,
-                        ela descarta as informações mais antigas — incluindo seus guardrails.
+                        ela descarta as informações mais antigas, incluindo seus guardrails.
                     </p>
                 </div>
 
@@ -204,13 +204,13 @@
                             <p class="text-sm text-stone-600 mb-4" data-i18n-html="sec.context.token.desc">
                                 Pedaços de palavras processados pelo modelo. Em média,
                                 <strong>1.000 tokens ≈ 750 palavras</strong>.
-                                Claude tem uma janela de <strong>200k tokens</strong> — mas atenção seletiva importa mais do que tamanho bruto.
+                                Claude tem uma janela de <strong>200k tokens</strong>, mas atenção seletiva importa mais do que tamanho bruto.
                             </p>
 
                             <h3 class="font-bold text-lg mb-2 text-stone-800" data-i18n="sec.context.memory.title">A "Memória de Curto Prazo"</h3>
                             <p class="text-sm text-stone-600 mb-4" data-i18n-html="sec.context.memory.desc">
                                 Quando projeto + histórico de conversa excedem a janela, a IA começa a
-                                <strong>descartar as instruções do início</strong> — exatamente onde ficam seus guardrails e regras de projeto.
+                                <strong>descartar as instruções do início</strong>, exatamente onde ficam seus guardrails e regras de projeto.
                             </p>
 
                             <div class="bg-red-50 text-accent-red p-3 rounded-lg text-sm border border-red-100 flex gap-2 mb-4">
@@ -248,7 +248,7 @@
                                 <canvas id="contextChart"></canvas>
                             </div>
                             <p id="context-caption" class="text-xs text-center text-stone-500 italic" data-i18n="sec.context.caption.dirty">
-                                65% dos tokens gastos com ruído — a IA "vê" mal o código que importa.
+                                65% dos tokens gastos com ruído. A IA "vê" mal o código que importa.
                             </p>
                         </div>
                     </div>
@@ -262,7 +262,7 @@
                         <span>🛡️</span> <span data-i18n="sec.guardrails.h2">Guardrails por Ferramenta</span>
                     </h2>
                     <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.guardrails.intro">
-                        Cada ferramenta lê as regras do projeto de um arquivo diferente — mas o objetivo é sempre o mesmo:
+                        Cada ferramenta lê as regras do projeto de um arquivo diferente, mas o objetivo é sempre o mesmo:
                         dar uma <strong>bússola</strong> à IA para que o código gerado já saia alinhado com os padrões do time.
                     </p>
                 </div>
@@ -287,13 +287,13 @@
                     <!-- CLAUDE.md panel -->
                     <div id="gpanel-claude" class="guardrail-panel block">
                         <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex justify-between items-center">
-                            <span class="font-mono text-xs font-bold text-stone-700">📄 CLAUDE.md — Claude Code</span>
+                            <span class="font-mono text-xs font-bold text-stone-700">📄 CLAUDE.md | Claude Code</span>
                             <button onclick="copyGuardrail('claude')" id="copybtn-claude"
                                 class="text-xs bg-white border border-stone-300 px-2 py-1 rounded hover:bg-stone-50 transition-colors flex items-center gap-1">
                                 <span>📋</span> <span data-i18n="sec.guardrails.copy">Copiar</span>
                             </button>
                         </div>
-                        <pre id="code-claude" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-emerald-400"># Regras do Engenheiro Sênior — Projeto X</span>
+                        <pre id="code-claude" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-emerald-400"># Regras do Engenheiro Sênior: Projeto X</span>
 
 <span class="text-blue-400">## Perfil</span>
 - Você é um Engenheiro de Software Sênior especializado em TypeScript e Clean Architecture.
@@ -317,20 +317,20 @@
                     <!-- .cursorrules panel -->
                     <div id="gpanel-cursor" class="guardrail-panel hidden">
                         <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex justify-between items-center">
-                            <span class="font-mono text-xs font-bold text-stone-700">📄 .cursorrules — Cursor IDE</span>
+                            <span class="font-mono text-xs font-bold text-stone-700">📄 .cursorrules | Cursor IDE</span>
                             <button onclick="copyGuardrail('cursor')" id="copybtn-cursor"
                                 class="text-xs bg-white border border-stone-300 px-2 py-1 rounded hover:bg-stone-50 transition-colors flex items-center gap-1">
                                 <span>📋</span> <span data-i18n="sec.guardrails.copy">Copiar</span>
                             </button>
                         </div>
-                        <pre id="code-cursor" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-stone-400"># Cursor Rules — Projeto X</span>
+                        <pre id="code-cursor" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-stone-400"># Cursor Rules: Projeto X</span>
 
 <span class="text-violet-400">You are a Senior TypeScript engineer. Follow these rules strictly:</span>
 
 <span class="text-blue-400">## Code Style</span>
 - Never use `any`. Prefer `unknown` for unsafe types.
 - All async functions must have explicit return types.
-- Use dependency injection — never instantiate services inline.
+- Use dependency injection, never instantiate services inline.
 
 <span class="text-blue-400">## Architecture</span>
 - Feature Folders pattern: keep domain logic inside `src/features/`.
@@ -340,24 +340,24 @@
 - Always suggest a Vitest skeleton for new functionality.
 - Mocks must use `vi.fn()`, never manual class overrides.</pre>
                         <div class="p-4 bg-white text-sm text-stone-600 border-t border-stone-200" data-i18n-html="sec.guardrails.cursor.note">
-                            O Cursor também suporta regras por pasta em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.cursor/rules/*.mdc</code> — útil para regras específicas por domínio.
+                            O Cursor também suporta regras por pasta em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.cursor/rules/*.mdc</code>, útil para regras específicas por domínio.
                         </div>
                     </div>
 
                     <!-- copilot panel -->
                     <div id="gpanel-copilot" class="guardrail-panel hidden">
                         <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex justify-between items-center">
-                            <span class="font-mono text-xs font-bold text-stone-700">📄 .github/copilot-instructions.md — GitHub Copilot</span>
+                            <span class="font-mono text-xs font-bold text-stone-700">📄 .github/copilot-instructions.md | GitHub Copilot</span>
                             <button onclick="copyGuardrail('copilot')" id="copybtn-copilot"
                                 class="text-xs bg-white border border-stone-300 px-2 py-1 rounded hover:bg-stone-50 transition-colors flex items-center gap-1">
                                 <span>📋</span> <span data-i18n="sec.guardrails.copy">Copiar</span>
                             </button>
                         </div>
-                        <pre id="code-copilot" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-stone-400"># GitHub Copilot Instructions — Projeto X</span>
+                        <pre id="code-copilot" class="m-0 rounded-none border-0 font-mono text-sm"><span class="text-stone-400"># GitHub Copilot Instructions: Projeto X</span>
 
 <span class="text-blue-400">## Language and Stack</span>
 - TypeScript only. No JavaScript files should be created.
-- Use React 19 functional components with hooks — no class components.
+- Use React 19 functional components with hooks, no class components.
 - State management: Zustand. Do not suggest Redux or Context API.
 
 <span class="text-blue-400">## Code Conventions</span>
@@ -388,7 +388,7 @@
                     </h2>
                     <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.trio.intro">
                         Antes de pedir à IA para escrever a primeira linha de código, garanta que ela conheça o terreno.
-                        Três arquivos simples servem de <strong>âncora de contexto</strong> — evitando sugestões fora do padrão,
+                        Três arquivos simples servem de <strong>âncora de contexto</strong>, evitando sugestões fora do padrão,
                         versões erradas de libs, e estruturas incompatíveis com o projeto.
                     </p>
                 </div>
@@ -425,7 +425,7 @@
                                     <strong>Objetivo:</strong> Evita que a IA sugira React 17 quando você usa 19, ou instale <code>axios</code> quando o projeto já usa <code>ky</code>.
                                 </div>
                             </div>
-                            <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Tech Stack — Projeto X</span>
+                            <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Tech Stack: Projeto X</span>
 
 <span class="text-blue-400">## Frontend</span>
 - React 19.0 + TypeScript 5.4
@@ -448,7 +448,7 @@
                                     <strong>Objetivo:</strong> Se diz "Feature Folders", a IA não criará arquivos soltos em <code>/controllers</code> ou <code>/views</code> gigantes.
                                 </div>
                             </div>
-                            <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Architecture — Projeto X</span>
+                            <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Architecture: Projeto X</span>
 
 <span class="text-blue-400">## Padrão: Feature Folders</span>
 src/
@@ -463,7 +463,7 @@ src/
     errors/             <span class="text-stone-500"># Result types</span>
 
 <span class="text-blue-400">## Regras</span>
-- Controllers são adaptadores finos — zero lógica de negócio.
+- Controllers são adaptadores finos, zero lógica de negócio.
 - Serviços recebem dependências via parâmetro (sem instanciar).</pre>
                         </div>
 
@@ -476,7 +476,7 @@ src/
                                     <strong>Objetivo:</strong> Mantém a IA focada no "o que" estamos construindo. Impede que ignore casos de borda cruciais ou proponha soluções que não atendem o usuário real.
                                 </div>
                             </div>
-                            <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Requirements — Feature: Autenticação</span>
+                            <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Requirements: Feature: Autenticação</span>
 
 <span class="text-blue-400">## Fluxo Principal</span>
 1. Usuário envia email + senha via POST /auth/login
@@ -489,8 +489,8 @@ src/
 - Refresh token rotativo: invalidar o anterior ao emitir novo
 
 <span class="text-blue-400">## Fora do Escopo (v1)</span>
-- OAuth / SSO — será na v2
-- 2FA — será na v2</pre>
+- OAuth / SSO (será na v2)
+- 2FA (será na v2)</pre>
                         </div>
                     </div>
                 </div>
@@ -537,7 +537,7 @@ src/
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
                                 <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> <span data-i18n="sec.antipatterns.2.wrong.title">Corrigir Só no Chat</span></h4>
-                                <p class="text-sm text-red-700 mb-3" data-i18n-html="sec.antipatterns.2.wrong.desc">Quando a IA usa <code>axios</code> e você quer <code>ky</code>, você fala no chat — e na próxima sessão ela usa <code>axios</code> de novo.</p>
+                                <p class="text-sm text-red-700 mb-3" data-i18n-html="sec.antipatterns.2.wrong.desc">Quando a IA usa <code>axios</code> e você quer <code>ky</code>, você fala no chat, e na próxima sessão ela usa <code>axios</code> de novo.</p>
                                 <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-600 italic" data-i18n-html="sec.antipatterns.2.wrong.example">
                                     "Não, use ky ao invés de axios"
                                     <span class="block mt-1 text-red-500 font-semibold">→ Correto apenas nesta mensagem.</span>
@@ -582,7 +582,7 @@ src/
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="antipattern-wrong bg-red-50 rounded-xl p-5">
                                 <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2"><span>❌</span> <span data-i18n="sec.antipatterns.4.wrong.title">Aceitar Sem Ler</span></h4>
-                                <p class="text-sm text-red-700 mb-3" data-i18n="sec.antipatterns.4.wrong.desc">Aprovar o código gerado sem entender a intenção — criando dívida técnica oculta que ninguém consegue manter depois.</p>
+                                <p class="text-sm text-red-700 mb-3" data-i18n="sec.antipatterns.4.wrong.desc">Aprovar o código gerado sem entender a intenção, criando dívida técnica oculta que ninguém consegue manter depois.</p>
                                 <div class="bg-white rounded-lg p-3 border border-red-100 text-xs text-stone-500 italic" data-i18n="sec.antipatterns.4.wrong.example">
                                     "Parece certo, aceitar tudo." → 3 semanas depois ninguém sabe por que aquele código existe.
                                 </div>
@@ -626,7 +626,7 @@ src/
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">2</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.workflow.step.2.title">O "Check-in" — Primeiro Prompt</h4>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.workflow.step.2.title">O "Check-in": Primeiro Prompt</h4>
                             <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.workflow.step.2.desc">Sempre contextualize a IA com os arquivos âncora <em>antes</em> de pedir a tarefa. Não presuma que ela lembrou da sessão anterior.</p>
                             <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
                                 <span class="text-lg flex-shrink-0">💬</span>
@@ -664,7 +664,7 @@ src/
                         <div class="flex-1">
                             <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.workflow.step.5.title">Fechando a Sessão</h4>
                             <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.workflow.step.5.desc">
-                                Sessões longas degradam. Detecte os sinais — IA repetindo erros já corrigidos, ignorando regras, gerando código inconsistente — e encerre.
+                                Sessões longas degradam. Detecte os sinais (IA repetindo erros já corrigidos, ignorando regras, gerando código inconsistente) e encerre.
                                 Abra uma nova sessão com um <strong>prompt de handoff</strong>:
                             </p>
                             <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
@@ -771,8 +771,8 @@ git commit -m "feat: add AI context files for Claude Code"</pre>
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">🎓</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.next">Próximo módulo: Prompts & Contexto Avançado</p>
-                                <p class="text-xs text-stone-500" data-i18n="sec.nextsteps.refs.next.sub">Engineering Hour — Parte 2</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.next">Próximo módulo: Memória de IA</p>
+                                <p class="text-xs text-stone-500" data-i18n="sec.nextsteps.refs.next.sub">Engineering Hour · Parte 2</p>
                             </div>
                         </div>
                     </div>
@@ -854,8 +854,8 @@ git commit -m "feat: add AI context files for Claude Code"</pre>
             dirty: {
                 data: [15, 20, 65],
                 colors: ['#059669', '#0284c7', '#e11d48'],
-                labels: ['Código Útil (15%)', 'Histórico Relevante (20%)', 'Ruído — logs/dist/node_modules (65%)'],
-                caption: '65% dos tokens gastos com ruído — a IA "vê" mal o código que importa.',
+                labels: ['Código Útil (15%)', 'Histórico Relevante (20%)', 'Ruído: logs/dist/node_modules (65%)'],
+                caption: '65% dos tokens gastos com ruído. A IA "vê" mal o código que importa.',
             },
             clean: {
                 data: [55, 35, 10],
@@ -913,7 +913,7 @@ git commit -m "feat: add AI context files for Claude Code"</pre>
                 const dirtyLabels = [
                     t('sec.context.chart.dirty.useful') || 'Código Útil (15%)',
                     t('sec.context.chart.dirty.relevant') || 'Histórico Relevante (20%)',
-                    t('sec.context.chart.dirty.noise') || 'Ruído — logs/dist/node_modules (65%)'
+                    t('sec.context.chart.dirty.noise') || 'Ruído: logs/dist/node_modules (65%)'
                 ];
                 const cleanLabels = [
                     t('sec.context.chart.clean.useful') || 'Código Útil (55%)',

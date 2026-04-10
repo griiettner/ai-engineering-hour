@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Hour P2: Planejamento Avançado</title>
+    <title>Engineering Hour P2: Memória de IA</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,10 +19,10 @@
                             50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
                             300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
                         },
-                        gov: {
-                            emerald: '#065f46',
-                            gold: '#b45309',
-                            slate: '#334155',
+                        accent: {
+                            cyan: '#0891b2',
+                            light: '#ecfeff',
+                            border: '#22d3ee',
                         }
                     },
                     fontFamily: {
@@ -36,12 +36,11 @@
 
     <link rel="stylesheet" href="shared.css">
     <style>
-        :root { --accent: #065f46; }
-        .chart-container { max-width: 500px; height: 300px; }
-        .doc-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .doc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
-        .doc-card:hover .doc-icon { transform: scale(1.1) rotate(5deg); }
-        .doc-icon { transition: transform 0.2s ease; }
+        :root { --accent: #0891b2; }
+        .memory-type-tab { transition: all 0.15s; cursor: pointer; }
+        .memory-type-tab.active { background: #0891b2; color: white; font-weight: 600; }
+        .toggle-btn { transition: all 0.2s; }
+        .toggle-btn.active { background: #0891b2; color: white; }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
@@ -50,13 +49,13 @@
     <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="text-2xl">🏛️</span>
+                <span class="text-2xl">🧠</span>
                 <h1 class="text-xl font-bold text-stone-800 tracking-tight">
-                    Engineering Hour <span class="text-gov-emerald">P2</span>
+                    Engineering Hour <span class="text-accent-cyan">P2</span>
                 </h1>
             </div>
             <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
-                Módulo 2: Planejamento Avançado & Governança
+                Módulo 2: Memória de IA | Como Ferramentas Aprendem Sobre Você
             </div>
         </div>
     </header>
@@ -66,521 +65,819 @@
         <!-- Sidebar Navigation -->
         <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
 
-            <div class="nav-group-label" data-i18n="nav.group.concept">O Conceito</div>
-            <button onclick="navigate('maturity')" id="nav-maturity"
+            <div class="nav-group-label" data-i18n="nav.group.conceito">O Conceito</div>
+            <button onclick="navigate('problema')" id="nav-problema"
                 class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📈</span> <span data-i18n="nav.maturity">Maturação de Contexto</span>
+                <span>💭</span> <span data-i18n="nav.problema">O Problema</span>
             </button>
-            <button onclick="navigate('constitution')" id="nav-constitution"
+            <button onclick="navigate('tipos')" id="nav-tipos"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📜</span> <span data-i18n="nav.constitution">A Constituição (.md)</span>
-            </button>
-
-            <div class="nav-group-label mt-2" data-i18n="nav.group.execution">Execução</div>
-            <button onclick="navigate('lifecycle')" id="nav-lifecycle"
-                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🗺️</span> <span data-i18n="nav.lifecycle">Ritual do Plan.md</span>
-            </button>
-            <button onclick="navigate('decision')" id="nav-decision"
-                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚖️</span> <span data-i18n="nav.decision">Estratégia vs Código</span>
+                <span>🗂️</span> <span data-i18n="nav.tipos">Tipos de Memória</span>
             </button>
 
-            <div class="nav-group-label mt-2" data-i18n="nav.group.caution">Cuidados</div>
-            <button onclick="navigate('limits')" id="nav-limits"
+            <div class="nav-group-label mt-2" data-i18n="nav.group.claudecode">No Claude Code</div>
+            <button onclick="navigate('memory-md')" id="nav-memory-md"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚠️</span> <span data-i18n="nav.limits">Limites & Cuidados</span>
+                <span>📄</span> <span data-i18n="nav.memorymd">MEMORY.md</span>
+            </button>
+            <button onclick="navigate('quatro-tipos')" id="nav-quatro-tipos"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🏷️</span> <span data-i18n="nav.quatrotipos">Os 4 Tipos</span>
             </button>
 
-            <div class="nav-group-label mt-2" data-i18n="nav.group.action">Ação</div>
-            <button onclick="navigate('nextsteps')" id="nav-nextsteps"
+            <div class="nav-group-label mt-2" data-i18n="nav.group.pratica">Na Prática</div>
+            <button onclick="navigate('pratica')" id="nav-pratica"
                 class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🚀</span> <span data-i18n="nav.nextsteps">Próximos Passos</span>
+                <span>⚡</span> <span data-i18n="nav.pratica">Salvando & Recuperando</span>
+            </button>
+            <button onclick="navigate('limites')" id="nav-limites"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚠️</span> <span data-i18n="nav.limites">Limites & Cuidados</span>
+            </button>
+
+            <div class="nav-group-label mt-2" data-i18n="nav.group.avancado">Método Avançado</div>
+            <button onclick="navigate('avancado')" id="nav-avancado"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🗂️</span> <span data-i18n="nav.avancado">Organização por Pastas</span>
+            </button>
+
+            <div class="nav-group-label mt-2" data-i18n="nav.group.acao">Ação</div>
+            <button onclick="navigate('proximos')" id="nav-proximos"
+                class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> <span data-i18n="nav.proximos">Próximos Passos</span>
             </button>
         </nav>
 
-        <!-- Main Content -->
+        <!-- Content Area -->
         <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
 
-            <!-- SECTION 1: Maturação -->
-            <section id="sec-maturity" class="block">
+            <!-- SECTION 1: O Problema -->
+            <section id="sec-problema" class="block">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📈</span> <span data-i18n="sec.maturity.h2">Maturação: O Fim do "Chute"</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.maturity.intro">
-                        Quanto mais madura é a sua documentação, menos a IA precisa adivinhar.
-                        A Parte 1 cobriu o mínimo viável — aqui saímos do básico e entramos na <strong>governança corporativa</strong>.
-                        O gráfico mostra como documentos específicos eliminam riscos de desenvolvimento.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>💭</span> <span data-i18n="sec.problema.h2">Por que a IA esquece tudo?</span>
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.problema.intro">
+                        Cada conversa com uma IA começa <strong>do zero</strong>. Sem memória, o modelo não sabe quem você é,
+                        qual é o seu projeto, nem quais decisões já foram tomadas. O resultado? Repetição, contexto perdido e respostas genéricas.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-xl border border-stone-200 mb-6">
-                    <div class="chart-container">
-                        <canvas id="maturityChart"></canvas>
+                <!-- Toggle: Sem vs Com Memória -->
+                <div class="mb-8">
+                    <div class="flex gap-2 mb-4">
+                        <button id="toggle-sem" onclick="toggleMemoryView('sem')" class="toggle-btn active px-4 py-2 rounded-lg text-sm font-medium border border-stone-200" data-i18n="sec.problema.toggle.sem">
+                            Sem Memória
+                        </button>
+                        <button id="toggle-com" onclick="toggleMemoryView('com')" class="toggle-btn px-4 py-2 rounded-lg text-sm font-medium border border-stone-200 bg-stone-50 text-stone-600" data-i18n="sec.problema.toggle.com">
+                            Com Memória
+                        </button>
                     </div>
-                    <div class="space-y-4">
-                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-gov-emerald">
-                            <h4 class="font-bold text-sm text-gov-emerald uppercase" data-i18n="sec.maturity.card.1.title">Escalabilidade de Contexto</h4>
-                            <p class="text-sm text-stone-600 mt-1" data-i18n-html="sec.maturity.card.1.desc">Documentos granulares permitem que a IA carregue <em>apenas o necessário</em> para cada tarefa — economizando tokens e mantendo precisão.</p>
+
+                    <div id="view-sem" class="bg-stone-900 rounded-xl p-5 text-sm font-mono leading-relaxed">
+                        <p class="text-stone-400 mb-3" data-i18n="sec.problema.sem.label">// Conversa 5, mesmo projeto, mesma pessoa</p>
+                        <p class="text-cyan-300 mb-2" data-i18n="sec.problema.sem.user"><span class="text-stone-500">Você:</span> Preciso adicionar autenticação ao projeto</p>
+                        <p class="text-stone-300 mb-4" data-i18n-html="sec.problema.sem.ai"><span class="text-stone-500">IA:</span> Claro! Qual linguagem você usa? Qual framework? Já tem um banco de dados? Usa JWT ou sessões? <span class="text-red-400">(pergunta tudo de novo)</span></p>
+                        <div class="border-t border-stone-700 pt-3">
+                            <p class="text-red-400 text-xs" data-i18n="sec.problema.sem.waste">~2.000 tokens gastos reconstruindo contexto que já existia</p>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-gov-gold">
-                            <h4 class="font-bold text-sm text-gov-gold uppercase" data-i18n="sec.maturity.card.2.title">Segurança de Decisão</h4>
-                            <p class="text-sm text-stone-600 mt-1" data-i18n-html="sec.maturity.card.2.desc">Com um histórico de decisões (ADRs), a IA para de sugerir padrões que o time já decidiu abandonar no passado.</p>
+                    </div>
+
+                    <div id="view-com" class="bg-stone-900 rounded-xl p-5 text-sm font-mono leading-relaxed hidden">
+                        <p class="text-stone-400 mb-3" data-i18n="sec.problema.com.label">// Conversa 5, com memória ativa</p>
+                        <p class="text-cyan-300 mb-2" data-i18n="sec.problema.com.user"><span class="text-stone-500">Você:</span> Preciso adicionar autenticação ao projeto</p>
+                        <p class="text-stone-300 mb-4" data-i18n-html="sec.problema.com.ai"><span class="text-stone-500">IA:</span> Baseado no seu projeto Node.js + Express com PostgreSQL, recomendo JWT com refresh tokens. Vou seguir o padrão de middleware que você já usa em <code class="text-emerald-400">src/middleware/</code>. <span class="text-emerald-400">(contexto preservado)</span></p>
+                        <div class="border-t border-stone-700 pt-3">
+                            <p class="text-emerald-400 text-xs" data-i18n="sec.problema.com.save">0 tokens gastos com re-contexto. Resposta direta e personalizada.</p>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-stone-400">
-                            <h4 class="font-bold text-sm text-stone-600 uppercase" data-i18n="sec.maturity.card.3.title">A Evolução Natural</h4>
-                            <p class="text-sm text-stone-500 mt-1" data-i18n-html="sec.maturity.card.3.desc">
-                                Parte 1: <code class="bg-stone-100 font-mono px-1 rounded text-xs">CLAUDE.md + TECH_STACK + ARCHITECTURE</code><br>
-                                Parte 2: + Constituição completa + Plan.md ritual
-                            </p>
+                    </div>
+                </div>
+
+                <!-- Chart: Context tokens comparison -->
+                <div class="bg-stone-50 rounded-xl p-6 border border-stone-200">
+                    <h3 class="text-sm font-bold text-stone-700 mb-4" data-i18n="sec.problema.chart.title">Tokens gastos com contexto por conversa</h3>
+                    <div style="max-width: 480px; height: 260px;">
+                        <canvas id="contextChart"></canvas>
+                    </div>
+                    <p class="text-xs text-stone-400 mt-3" data-i18n="sec.problema.chart.caption">Sem memória, cada conversa reconstrói o contexto do zero. Com memória, o investimento cai progressivamente.</p>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Tipos de Memória -->
+            <section id="sec-tipos" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>🗂️</span> <span data-i18n="sec.tipos.h2">Tipos de Memória em Ferramentas de IA</span>
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.tipos.intro">
+                        Diferentes ferramentas implementam memória de formas diferentes. Entender os tipos ajuda a escolher a abordagem certa.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <!-- Session Memory -->
+                    <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg" style="background:#ecfeff">💬</div>
+                            <h3 class="font-bold text-stone-800" data-i18n="sec.tipos.session.title">Memória de Sessão</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-3" data-i18n="sec.tipos.session.desc">
+                            Existe apenas durante a conversa atual. É o padrão em ChatGPT, Claude.ai e todos os chats de IA. Quando a conversa fecha, o contexto desaparece.
+                        </p>
+                        <div class="flex gap-2">
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-500" data-i18n="sec.tipos.session.scope">Escopo: 1 conversa</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-500" data-i18n="sec.tipos.session.tools">ChatGPT, Claude.ai, Gemini</span>
+                        </div>
+                    </div>
+
+                    <!-- User Memory -->
+                    <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg" style="background:#ecfeff">👤</div>
+                            <h3 class="font-bold text-stone-800" data-i18n="sec.tipos.user.title">Memória do Usuário</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-3" data-i18n="sec.tipos.user.desc">
+                            Persiste entre conversas. Armazena preferências, papel profissional e padrões de trabalho. ChatGPT Memory e Claude Code auto-memory usam este tipo.
+                        </p>
+                        <div class="flex gap-2">
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700" data-i18n="sec.tipos.user.scope">Escopo: cross-session</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700" data-i18n="sec.tipos.user.tools">ChatGPT Memory, Claude Code</span>
+                        </div>
+                    </div>
+
+                    <!-- Project Memory -->
+                    <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg" style="background:#ecfeff">📁</div>
+                            <h3 class="font-bold text-stone-800" data-i18n="sec.tipos.project.title">Memória de Projeto</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-3" data-i18n="sec.tipos.project.desc">
+                            Vinculada a um repositório ou workspace específico. Inclui decisões de arquitetura, bugs conhecidos e estado do projeto. CLAUDE.md e MEMORY.md são exemplos.
+                        </p>
+                        <div class="flex gap-2">
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700" data-i18n="sec.tipos.project.scope">Escopo: 1 repositório</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700" data-i18n="sec.tipos.project.tools">Claude Code, Cursor, Windsurf</span>
+                        </div>
+                    </div>
+
+                    <!-- Instruction Memory -->
+                    <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg" style="background:#ecfeff">📋</div>
+                            <h3 class="font-bold text-stone-800" data-i18n="sec.tipos.instruction.title">Instruções Persistentes</h3>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-3" data-i18n="sec.tipos.instruction.desc">
+                            Arquivos de configuração que a IA lê automaticamente em cada sessão. São a forma mais previsível de "memória", controlada diretamente pelo dev.
+                        </p>
+                        <div class="flex gap-2">
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700" data-i18n="sec.tipos.instruction.scope">Escopo: configurável</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700" data-i18n="sec.tipos.instruction.tools">CLAUDE.md, .cursorrules, Custom Instructions</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-5">
+                    <p class="text-sm text-cyan-800 leading-relaxed" data-i18n-html="sec.tipos.insight">
+                        <strong>Insight:</strong> A combinação mais poderosa é <strong>instruções persistentes</strong> (previsível, controlada) + <strong>memória de projeto</strong> (dinâmica, aprendida). É exatamente o que o Claude Code faz com CLAUDE.md + auto-memory.
+                    </p>
+                </div>
+            </section>
+
+            <!-- SECTION 3: MEMORY.md Deep-Dive -->
+            <section id="sec-memory-md" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>📄</span> <span data-i18n="sec.memorymd.h2">O Sistema MEMORY.md</span>
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.memorymd.intro">
+                        O Claude Code possui um sistema de memória automática baseado em arquivos. Cada projeto pode ter seu próprio diretório de memória em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/memory/</code>.
+                    </p>
+                </div>
+
+                <!-- File structure -->
+                <div class="bg-stone-900 rounded-xl p-5 mb-6 text-sm font-mono">
+                    <p class="text-stone-400 mb-3" data-i18n="sec.memorymd.structure.label"># Estrutura do diretório de memória</p>
+                    <div class="text-stone-300 leading-relaxed">
+                        <p><span class="text-cyan-400">.claude/</span></p>
+                        <p>&nbsp;&nbsp;<span class="text-cyan-400">memory/</span></p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-emerald-400">MEMORY.md</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-stone-500" data-i18n="sec.memorymd.structure.index"># Índice: ponteiros para cada arquivo de memória</span></p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-violet-400">user_role.md</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-stone-500" data-i18n="sec.memorymd.structure.user"># Quem é o usuário, preferências</span></p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-violet-400">feedback_testing.md</span>&nbsp;<span class="text-stone-500" data-i18n="sec.memorymd.structure.feedback"># Correções e confirmações</span></p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-violet-400">project_api.md</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-stone-500" data-i18n="sec.memorymd.structure.project"># Decisões de projeto em andamento</span></p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-violet-400">reference_jira.md</span>&nbsp;&nbsp;&nbsp;<span class="text-stone-500" data-i18n="sec.memorymd.structure.reference"># Onde encontrar info externa</span></p>
+                    </div>
+                </div>
+
+                <!-- MEMORY.md example -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-bold text-stone-700" data-i18n="sec.memorymd.example.title">Exemplo: MEMORY.md (o índice)</h3>
+                        <button onclick="copyCode('memory-index-code')" class="text-xs text-stone-400 hover:text-stone-600 px-2 py-1 rounded bg-stone-100" data-i18n="sec.memorymd.example.copy">Copiar</button>
+                    </div>
+                    <div class="bg-stone-900 rounded-xl p-5 text-sm font-mono leading-relaxed overflow-x-auto">
+                        <pre id="memory-index-code" class="m-0 rounded-none border-0"><span class="text-stone-400"># Memory Index</span>
+
+<span class="text-stone-300">- [User: Senior Backend Dev](user_role.md) · Node.js, PostgreSQL, prefere testes de integração</span>
+<span class="text-stone-300">- [Feedback: Sem mocks](feedback_testing.md) · Testes devem bater no banco real</span>
+<span class="text-stone-300">- [Projeto: API v3](project_api.md) · Migração em andamento, deadline 15/04</span>
+<span class="text-stone-300">- [Ref: Board Jira](reference_jira.md) · Bugs tracked em PROJ-backend</span></pre>
+                    </div>
+                </div>
+
+                <!-- Memory file example with frontmatter -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-bold text-stone-700" data-i18n="sec.memorymd.file.title">Exemplo: arquivo de memória individual</h3>
+                        <button onclick="copyCode('memory-file-code')" class="text-xs text-stone-400 hover:text-stone-600 px-2 py-1 rounded bg-stone-100" data-i18n="sec.memorymd.file.copy">Copiar</button>
+                    </div>
+                    <div class="bg-stone-900 rounded-xl p-5 text-sm font-mono leading-relaxed overflow-x-auto">
+                        <pre id="memory-file-code" class="m-0 rounded-none border-0"><span class="text-stone-500">---</span>
+<span class="text-violet-400">name</span>: <span class="text-emerald-400">Sem mocks nos testes</span>
+<span class="text-violet-400">description</span>: <span class="text-emerald-400">Testes de integração devem usar banco real</span>
+<span class="text-violet-400">type</span>: <span class="text-emerald-400">feedback</span>
+<span class="text-stone-500">---</span>
+
+<span class="text-stone-300">Não usar mocks de banco nos testes de integração.</span>
+
+<span class="text-cyan-400">**Why:**</span> <span class="text-stone-300">Incidente Q3: testes com mock passavam mas a migração</span>
+<span class="text-stone-300">quebrou em produção porque o schema real era diferente.</span>
+
+<span class="text-cyan-400">**How to apply:**</span> <span class="text-stone-300">Quando criar testes que envolvem banco de dados,</span>
+<span class="text-stone-300">sempre usar um container PostgreSQL de teste, nunca jest.mock().</span></pre>
+                    </div>
+                </div>
+
+                <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-5">
+                    <p class="text-sm text-cyan-800 leading-relaxed" data-i18n-html="sec.memorymd.keypoint">
+                        <strong>Ponto-chave:</strong> MEMORY.md é apenas o <strong>índice</strong>. Cada memória vive em seu próprio arquivo com frontmatter YAML. O Claude lê o índice no início de cada conversa e acessa os arquivos individuais conforme necessário.
+                    </p>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Os 4 Tipos no Claude Code -->
+            <section id="sec-quatro-tipos" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>🏷️</span> <span data-i18n="sec.quatrotipos.h2">Os 4 Tipos de Memória no Claude Code</span>
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.quatrotipos.intro">
+                        O Claude Code organiza memórias em 4 categorias. Cada tipo tem um propósito específico e guia quando e como salvar informações.
+                    </p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex gap-2 mb-6 flex-wrap">
+                    <button onclick="showMemoryType('user')" class="memory-type-tab active px-4 py-2 rounded-lg text-sm border border-stone-200" data-i18n="sec.quatrotipos.tab.user">User</button>
+                    <button onclick="showMemoryType('feedback')" class="memory-type-tab px-4 py-2 rounded-lg text-sm border border-stone-200 bg-stone-50 text-stone-600" data-i18n="sec.quatrotipos.tab.feedback">Feedback</button>
+                    <button onclick="showMemoryType('project')" class="memory-type-tab px-4 py-2 rounded-lg text-sm border border-stone-200 bg-stone-50 text-stone-600" data-i18n="sec.quatrotipos.tab.project">Project</button>
+                    <button onclick="showMemoryType('reference')" class="memory-type-tab px-4 py-2 rounded-lg text-sm border border-stone-200 bg-stone-50 text-stone-600" data-i18n="sec.quatrotipos.tab.reference">Reference</button>
+                </div>
+
+                <!-- User Type -->
+                <div id="type-user" class="memory-type-content">
+                    <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="step-number">👤</div>
+                            <div>
+                                <h3 class="font-bold text-stone-800 text-lg" data-i18n="sec.quatrotipos.user.title">User Memory</h3>
+                                <p class="text-xs text-stone-400" data-i18n="sec.quatrotipos.user.when">Quando salvar: ao aprender detalhes sobre o papel, preferências ou conhecimento do usuário</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n-html="sec.quatrotipos.user.desc">
+                            Informações sobre quem você é, o que faz e como prefere trabalhar. Permite que o Claude adapte respostas ao seu nível e contexto profissional. O Claude cria um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">.md</code> em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/memory/</code> e adiciona uma entrada no índice MEMORY.md.
+                        </p>
+                        <div class="bg-stone-50 rounded-lg p-4 text-sm mb-4">
+                            <p class="font-mono text-stone-500 mb-2" data-i18n="sec.quatrotipos.user.example.label">Exemplo de trigger:</p>
+                            <p class="text-stone-700" data-i18n="sec.quatrotipos.user.example.trigger">"Sou data scientist, estou investigando os logs do sistema"</p>
+                        </div>
+                        <div class="mb-2">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider" data-i18n="sec.quatrotipos.user.file.label">Arquivo criado: user_role.md</h4>
+                                <button onclick="copyCode('sample-user-md')" class="text-xs text-stone-400 hover:text-stone-600 px-2 py-1 rounded bg-stone-100">Copiar</button>
+                            </div>
+                            <div class="bg-stone-900 rounded-xl p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+                                <pre id="sample-user-md" class="m-0 rounded-none border-0"><span class="text-stone-500">---</span>
+<span class="text-violet-400">name</span>: <span class="text-emerald-400">Data scientist focado em observabilidade</span>
+<span class="text-violet-400">description</span>: <span class="text-emerald-400">Usuário é data scientist, investigando logs do sistema</span>
+<span class="text-violet-400">type</span>: <span class="text-emerald-400">user</span>
+<span class="text-stone-500">---</span>
+
+<span class="text-stone-300">Usuário é data scientist com foco atual em observabilidade e logging.</span>
+<span class="text-stone-300">Adaptar explicações para perfil analítico, usar analogias com</span>
+<span class="text-stone-300">dados, pipelines e métricas quando possível.</span></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Type -->
+                <div id="type-feedback" class="memory-type-content hidden">
+                    <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="step-number">🔄</div>
+                            <div>
+                                <h3 class="font-bold text-stone-800 text-lg" data-i18n="sec.quatrotipos.feedback.title">Feedback Memory</h3>
+                                <p class="text-xs text-stone-400" data-i18n="sec.quatrotipos.feedback.when">Quando salvar: quando o usuário corrige OU confirma uma abordagem</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n-html="sec.quatrotipos.feedback.desc">
+                            Correções e confirmações sobre como trabalhar. O tipo mais importante: evita que o mesmo erro se repita em conversas futuras. Cria um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">.md</code> com a regra, o motivo (<strong>Why</strong>) e como aplicar (<strong>How to apply</strong>).
+                        </p>
+                        <div class="space-y-3 mb-4">
+                            <div class="antipattern-wrong rounded-lg p-4 text-sm">
+                                <p class="font-bold text-red-700 mb-1" data-i18n="sec.quatrotipos.feedback.wrong.label">Correção:</p>
+                                <p class="text-stone-700" data-i18n="sec.quatrotipos.feedback.wrong.text">"Não use mock no banco. Fomos queimados no trimestre passado quando testes mockados passaram mas a migração falhou"</p>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider" data-i18n="sec.quatrotipos.feedback.file.label">Arquivo criado: feedback_no_mocks.md</h4>
+                                <button onclick="copyCode('sample-feedback-md')" class="text-xs text-stone-400 hover:text-stone-600 px-2 py-1 rounded bg-stone-100">Copiar</button>
+                            </div>
+                            <div class="bg-stone-900 rounded-xl p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+                                <pre id="sample-feedback-md" class="m-0 rounded-none border-0"><span class="text-stone-500">---</span>
+<span class="text-violet-400">name</span>: <span class="text-emerald-400">Sem mocks nos testes de integração</span>
+<span class="text-violet-400">description</span>: <span class="text-emerald-400">Testes de integração devem usar banco real, nunca mocks</span>
+<span class="text-violet-400">type</span>: <span class="text-emerald-400">feedback</span>
+<span class="text-stone-500">---</span>
+
+<span class="text-stone-300">Não usar mocks de banco nos testes de integração.</span>
+
+<span class="text-cyan-400">**Why:**</span> <span class="text-stone-300">Incidente Q3: testes com mock passavam mas a migração</span>
+<span class="text-stone-300">quebrou em produção porque o schema real era diferente.</span>
+
+<span class="text-cyan-400">**How to apply:**</span> <span class="text-stone-300">Quando criar testes que envolvem banco,</span>
+<span class="text-stone-300">sempre usar container PostgreSQL de teste, nunca jest.mock().</span></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Type -->
+                <div id="type-project" class="memory-type-content hidden">
+                    <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="step-number">📁</div>
+                            <div>
+                                <h3 class="font-bold text-stone-800 text-lg" data-i18n="sec.quatrotipos.project.title">Project Memory</h3>
+                                <p class="text-xs text-stone-400" data-i18n="sec.quatrotipos.project.when">Quando salvar: ao aprender sobre trabalho em andamento, metas, decisões ou prazos</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n-html="sec.quatrotipos.project.desc">
+                            Informações sobre o estado atual do projeto que não são deriváveis do código ou histórico git. Inclui decisões, motivações e prazos. Cria um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">.md</code> com o fato, o motivo (<strong>Why</strong>) e como aplicar (<strong>How to apply</strong>). Datas relativas são convertidas para absolutas.
+                        </p>
+                        <div class="bg-stone-50 rounded-lg p-4 text-sm mb-4">
+                            <p class="font-mono text-stone-500 mb-2" data-i18n="sec.quatrotipos.project.example.label">Exemplo de trigger:</p>
+                            <p class="text-stone-700" data-i18n="sec.quatrotipos.project.example.trigger">"Estamos congelando merges não-críticos depois de quinta. Time mobile vai cortar a release branch"</p>
+                        </div>
+                        <div class="mb-2">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider" data-i18n="sec.quatrotipos.project.file.label">Arquivo criado: project_merge_freeze.md</h4>
+                                <button onclick="copyCode('sample-project-md')" class="text-xs text-stone-400 hover:text-stone-600 px-2 py-1 rounded bg-stone-100">Copiar</button>
+                            </div>
+                            <div class="bg-stone-900 rounded-xl p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+                                <pre id="sample-project-md" class="m-0 rounded-none border-0"><span class="text-stone-500">---</span>
+<span class="text-violet-400">name</span>: <span class="text-emerald-400">Merge freeze para release mobile</span>
+<span class="text-violet-400">description</span>: <span class="text-emerald-400">Congelamento de merges não-críticos a partir de 2026-03-05</span>
+<span class="text-violet-400">type</span>: <span class="text-emerald-400">project</span>
+<span class="text-stone-500">---</span>
+
+<span class="text-stone-300">Merge freeze começa 2026-03-05 para corte de release mobile.</span>
+
+<span class="text-cyan-400">**Why:**</span> <span class="text-stone-300">Time mobile precisa de branch estável para o release.</span>
+<span class="text-stone-300">Merges não-críticos podem introduzir regressões.</span>
+
+<span class="text-cyan-400">**How to apply:**</span> <span class="text-stone-300">Sinalizar qualquer PR não-crítico agendado</span>
+<span class="text-stone-300">após 2026-03-05. Sugerir adiar para após o release cut.</span></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reference Type -->
+                <div id="type-reference" class="memory-type-content hidden">
+                    <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="step-number">🔗</div>
+                            <div>
+                                <h3 class="font-bold text-stone-800 text-lg" data-i18n="sec.quatrotipos.reference.title">Reference Memory</h3>
+                                <p class="text-xs text-stone-400" data-i18n="sec.quatrotipos.reference.when">Quando salvar: ao aprender onde informações vivem em sistemas externos</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n-html="sec.quatrotipos.reference.desc">
+                            Cria um arquivo <code class="font-mono bg-stone-100 px-1 rounded text-xs">.md</code> com ponteiros para sistemas externos. Funciona como um caderno de endereços: não armazena o conteúdo do sistema externo, apenas <strong>onde encontrá-lo</strong>. Útil porque o conteúdo muda frequentemente, mas o endereço permanece estável.
+                        </p>
+                        <div class="bg-stone-50 rounded-lg p-4 text-sm mb-4">
+                            <p class="font-mono text-stone-500 mb-2" data-i18n="sec.quatrotipos.reference.example.label">Exemplo de trigger:</p>
+                            <p class="text-stone-700" data-i18n="sec.quatrotipos.reference.example.trigger">"Bugs de pipeline são rastreados no projeto Linear 'INGEST'"</p>
+                        </div>
+                        <div class="mb-2">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider" data-i18n="sec.quatrotipos.reference.file.label">Arquivo criado: reference_linear_ingest.md</h4>
+                                <button onclick="copyCode('sample-reference-md')" class="text-xs text-stone-400 hover:text-stone-600 px-2 py-1 rounded bg-stone-100">Copiar</button>
+                            </div>
+                            <div class="bg-stone-900 rounded-xl p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+                                <pre id="sample-reference-md" class="m-0 rounded-none border-0"><span class="text-stone-500">---</span>
+<span class="text-violet-400">name</span>: <span class="text-emerald-400">Pipeline bugs no Linear</span>
+<span class="text-violet-400">description</span>: <span class="text-emerald-400">Bugs de pipeline são rastreados no Linear projeto INGEST</span>
+<span class="text-violet-400">type</span>: <span class="text-emerald-400">reference</span>
+<span class="text-stone-500">---</span>
+
+<span class="text-stone-300">Bugs de pipeline → Linear, projeto "INGEST"</span>
+
+<span class="text-stone-300">Quando o usuário mencionar problemas de pipeline ou bugs de</span>
+<span class="text-stone-300">ingestão, consultar este projeto no Linear para contexto.</span></pre>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 2: A Constituição -->
-            <section id="sec-constitution" class="hidden">
+            <!-- SECTION 5: Salvando & Recuperando -->
+            <section id="sec-pratica" class="hidden">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📜</span> <span data-i18n="sec.constitution.h2">A Constituição do Projeto</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.constitution.intro">
-                        Uma estrutura documental avançada é o que chamamos de "Constituição" — ela define os <strong>limites inegociáveis</strong>
-                        da IA no projeto. Cada categoria tem um propósito distinto na mente do modelo.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>⚡</span> <span data-i18n="sec.pratica.h2">Salvando & Recuperando Memórias</span>
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.pratica.intro">
+                        No Claude Code, memórias podem ser salvas explicitamente ou detectadas automaticamente. Veja como usar na prática.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-
-                    <!-- Comportamento -->
-                    <div class="doc-card border border-stone-200 p-5 rounded-xl bg-stone-50">
-                        <div class="doc-icon text-2xl mb-3">🤖</div>
-                        <h3 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.constitution.card.1.title">Comportamento (LLM)</h3>
-                        <p class="text-xs text-stone-500 mb-3" data-i18n="sec.constitution.card.1.desc">Define quem a IA é e como ela deve agir.</p>
-                        <div class="space-y-1">
-                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CLAUDE.md</span>
-                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">LLM_CONTEXT.md</span>
-                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CLI_AND_DEV_RULES.md</span>
-                        </div>
-                    </div>
-
-                    <!-- Design & Padrões -->
-                    <div class="doc-card border border-stone-200 p-5 rounded-xl bg-stone-50">
-                        <div class="doc-icon text-2xl mb-3">📐</div>
-                        <h3 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.constitution.card.2.title">Design & Padrões</h3>
-                        <p class="text-xs text-stone-500 mb-3" data-i18n="sec.constitution.card.2.desc">Impede que a IA invente estruturas ou padrões não aprovados.</p>
-                        <div class="space-y-1">
-                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">FOLDER_STRUCTURE.md</span>
-                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CODING_GUIDELINES.md</span>
-                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">API_SPEC.md</span>
-                        </div>
-                    </div>
-
-                    <!-- Histórico & Decisões -->
-                    <div class="doc-card border border-stone-200 p-5 rounded-xl bg-stone-50">
-                        <div class="doc-icon text-2xl mb-3">🕰️</div>
-                        <h3 class="font-bold text-stone-800 text-sm mb-1" data-i18n="sec.constitution.card.3.title">Histórico & Decisões</h3>
-                        <p class="text-xs text-stone-500 mb-3" data-i18n="sec.constitution.card.3.desc">Evita que a IA repita erros do passado ou reverta decisões já tomadas.</p>
-                        <div class="space-y-1">
-                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">DECISIONS.md</span>
-                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">DATABASE_DISCOVERIES.md</span>
-                            <span class="block text-xs font-mono bg-white p-1.5 border border-stone-200 rounded">CHANGELOG.md</span>
+                <!-- Method 1: Explicit -->
+                <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                    <div class="step-number flex-shrink-0">1</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.pratica.step1.title">Pedido explícito</h3>
+                        <p class="text-sm text-stone-600 mb-3" data-i18n="sec.pratica.step1.desc">Diga ao Claude para lembrar algo e ele salva automaticamente no diretório de memória.</p>
+                        <div class="bg-stone-900 rounded-lg p-3 text-sm font-mono">
+                            <p class="text-cyan-300" data-i18n="sec.pratica.step1.example">"Lembre que neste projeto usamos PostgreSQL com Prisma e testes rodam contra um container Docker local."</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- The LLM_CONTEXT index tip -->
-                <div class="bg-stone-900 text-stone-100 rounded-2xl p-6 mb-6">
-                    <h4 class="font-bold mb-3 flex items-center gap-2"><span>💡</span> <span data-i18n="sec.constitution.tip.title">O Truque do Índice — LLM_CONTEXT.md</span></h4>
-                    <p class="text-sm text-stone-300 mb-4 leading-relaxed" data-i18n-html="sec.constitution.tip.desc">
-                        Com muitos documentos, a IA pode não saber qual ler primeiro. O <code class="bg-stone-700 text-emerald-300 font-mono px-1 rounded text-xs">LLM_CONTEXT.md</code>
-                        funciona como um roteador: instrui a IA a carregar o documento certo para cada tipo de tarefa.
-                    </p>
-                    <pre class="text-xs !p-3 !bg-stone-800"><span class="text-emerald-400"># LLM_CONTEXT.md — Índice de Instruções</span>
+                <!-- Method 2: Auto-detection -->
+                <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                    <div class="step-number flex-shrink-0">2</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.pratica.step2.title">Detecção automática</h3>
+                        <p class="text-sm text-stone-600 mb-3" data-i18n="sec.pratica.step2.desc">O Claude detecta correções, confirmações e informações importantes durante a conversa e salva proativamente.</p>
+                        <div class="bg-stone-900 rounded-lg p-3 text-sm font-mono">
+                            <p class="text-cyan-300" data-i18n="sec.pratica.step2.example">"Não, não use npm. Este projeto usa pnpm com workspaces."</p>
+                            <p class="text-stone-500 mt-1" data-i18n="sec.pratica.step2.result">→ Salva feedback: "projeto usa pnpm com workspaces, não npm"</p>
+                        </div>
+                    </div>
+                </div>
 
-<span class="text-blue-400">## Antes de qualquer tarefa, leia:</span>
-- CLAUDE.md → regras gerais de comportamento
-- TECH_STACK.md → versões e libs disponíveis
+                <!-- Method 3: Review -->
+                <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                    <div class="step-number flex-shrink-0">3</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.pratica.step3.title">Revisar e editar</h3>
+                        <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.pratica.step3.desc">Memórias são arquivos Markdown comuns em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/memory/</code>. Você pode editar, remover ou reorganizar a qualquer momento.</p>
+                        <div class="bg-stone-900 rounded-lg p-3 text-sm font-mono">
+                            <p class="text-stone-400"># Para ver o que o Claude lembra:</p>
+                            <p class="text-emerald-300" data-i18n="sec.pratica.step3.example">"O que você lembra sobre este projeto?"</p>
+                            <p class="text-stone-400 mt-2"># Para remover:</p>
+                            <p class="text-emerald-300" data-i18n="sec.pratica.step3.forget">"Esqueça a informação sobre o deadline da API v3"</p>
+                        </div>
+                    </div>
+                </div>
 
-<span class="text-blue-400">## Se for mexer em banco de dados:</span>
-- DATABASE_DISCOVERIES.md → gotchas e decisões sobre o schema
+                <!-- Method 4: Recall -->
+                <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-6">
+                    <div class="step-number flex-shrink-0">4</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.pratica.step4.title">Recuperação automática</h3>
+                        <p class="text-sm text-stone-600 mb-3" data-i18n="sec.pratica.step4.desc">O MEMORY.md é carregado automaticamente no início de cada conversa. Memórias relevantes são acessadas conforme necessário durante a sessão.</p>
+                        <div class="bg-cyan-50 border border-cyan-200 rounded-lg p-3 text-sm">
+                            <p class="text-cyan-800" data-i18n-html="sec.pratica.step4.note"><strong>Importante:</strong> O Claude verifica se memórias ainda são válidas antes de agir nelas. Se uma memória referencia um arquivo que não existe mais, ele atualiza ou remove automaticamente.</p>
+                        </div>
+                    </div>
+                </div>
 
-<span class="text-blue-400">## Se for criar uma nova feature:</span>
-- ARCHITECTURE.md → padrão Feature Folders
-- REQUIREMENTS.md → regras de negócio vigentes
-
-<span class="text-blue-400">## Se for alterar algo existente:</span>
-- DECISIONS.md → verifique se existe ADR sobre o componente</pre>
+                <div class="bg-stone-50 rounded-xl p-5 border border-stone-200">
+                    <h3 class="font-bold text-stone-700 mb-3 text-sm" data-i18n="sec.pratica.whatnot.title">O que NÃO salvar em memória</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div class="flex items-start gap-2">
+                            <span class="text-red-500">✕</span>
+                            <span class="text-stone-600" data-i18n="sec.pratica.whatnot.1">Padrões de código ou arquitetura (leia do código)</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-red-500">✕</span>
+                            <span class="text-stone-600" data-i18n="sec.pratica.whatnot.2">Histórico git ou quem mudou o quê (use git log)</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-red-500">✕</span>
+                            <span class="text-stone-600" data-i18n="sec.pratica.whatnot.3">Soluções de debugging (o fix está no commit)</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-red-500">✕</span>
+                            <span class="text-stone-600" data-i18n="sec.pratica.whatnot.4">Qualquer coisa já documentada no CLAUDE.md</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- SECTION 3: Ritual do Plan.md -->
-            <section id="sec-lifecycle" class="hidden">
+            <!-- SECTION 6: Limites & Cuidados -->
+            <section id="sec-limites" class="hidden">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🗺️</span> <span data-i18n="sec.lifecycle.h2">O Ritual do Plan.md</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.lifecycle.intro">
-                        O <code class="bg-stone-100 font-mono px-1 rounded text-sm">plan.md</code> é onde a IA "pensa alto" antes de escrever uma linha de código.
-                        Você aprova a <strong>estratégia</strong> antes da execução — eliminando retrabalho por decisões erradas de arquitetura.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>⚠️</span> <span data-i18n="sec.limites.h2">Limites & Cuidados</span>
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.limites.intro">
+                        Memória de IA não é mágica. Entender os limites evita surpresas e decisões baseadas em informação obsoleta.
                     </p>
                 </div>
 
                 <div class="space-y-4 mb-8">
+                    <!-- Stale memories -->
+                    <div class="antipattern-wrong rounded-xl p-5">
+                        <h3 class="font-bold text-red-800 mb-2 text-sm" data-i18n="sec.limites.stale.title">Memórias ficam obsoletas</h3>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.limites.stale.desc">
+                            Uma memória que diz "usamos Express" pode estar errada se o time migrou para Fastify. Memórias são snapshots de um momento, não verdades permanentes. O Claude tenta verificar antes de agir, mas nem sempre consegue detectar mudanças silenciosas.
+                        </p>
+                    </div>
 
+                    <!-- Privacy -->
+                    <div class="antipattern-wrong rounded-xl p-5">
+                        <h3 class="font-bold text-red-800 mb-2 text-sm" data-i18n="sec.limites.privacy.title">Cuidado com informações sensíveis</h3>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.limites.privacy.desc">
+                            Memórias são arquivos em texto plano no repositório. Nunca salve senhas, tokens, chaves de API ou PII (dados pessoais identificáveis) como memória. Trate o diretório de memória como qualquer outro arquivo do projeto.
+                        </p>
+                    </div>
+
+                    <!-- Over-reliance -->
+                    <div class="antipattern-wrong rounded-xl p-5">
+                        <h3 class="font-bold text-red-800 mb-2 text-sm" data-i18n="sec.limites.overreliance.title">Não confie cegamente</h3>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.limites.overreliance.desc">
+                            Uma memória diz que a função X existe, mas ela pode ter sido renomeada ou removida. Antes de recomendar algo baseado em memória, o Claude deve verificar no código atual. "A memória diz que X existe" não é o mesmo que "X existe agora".
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Good practices -->
+                    <div class="antipattern-right rounded-xl p-5">
+                        <h3 class="font-bold text-emerald-800 mb-2 text-sm" data-i18n="sec.limites.curate.title">Curadoria regular</h3>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.limites.curate.desc">
+                            Revise as memórias periodicamente. Remova o que ficou obsoleto, atualize prazos que passaram e consolide memórias fragmentadas. Uma memória limpa é melhor que uma memória grande.
+                        </p>
+                    </div>
+
+                    <div class="antipattern-right rounded-xl p-5">
+                        <h3 class="font-bold text-emerald-800 mb-2 text-sm" data-i18n="sec.limites.gitignore.title">Considere o .gitignore</h3>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n-html="sec.limites.gitignore.desc">
+                            Se o diretório de memória contém informações pessoais ou específicas do seu workflow, considere adicionar <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/memory/</code> ao .gitignore. Memória de projeto pode ser commitada; memória pessoal geralmente não.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 7: Organização Avançada -->
+            <section id="sec-avancado" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>🗂️</span> <span data-i18n="sec.avancado.h2">Organização por Pastas: Skill + Agent</span>
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.avancado.intro">
+                        O padrão flat (tudo em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/memory/</code>) funciona para projetos pequenos. Mas quando as memórias crescem, o <code class="font-mono bg-stone-100 px-1 rounded text-xs">MEMORY.md</code> estoura o <strong>limite de 200 linhas</strong> e é truncado. O Claude perde acesso a parte das memórias. A solução: <strong>subpastas por categoria</strong> com Skill + Agent para manter a convenção.
+                    </p>
+                </div>
+
+                <!-- Problem: Flat vs Folders toggle -->
+                <div class="mb-8">
+                    <div class="flex gap-2 mb-4">
+                        <button id="toggle-flat" onclick="toggleOrgView('flat')" class="toggle-btn active px-4 py-2 rounded-lg text-sm font-medium border border-stone-200" data-i18n="sec.avancado.toggle.flat">
+                            Flat (padrão)
+                        </button>
+                        <button id="toggle-folders" onclick="toggleOrgView('folders')" class="toggle-btn px-4 py-2 rounded-lg text-sm font-medium border border-stone-200 bg-stone-50 text-stone-600" data-i18n="sec.avancado.toggle.folders">
+                            Subpastas (avançado)
+                        </button>
+                    </div>
+
+                    <div id="view-flat" class="bg-stone-900 rounded-xl p-5 text-sm font-mono leading-relaxed">
+                        <p class="text-stone-400 mb-3"># Flat: tudo no mesmo nível</p>
+                        <p class="text-stone-300"><span class="text-cyan-400">.claude/memory/</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-emerald-400">MEMORY.md</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-stone-500">← índice (200 linhas max!)</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-violet-400">user_role.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-violet-400">feedback_no_mocks.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-violet-400">feedback_pnpm.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-violet-400">project_api_v3.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-violet-400">project_merge_freeze.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-violet-400">reference_linear.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-violet-400">reference_grafana.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-violet-400">...</span> <span class="text-red-400">← 30+ arquivos = MEMORY.md cresce demais</span></p>
+                    </div>
+
+                    <div id="view-folders" class="bg-stone-900 rounded-xl p-5 text-sm font-mono leading-relaxed hidden">
+                        <p class="text-stone-400 mb-3"># Subpastas: organizado por domínio</p>
+                        <p class="text-stone-300"><span class="text-cyan-400">.claude/memory/</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-emerald-400">MEMORY.md</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-stone-500">← só ~10 linhas (ponteiros para pastas)</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-cyan-400">api/</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-emerald-400">README.md</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-stone-500">← índice desta categoria</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-violet-400">auth_flow.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-violet-400">rate_limits.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-cyan-400">ui/</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-emerald-400">README.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-violet-400">design_system.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;<span class="text-cyan-400">infra/</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-emerald-400">README.md</span></p>
+                        <p class="text-stone-300">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-violet-400">deploy_pipeline.md</span></p>
+                        <p class="text-emerald-400 mt-2">&nbsp;&nbsp;<span class="text-stone-500">← MEMORY.md leve, Claude lê só a pasta relevante</span></p>
+                    </div>
+                </div>
+
+                <!-- How it works: 3 pieces -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-bold text-stone-800 mb-4" data-i18n="sec.avancado.how.title">As 3 peças necessárias</h3>
+                    <p class="text-sm text-stone-600 mb-4" data-i18n="sec.avancado.how.intro">
+                        O Claude Code não cria subpastas sozinho: ele precisa de instruções explícitas. A combinação de CLAUDE.md + Skill + Agent resolve isso.
+                    </p>
+
+                    <!-- Piece 1: CLAUDE.md instruction -->
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                        <div class="step-number flex-shrink-0">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.avancado.piece1.title">CLAUDE.md: a instrução base</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.avancado.piece1.desc">Adicione no CLAUDE.md do projeto a regra de como salvar memórias. Isso é lido em toda conversa.</p>
+                            <div class="bg-stone-900 rounded-lg p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+                                <pre class="m-0 rounded-none border-0"><span class="text-stone-400">## Memória do Projeto</span>
+<span class="text-stone-300">Memórias ficam em subpastas de `.claude/memory/` por domínio.</span>
+<span class="text-stone-300">Cada pasta tem um README.md como índice local.</span>
+<span class="text-stone-300">Use a skill `/save-memory` para salvar no local correto.</span>
+<span class="text-stone-300">Nunca salve memórias diretamente na raiz de `.claude/memory/`.</span></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Piece 2: Skill -->
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                        <div class="step-number flex-shrink-0">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.avancado.piece2.title">Skill: o comando de salvar</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.avancado.piece2.desc">Uma skill em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/commands/save-memory.md</code> que o Claude invoca para criar o arquivo no lugar certo.</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-stone-500 uppercase tracking-wider" data-i18n="sec.avancado.piece2.file">.claude/commands/save-memory.md</span>
+                                <button onclick="copyCode('skill-save-memory')" class="text-xs text-stone-400 hover:text-stone-600 px-2 py-1 rounded bg-stone-100">Copiar</button>
+                            </div>
+                            <div class="bg-stone-900 rounded-lg p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+                                <pre id="skill-save-memory" class="m-0 rounded-none border-0"><span class="text-stone-500">---</span>
+<span class="text-violet-400">description</span>: <span class="text-emerald-400">Salva uma memória na subpasta correta</span>
+<span class="text-stone-500">---</span>
+
+<span class="text-stone-300">Salve uma memória seguindo estas regras:</span>
+
+<span class="text-stone-300">1. Identifique a **categoria** (api, ui, infra, team, etc.)</span>
+<span class="text-stone-300">2. Crie a pasta `.claude/memory/{categoria}/` se não existir</span>
+<span class="text-stone-300">3. Crie o arquivo `.md` com frontmatter (name, description, type)</span>
+<span class="text-stone-300">4. Atualize `.claude/memory/{categoria}/README.md` com a nova entrada</span>
+<span class="text-stone-300">5. Atualize `.claude/memory/MEMORY.md` se a categoria for nova</span>
+
+<span class="text-stone-300">Formato do MEMORY.md (índice raiz):</span>
+<span class="text-stone-300">```</span>
+<span class="text-stone-300"># Memory Index</span>
+<span class="text-stone-300">- [API](api/README.md) · autenticação, rate limits, endpoints</span>
+<span class="text-stone-300">- [UI](ui/README.md) · design system, componentes, acessibilidade</span>
+<span class="text-stone-300">- [Infra](infra/README.md) · deploy, CI/CD, monitoramento</span>
+<span class="text-stone-300">```</span>
+
+<span class="text-stone-300">Formato do README.md de cada pasta:</span>
+<span class="text-stone-300">```</span>
+<span class="text-stone-300"># API Memories</span>
+<span class="text-stone-300">- [Auth Flow](auth_flow.md) · JWT + refresh tokens, middleware pattern</span>
+<span class="text-stone-300">- [Rate Limits](rate_limits.md) · 100 req/min por tenant</span>
+<span class="text-stone-300">```</span></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Piece 3: Agent -->
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm mb-4">
+                        <div class="step-number flex-shrink-0">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.avancado.piece3.title">Agent: o curador automático</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.avancado.piece3.desc">Um agente em <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/agents/memory-curator.md</code> que revisa, limpa e reorganiza memórias periodicamente.</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-stone-500 uppercase tracking-wider" data-i18n="sec.avancado.piece3.file">.claude/agents/memory-curator.md</span>
+                                <button onclick="copyCode('agent-curator')" class="text-xs text-stone-400 hover:text-stone-600 px-2 py-1 rounded bg-stone-100">Copiar</button>
+                            </div>
+                            <div class="bg-stone-900 rounded-lg p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+                                <pre id="agent-curator" class="m-0 rounded-none border-0"><span class="text-stone-500">---</span>
+<span class="text-violet-400">description</span>: <span class="text-emerald-400">Revisa e organiza memórias do projeto</span>
+<span class="text-violet-400">allowed-tools</span>: <span class="text-emerald-400">Read, Write, Edit, Glob, Grep</span>
+<span class="text-stone-500">---</span>
+
+<span class="text-stone-300">Você é o curador de memórias do projeto.</span>
+
+<span class="text-stone-300">## Tarefas</span>
+<span class="text-stone-300">1. Leia todos os arquivos em `.claude/memory/` recursivamente</span>
+<span class="text-stone-300">2. Para cada memória, verifique:</span>
+<span class="text-stone-300">   - O arquivo/função referenciado ainda existe no código?</span>
+<span class="text-stone-300">   - A data mencionada já passou? (memória expirada)</span>
+<span class="text-stone-300">   - Existe duplicata em outra categoria?</span>
+<span class="text-stone-300">3. Remova memórias obsoletas</span>
+<span class="text-stone-300">4. Consolide duplicatas em uma única memória</span>
+<span class="text-stone-300">5. Atualize todos os README.md de cada subpasta</span>
+<span class="text-stone-300">6. Atualize o MEMORY.md raiz</span>
+
+<span class="text-stone-300">## Regras</span>
+<span class="text-stone-300">- Nunca remova memórias do tipo `feedback` sem confirmação</span>
+<span class="text-stone-300">- Converta datas relativas para absolutas</span>
+<span class="text-stone-300">- Mantenha MEMORY.md abaixo de 50 linhas</span>
+<span class="text-stone-300">- Cada README.md de subpasta: máx 30 linhas</span></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Why this works -->
+                <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-5 mb-6">
+                    <h3 class="font-bold text-cyan-800 mb-2 text-sm" data-i18n="sec.avancado.why.title">Por que funciona</h3>
+                    <div class="space-y-2 text-sm text-cyan-800">
+                        <p data-i18n-html="sec.avancado.why.1"><strong>MEMORY.md leve:</strong> Só ponteiros para pastas (~10 linhas). Nunca atinge o limite de 200 linhas.</p>
+                        <p data-i18n-html="sec.avancado.why.2"><strong>Leitura sob demanda:</strong> O Claude só abre o README.md da pasta relevante, não carrega todas as memórias.</p>
+                        <p data-i18n-html="sec.avancado.why.3"><strong>Escalável:</strong> 100+ memórias organizadas em ~8 pastas, cada uma com índice próprio.</p>
+                        <p data-i18n-html="sec.avancado.why.4"><strong>Curadoria automática:</strong> O agent revisa periodicamente sem intervenção manual.</p>
+                    </div>
+                </div>
+
+                <div class="bg-stone-50 border border-stone-200 rounded-xl p-5">
+                    <p class="text-sm text-stone-600 leading-relaxed" data-i18n-html="sec.avancado.note">
+                        <strong>Nota:</strong> Este padrão é uma <strong>convenção manual</strong>. O Claude Code não cria subpastas por padrão. Você precisa das 3 peças (instrução no CLAUDE.md + skill + agent) para que o Claude siga a convenção. Sem elas, ele volta ao comportamento flat padrão.
+                    </p>
+                </div>
+            </section>
+
+            <!-- SECTION 8: Próximos Passos -->
+            <section id="sec-proximos" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>🚀</span> <span data-i18n="sec.proximos.h2">Como começar hoje</span>
+                    </h2>
+                    <p class="text-stone-600" data-i18n="sec.proximos.intro">
+                        Quatro passos para ativar e usar memória de IA no seu projeto.
+                    </p>
+                </div>
+
+                <div class="space-y-4 mb-8">
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">1</div>
                         <div class="flex-1">
-                            <div class="flex items-center justify-between mb-1">
-                                <h4 class="font-bold text-stone-800" data-i18n="sec.lifecycle.step.1.title">A Proposta</h4>
-                                <span class="text-xs bg-stone-800 text-white px-2 py-1 rounded-full" data-i18n="sec.lifecycle.step.1.badge">IA escreve</span>
-                            </div>
-                            <p class="text-sm text-stone-600" data-i18n-html="sec.lifecycle.step.1.desc">Você pede: <em>"Antes de começar, crie um plan.md listando cada arquivo que será alterado e por quê."</em> A IA mapeia o impacto completo da mudança.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step1.title">Verifique se a memória está ativa</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n-html="sec.proximos.step1.desc">No Claude Code, verifique se existe o diretório <code class="font-mono bg-stone-100 px-1 rounded text-xs">.claude/memory/</code> no seu projeto. Se não existir, peça: "Lembre que este é um projeto Node.js com TypeScript".</p>
                         </div>
                     </div>
 
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">2</div>
                         <div class="flex-1">
-                            <div class="flex items-center justify-between mb-1">
-                                <h4 class="font-bold text-stone-800" data-i18n="sec.lifecycle.step.2.title">O Crivo do Arquiteto</h4>
-                                <span class="text-xs bg-gov-gold text-white px-2 py-1 rounded-full" data-i18n="sec.lifecycle.step.2.badge">Você revisa</span>
-                            </div>
-                            <p class="text-sm text-stone-600" data-i18n-html="sec.lifecycle.step.2.desc">Você lê o plano. Se a IA quer alterar um Provider que você não quer mexer, ou ignora um edge case — você corrige o plano <em>antes</em> da execução, não depois.</p>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step2.title">Comece com 2-3 memórias fundamentais</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step2.desc">Salve seu papel (user), uma preferência forte do time (feedback) e um contexto de projeto atual (project). Não tente salvar tudo de uma vez.</p>
                         </div>
                     </div>
 
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">3</div>
                         <div class="flex-1">
-                            <div class="flex items-center justify-between mb-1">
-                                <h4 class="font-bold text-stone-800" data-i18n="sec.lifecycle.step.3.title">Execução de Baixa Fricção</h4>
-                                <span class="text-xs bg-gov-emerald text-white px-2 py-1 rounded-full" data-i18n="sec.lifecycle.step.3.badge">IA executa</span>
-                            </div>
-                            <p class="text-sm text-stone-600" data-i18n="sec.lifecycle.step.3.desc">Com a estratégia aprovada, a IA executa. Erros de lógica e de arquitetura caem drasticamente — porque foram eliminados no passo 2.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Real plan.md example -->
-                <div class="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden">
-                    <div class="bg-stone-200 px-4 py-2 border-b border-stone-300 flex items-center gap-3">
-                        <span class="font-mono text-xs font-bold text-stone-700" data-i18n="sec.lifecycle.example.label">📄 plan.md — Exemplo real</span>
-                        <span class="text-[10px] bg-emerald-100 text-gov-emerald font-bold px-2 py-0.5 rounded-full" data-i18n="sec.lifecycle.example.badge">template para copiar</span>
-                    </div>
-                    <pre class="m-0 rounded-none border-0 text-xs leading-relaxed"><span class="text-emerald-400"># Plan: Adicionar rate limit no endpoint de login</span>
-
-<span class="text-blue-400">## Contexto</span>
-POST /auth/login não tem proteção contra brute force.
-Ref: REQUIREMENTS.md → "Edge Cases Críticos"
-
-<span class="text-blue-400">## Arquivos a MODIFICAR</span>
-1. `src/features/auth/auth.routes.ts`
-   → adicionar middleware de rate limit antes do handler
-2. `src/features/auth/auth.test.ts`
-   → adicionar testes: 5 tentativas ok, 6ª retorna 429
-
-<span class="text-blue-400">## Arquivos a CRIAR</span>
-3. `src/shared/middleware/rate-limit.ts`
-   → encapsular lógica do @fastify/rate-limit (já no TECH_STACK.md)
-
-<span class="text-blue-400">## Arquivos que NÃO serão modificados</span>
-- Qualquer coisa fora de `src/features/auth/` e `src/shared/middleware/`
-- Schema do banco — não há mudança de persistência
-
-<span class="text-blue-400">## Riscos identificados</span>
-- Usuários atrás de proxy corporativo podem compartilhar IP
-- Rate limit distribuído requer Redis — não está no TECH_STACK.md (confirmar antes)
-
-<span class="text-blue-400">## Aguardando aprovação para prosseguir.</span></pre>
-                </div>
-            </section>
-
-            <!-- SECTION 4: Estratégia vs Código -->
-            <section id="sec-decision" class="hidden">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚖️</span> <span data-i18n="sec.decision.h2">Estratégia vs. Implementação</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n-html="sec.decision.intro">
-                        Desentupir o gargalo significa parar de olhar ponto e vírgula e começar a olhar a arquitetura.
-                        O Plan.md ritual muda o <em>tipo</em> de conversa que você tem com a IA.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="antipattern-wrong bg-red-50 rounded-xl p-6">
-                        <h3 class="font-bold text-red-800 mb-4 flex items-center gap-2"><span>⚠️</span> <span data-i18n="sec.decision.wrong.title">O Gargalo Antigo</span></h3>
-                        <div class="space-y-3">
-                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-red-100">
-                                <span class="text-red-400 flex-shrink-0">❌</span>
-                                <span class="text-sm text-stone-600" data-i18n="sec.decision.wrong.li.1">Revisão de sintaxe linha por linha.</span>
-                            </div>
-                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-red-100">
-                                <span class="text-red-400 flex-shrink-0">❌</span>
-                                <span class="text-sm text-stone-600" data-i18n="sec.decision.wrong.li.2">IA decide a arquitetura, dev descobre só no código.</span>
-                            </div>
-                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-red-100 font-semibold">
-                                <span class="text-red-400 flex-shrink-0">❌</span>
-                                <span class="text-sm text-red-700" data-i18n="sec.decision.wrong.li.3">Retrabalho por decisão errada já codificada.</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="antipattern-right bg-emerald-50 rounded-xl p-6">
-                        <h3 class="font-bold text-gov-emerald mb-4 flex items-center gap-2"><span>✅</span> <span data-i18n="sec.decision.right.title">O Fluxo Novo</span></h3>
-                        <div class="space-y-3">
-                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-emerald-100 shadow-sm">
-                                <span class="text-gov-emerald flex-shrink-0">✅</span>
-                                <span class="text-sm text-stone-600" data-i18n="sec.decision.right.li.1">Guardrails automatizados eliminam revisão de sintaxe.</span>
-                            </div>
-                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-emerald-100 shadow-sm">
-                                <span class="text-gov-emerald flex-shrink-0">✅</span>
-                                <span class="text-sm text-stone-600" data-i18n-html="sec.decision.right.li.2">Você aprova a <strong>estratégia</strong> no Plan.md antes do código existir.</span>
-                            </div>
-                            <div class="flex items-start gap-2 p-3 bg-white rounded-lg border border-emerald-100 shadow-sm font-semibold">
-                                <span class="text-gov-emerald flex-shrink-0">✅</span>
-                                <span class="text-sm text-gov-emerald" data-i18n="sec.decision.right.li.3">Retrabalho arquitetural cai por eliminação.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Risk prompt example -->
-                <div class="bg-stone-50 border border-stone-200 rounded-xl p-5 mb-8">
-                    <h4 class="font-bold text-stone-800 mb-3 flex items-center gap-2"><span>💬</span> <span data-i18n="sec.decision.prompts.title">Prompts de Alto Valor para Estratégia</span></h4>
-                    <div class="space-y-3">
-                        <div class="bg-gov-emerald/10 border border-gov-emerald/20 p-3 rounded-lg">
-                            <p class="text-xs font-bold text-gov-emerald mb-1" data-i18n="sec.decision.prompts.risk.label">Prompt de Riscos</p>
-                            <p class="text-sm text-stone-700 italic" data-i18n="sec.decision.prompts.risk.text">"Antes de aplicar este plano, analise o RISKS.md e liste 3 possíveis efeitos colaterais desta mudança na camada de autenticação."</p>
-                        </div>
-                        <div class="bg-gov-gold/10 border border-gov-gold/20 p-3 rounded-lg">
-                            <p class="text-xs font-bold text-gov-gold mb-1" data-i18n="sec.decision.prompts.history.label">Prompt de Verificação Histórica</p>
-                            <p class="text-sm text-stone-700 italic" data-i18n="sec.decision.prompts.history.text">"Antes de criar um novo cache layer, verifique o DECISIONS.md — já tomamos alguma decisão sobre caching que eu deva conhecer?"</p>
-                        </div>
-                        <div class="bg-stone-100 border border-stone-200 p-3 rounded-lg">
-                            <p class="text-xs font-bold text-stone-500 mb-1" data-i18n="sec.decision.prompts.scope.label">Prompt de Escopo</p>
-                            <p class="text-sm text-stone-700 italic" data-i18n="sec.decision.prompts.scope.text">"No plan.md, liste explicitamente os arquivos que NÃO devem ser modificados nesta tarefa."</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mantra -->
-                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl border-l-8 border-gov-emerald shadow-xl">
-                    <h4 class="font-bold mb-2 text-stone-400 text-xs uppercase tracking-widest" data-i18n="sec.decision.mantra.label">O Mantra da Parte 2:</h4>
-                    <p class="text-lg italic font-serif" data-i18n="sec.decision.mantra.text">"Aprovamos estratégias, não linhas de código. A IA executa o que o arquiteto aprovou."</p>
-                </div>
-            </section>
-
-            <!-- SECTION 5: Limites & Cuidados -->
-            <section id="sec-limits" class="hidden">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.limits.h2">Limites & Cuidados</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.limits.intro">
-                        Governança excessiva é tão prejudicial quanto governança insuficiente. Documentação em excesso
-                        ou mal mantida pode confundir a IA mais do que ajudá-la.
-                    </p>
-                </div>
-
-                <div class="space-y-4 mb-8">
-                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider"><span>🔴</span> <span data-i18n="sec.limits.risks.title">Riscos a evitar</span></h3>
-
-                    <div class="bg-red-50 rounded-xl p-5 border-l-4 border-red-500">
-                        <div class="flex items-start gap-3">
-                            <span class="text-xl">🦠</span>
-                            <div>
-                                <h4 class="font-bold text-red-800 mb-1" data-i18n="sec.limits.risk.1.title">Documentation Rot</h4>
-                                <p class="text-sm text-red-700 leading-relaxed" data-i18n-html="sec.limits.risk.1.desc">
-                                    Documentos que não são atualizados ficam desatualizados e passam a <strong>mentir</strong> para a IA.
-                                    Um <code class="bg-red-100 font-mono px-1 rounded text-xs">TECH_STACK.md</code> com React 17 quando você usa 19 é pior do que não ter o arquivo.
-                                </p>
-                                <div class="mt-2 bg-red-100 rounded-lg p-2">
-                                    <p class="text-[11px] text-red-800" data-i18n="sec.limits.risk.1.tip">✓ Defina um dono por documento e revise no início de cada sprint.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-red-50 rounded-xl p-5 border-l-4 border-red-500">
-                        <div class="flex items-start gap-3">
-                            <span class="text-xl">📚</span>
-                            <div>
-                                <h4 class="font-bold text-red-800 mb-1" data-i18n="sec.limits.risk.2.title">Documentação Demais</h4>
-                                <p class="text-sm text-red-700 leading-relaxed" data-i18n="sec.limits.risk.2.desc">
-                                    30 arquivos de contexto fragmentados consomem o contexto da IA antes mesmo de ela começar a trabalhar.
-                                    Se a IA precisa ler 15 arquivos para entender uma tarefa simples, a estrutura está errada.
-                                </p>
-                                <div class="mt-2 bg-red-100 rounded-lg p-2">
-                                    <p class="text-[11px] text-red-800" data-i18n-html="sec.limits.risk.2.tip">✓ Use o <code class="font-mono">LLM_CONTEXT.md</code> como índice — só carregue o necessário para cada tarefa.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-4 mb-8">
-                    <h3 class="font-bold text-stone-700 text-sm uppercase tracking-wider"><span>🟡</span> <span data-i18n="sec.limits.attention.title">Pontos de atenção</span></h3>
-
-                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
-                        <div class="flex items-start gap-3">
-                            <span class="text-xl">⚔️</span>
-                            <div>
-                                <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.attention.1.title">Regras Conflitantes</h4>
-                                <p class="text-sm text-amber-700 leading-relaxed" data-i18n-html="sec.limits.attention.1.desc">
-                                    Se o <code class="bg-amber-100 font-mono px-1 rounded text-xs">CLAUDE.md</code> diz "use Zustand" e o
-                                    <code class="bg-amber-100 font-mono px-1 rounded text-xs">CODING_GUIDELINES.md</code> diz "evite estado global",
-                                    a IA vai flutuar entre os dois. Conflitos silenciosos são difíceis de diagnosticar.
-                                </p>
-                                <div class="mt-2 bg-amber-100 rounded-lg p-2">
-                                    <p class="text-[11px] text-amber-800" data-i18n="sec.limits.attention.1.tip">✓ Quando alterar uma regra, busque contradições nos outros arquivos.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
-                        <div class="flex items-start gap-3">
-                            <span class="text-xl">🗺️</span>
-                            <div>
-                                <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.attention.2.title">Plan.md não é contrato imutável</h4>
-                                <p class="text-sm text-amber-700 leading-relaxed" data-i18n-html="sec.limits.attention.2.desc">
-                                    Durante a execução, a IA pode descobrir que o plano era inviável por um motivo técnico.
-                                    Isso é normal — a IA deve te avisar e propor revisão, não executar mesmo assim ou parar silenciosamente.
-                                    Instrua isso explicitamente no <code class="bg-amber-100 font-mono px-1 rounded text-xs">CLAUDE.md</code>.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-amber-50 rounded-xl p-5 border-l-4 border-amber-500">
-                        <div class="flex items-start gap-3">
-                            <span class="text-xl">🤖</span>
-                            <div>
-                                <h4 class="font-bold text-amber-800 mb-1" data-i18n="sec.limits.attention.3.title">Governança não elimina revisão humana</h4>
-                                <p class="text-sm text-amber-700 leading-relaxed" data-i18n-html="sec.limits.attention.3.desc">
-                                    Documentação avançada reduz erros de <em>padrão</em>, não erros de <em>lógica de negócio</em>.
-                                    A IA pode gerar código perfeitamente estruturado que resolve o problema errado.
-                                    Revisar a intenção da solução ainda é responsabilidade humana.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Good practices -->
-                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
-                    <h3 class="font-bold text-gov-emerald mb-4 flex items-center gap-2"><span>✅</span> <span data-i18n="sec.limits.practices.title">Boas práticas</span></h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div class="flex items-start gap-2">
-                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">1.</span>
-                            <p class="text-sm text-gov-emerald" data-i18n="sec.limits.practices.li.1">Comece com 3-5 arquivos. Só adicione um novo quando sentir a falta dele.</p>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">2.</span>
-                            <p class="text-sm text-gov-emerald" data-i18n="sec.limits.practices.li.2">Revise a Constituição toda vez que uma regra for violada — atualize, não apenas corrija no chat.</p>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">3.</span>
-                            <p class="text-sm text-gov-emerald" data-i18n="sec.limits.practices.li.3">Adicione uma data de atualização no header de cada arquivo de contexto.</p>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <span class="text-gov-emerald font-bold text-sm flex-shrink-0">4.</span>
-                            <p class="text-sm text-gov-emerald" data-i18n="sec.limits.practices.li.4">Versione todos os arquivos de contexto junto com o código — PRs devem incluir mudanças de docs.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECTION 6: Próximos Passos -->
-            <section id="sec-nextsteps" class="hidden">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.nextsteps.h2">Como começar hoje</span></h2>
-                    <p class="text-stone-600" data-i18n="sec.nextsteps.intro">
-                        Evolua a partir do que foi criado na Parte 1. Quatro passos para ir do mínimo viável
-                        para uma Constituição funcional.
-                    </p>
-                </div>
-
-                <div class="space-y-4 mb-10">
-
-                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="step-number flex-shrink-0">1</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.1.title">Crie o DECISIONS.md com as últimas 3 decisões do time</h4>
-                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.1.desc">Não precisa ser retroativo. Documente as 3 decisões mais recentes que a IA deveria conhecer antes de sugerir algo.</p>
-                            <pre class="text-xs !p-3"><span class="text-emerald-400"># DECISIONS.md</span>
-
-<span class="text-blue-400">## [2025-03] Migração de Axios para ky</span>
-<span class="text-stone-400">Motivo: ky é mais leve e tem melhor suporte a streams.
-Status: Migração completa. Não usar axios em código novo.</span>
-
-<span class="text-blue-400">## [2025-02] Abandonamos Redux</span>
-<span class="text-stone-400">Motivo: Over-engineering para o tamanho do projeto.
-Adotamos Zustand. Não sugerir Redux.</span></pre>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="step-number flex-shrink-0">2</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.2.title">Transforme o CLAUDE.md em um índice de roteamento</h4>
-                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.2.desc">Adicione uma seção que instrui a IA a carregar documentos específicos para cada tipo de tarefa.</p>
-                            <pre class="text-xs !p-3"><span class="text-emerald-400"># Adicionar no CLAUDE.md:</span>
-
-<span class="text-blue-400">## Documentos de Contexto</span>
-- Para tarefas de banco: leia DATABASE_DISCOVERIES.md primeiro
-- Para novas features: leia ARCHITECTURE.md + REQUIREMENTS.md
-- Antes de qualquer decisão técnica: verifique DECISIONS.md</pre>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="step-number flex-shrink-0">3</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.3.title">Execute o ritual Plan.md em uma tarefa real</h4>
-                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.3.desc">Pegue a próxima feature do seu backlog e execute o ritual completo: peça o plano, revise, aprove, execute.</p>
-                            <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-lg text-sm text-stone-700 italic flex gap-3">
-                                <span class="text-lg flex-shrink-0">💬</span>
-                                <span data-i18n="sec.nextsteps.step.3.prompt">"Leia o CLAUDE.md e o REQUIREMENTS.md. Antes de escrever qualquer código, crie um plan.md com os arquivos que serão modificados e os riscos que você identificou."</span>
-                            </div>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step3.title">Observe a detecção automática</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step3.desc">Nas próximas conversas, observe quando o Claude salva memórias por conta própria. Revise o MEMORY.md após algumas sessões para verificar qualidade.</p>
                         </div>
                     </div>
 
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number flex-shrink-0">4</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.nextsteps.step.4.title">Agende uma revisão trimestral da Constituição</h4>
-                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.nextsteps.step.4.desc">Documentação apodrecida é pior do que ausente. Reserve 30 minutos por trimestre para revisar cada arquivo de contexto com o time.</p>
-                            <div class="bg-stone-50 border border-stone-200 p-3 rounded-lg text-sm text-stone-600 flex gap-3">
-                                <span class="text-lg flex-shrink-0">📅</span>
-                                <span data-i18n="sec.nextsteps.step.4.checklist">Checklist trimestral: versões no TECH_STACK ainda corretas? Decisões no DECISIONS.md ainda válidas? Regras no CLAUDE.md ainda seguidas?</span>
-                            </div>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step4.title">Estabeleça um ciclo de curadoria</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step4.desc">Uma vez por semana, abra o MEMORY.md e pergunte: cada memória aqui ainda é verdade? Remova o que ficou obsoleto, atualize o que mudou.</p>
                         </div>
                     </div>
                 </div>
 
+                <!-- Mantra -->
+                <div class="bg-stone-900 rounded-xl p-6 text-center">
+                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#22d3ee" data-i18n="sec.proximos.mantra.label">Mantra da Parte 2:</h4>
+                    <p class="text-lg font-bold text-white leading-relaxed" data-i18n="sec.proximos.mantra.text">
+                        "A memória da IA é tão boa quanto a curadoria humana por trás dela."
+                    </p>
+                </div>
+
                 <!-- References -->
-                <div class="bg-stone-50 border border-stone-200 rounded-2xl p-6">
-                    <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>📚</span> <span data-i18n="sec.nextsteps.refs.title">Referências</span></h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="mt-8 pt-6 border-t border-stone-200">
+                    <h3 class="text-sm font-bold text-stone-500 mb-4" data-i18n="sec.proximos.refs.title">Referências & Próximo Módulo</h3>
+                    <div class="space-y-2">
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">📖</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.1.title">Claude Code — CLAUDE.md docs</p>
-                                <p class="text-xs text-stone-500 font-mono">docs.anthropic.com/claude-code/memory</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
-                            <span class="text-lg">📐</span>
-                            <div>
-                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.2.title">ADR (Architecture Decision Records)</p>
-                                <p class="text-xs text-stone-500 font-mono">adr.github.io</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
-                            <span class="text-lg">⬅️</span>
-                            <div>
-                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.3.title">Módulo anterior: Setup & Regras de Ouro</p>
-                                <p class="text-xs text-stone-500" data-i18n="sec.nextsteps.refs.3.desc">Engineering Hour — Parte 1</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.proximos.refs.docs">Documentação: Claude Code Memory</p>
+                                <p class="text-xs text-stone-500" data-i18n="sec.proximos.refs.docs.sub">docs.anthropic.com</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 bg-white p-3 rounded-lg border border-stone-100">
                             <span class="text-lg">🎓</span>
                             <div>
-                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.nextsteps.refs.4.title">Próximo módulo: Claude Hooks</p>
-                                <p class="text-xs text-stone-500" data-i18n="sec.nextsteps.refs.4.desc">Engineering Hour — Parte 3</p>
+                                <p class="text-sm font-bold text-stone-700" data-i18n="sec.proximos.refs.next">Próximo módulo: Planejamento Avançado & Governança</p>
+                                <p class="text-xs text-stone-500" data-i18n="sec.proximos.refs.next.sub">Engineering Hour · Parte 3</p>
                             </div>
                         </div>
                     </div>
@@ -603,72 +900,100 @@ Adotamos Zustand. Não sugerir Redux.</span></pre>
     </div>
 
     <script>
-        let currentState = { activeSection: 'maturity', chart: null };
+        // ── Toggle: Sem vs Com Memória ────────────────────────────
+        function toggleMemoryView(mode) {
+            document.getElementById('view-sem').classList.toggle('hidden', mode !== 'sem');
+            document.getElementById('view-com').classList.toggle('hidden', mode !== 'com');
+            document.getElementById('toggle-sem').classList.toggle('active', mode === 'sem');
+            document.getElementById('toggle-com').classList.toggle('active', mode === 'com');
+            if (mode === 'sem') {
+                document.getElementById('toggle-sem').classList.remove('bg-stone-50', 'text-stone-600');
+                document.getElementById('toggle-com').classList.add('bg-stone-50', 'text-stone-600');
+            } else {
+                document.getElementById('toggle-com').classList.remove('bg-stone-50', 'text-stone-600');
+                document.getElementById('toggle-sem').classList.add('bg-stone-50', 'text-stone-600');
+            }
+        }
 
-        // ── Navigation hook (nav.js handles core logic) ─────────────
+        // ── Toggle: Flat vs Folders ───────────────────────────────
+        function toggleOrgView(mode) {
+            document.getElementById('view-flat').classList.toggle('hidden', mode !== 'flat');
+            document.getElementById('view-folders').classList.toggle('hidden', mode !== 'folders');
+            document.getElementById('toggle-flat').classList.toggle('active', mode === 'flat');
+            document.getElementById('toggle-folders').classList.toggle('active', mode === 'folders');
+            if (mode === 'flat') {
+                document.getElementById('toggle-flat').classList.remove('bg-stone-50', 'text-stone-600');
+                document.getElementById('toggle-folders').classList.add('bg-stone-50', 'text-stone-600');
+            } else {
+                document.getElementById('toggle-folders').classList.remove('bg-stone-50', 'text-stone-600');
+                document.getElementById('toggle-flat').classList.add('bg-stone-50', 'text-stone-600');
+            }
+        }
+
+        // ── Memory Type Tabs ──────────────────────────────────────
+        function showMemoryType(type) {
+            document.querySelectorAll('.memory-type-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.classList.add('bg-stone-50', 'text-stone-600');
+            });
+            document.querySelectorAll('.memory-type-content').forEach(c => c.classList.add('hidden'));
+
+            event.target.classList.add('active');
+            event.target.classList.remove('bg-stone-50', 'text-stone-600');
+            document.getElementById('type-' + type).classList.remove('hidden');
+        }
+
+        // ── Chart: Context tokens ─────────────────────────────────
+        let chartInstance = null;
+
         window.onNavigate = function(sectionId) {
-            if (!currentState.chart) initChart();
-            currentState.activeSection = sectionId;
+            if (sectionId === 'problema' && !chartInstance) initChart();
         };
 
         function initChart() {
-            const ctx = document.getElementById('maturityChart').getContext('2d');
-            currentState.chart = new Chart(ctx, {
-                type: 'radar',
+            const ctx = document.getElementById('contextChart');
+            if (!ctx) return;
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
                 data: {
-                    labels: ['Segurança', 'Performance', 'Arquitetura', 'Negócio', 'Manutenibilidade'],
+                    labels: ['Conv 1', 'Conv 2', 'Conv 3', 'Conv 4', 'Conv 5'],
                     datasets: [
                         {
-                            label: 'Sem Documentação (Chute)',
-                            data: [30, 40, 20, 50, 25],
-                            backgroundColor: 'rgba(225, 29, 72, 0.15)',
-                            borderColor: '#e11d48',
-                            borderWidth: 1.5,
-                            pointBackgroundColor: '#e11d48',
+                            label: 'Sem memória',
+                            data: [3200, 3400, 3100, 3500, 3300],
+                            backgroundColor: '#fca5a5',
+                            borderRadius: 4,
                         },
                         {
-                            label: 'Com Constituição (Maturidade)',
-                            data: [90, 85, 95, 80, 90],
-                            backgroundColor: 'rgba(6, 95, 70, 0.15)',
-                            borderColor: '#065f46',
-                            borderWidth: 2,
-                            pointBackgroundColor: '#065f46',
+                            label: 'Com memória',
+                            data: [3200, 1800, 1200, 800, 500],
+                            backgroundColor: '#22d3ee',
+                            borderRadius: 4,
                         }
                     ]
                 },
                 options: {
+                    responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: { font: { size: 10 }, stepSize: 25 },
-                            pointLabels: { font: { size: 11 } },
-                        }
-                    },
                     plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                        legend: { position: 'bottom', labels: { font: { size: 11 } } },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Tokens de contexto', font: { size: 11 } },
+                            grid: { color: '#e7e5e4' },
+                        },
+                        x: {
+                            grid: { display: false },
+                        }
                     }
                 }
             });
         }
 
-        // Chart is initialized via onNavigate on first load
-
-        window.addEventListener('i18n:applied', ({ detail: { t } }) => {
-            if (currentState.chart) {
-                currentState.chart.data.labels = [
-                    t['chart.label.security'],
-                    t['chart.label.performance'],
-                    t['chart.label.architecture'],
-                    t['chart.label.business'],
-                    t['chart.label.maintainability']
-                ];
-                currentState.chart.data.datasets[0].label = t['chart.dataset.noDoc'];
-                currentState.chart.data.datasets[1].label = t['chart.dataset.withConstitution'];
-                currentState.chart.update();
-            }
-        });
+        // Init chart on first load
+        initChart();
     </script>
 
     <!-- Footer -->
@@ -685,5 +1010,6 @@ Adotamos Zustand. Não sugerir Redux.</span></pre>
             </div>
         </div>
     </footer>
+
 </body>
 </html>

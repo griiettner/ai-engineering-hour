@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour P11: n8n & OpenClaw</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            950: '#020617',
+                        },
+                        cyber: {
+                            purple: '#a855f7', // neon purple for agents
+                            cyan: '#06b6d4',   // electric cyan for workflows
+                            pink: '#ec4899',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #020617; color: #e2e8f0; }
+        .nav-item.active {
+            background-color: #1e293b;
+            border-left: 4px solid #a855f7;
+            color: #f8fafc;
+            font-weight: 600;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        .cyber-card { 
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .cyber-card:hover { 
+            border-color: rgba(168, 85, 247, 0.6);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+        }
+        .node-pulse { animation: cyber-pulse 2s infinite; }
+        @keyframes cyber-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(6, 182, 212, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+        }
+        pre {
+            background-color: #000;
+            color: #a855f7;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.825rem;
+            overflow-x: auto;
+            border: 1px solid #1e293b;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- Chosen Palette: Cyber Automation (Slate 950, Neon Purple, Electric Cyan) -->
+    
+    <!-- Application Structure Plan: The SPA is designed as a "Hyper-Automation Control Center". It focuses on the synergy between n8n (visual workflows) and OpenClaw (agent execution). The structure follows: 1. The Productivity Leap (Bar chart showing the exponential gain from agents), 2. The Orchestrator (n8n node logic), 3. The Executor (OpenClaw agent capabilities), and 4. Agentic Ecosystem (How they respond to Slack/GitHub events). This design justifies why this is the "peak" of the series. -->
+
+    <!-- Visualization & Content Choices: 
+         1. Productivity Leap -> Compare -> Bar Chart -> Justification: Contrasts manual work, basic AI, and fully agentic automation. Method: Chart.js.
+         2. n8n Role -> Organize -> Interactive Workflow Nodes -> Justification: Visualizes n8n as the "logic board" for events. Method: Tailwind Grid.
+         3. OpenClaw Role -> Inform -> Capability List -> Justification: Details what an autonomous agent can do (code, chat, trigger). Method: Tailwind Cards.
+         4. Live Ecosystem -> Process -> Interactive Workflow Path -> Justification: Simulates an event (e.g., Bug Report) traveling through n8n to an OpenClaw Agent. Method: JS State.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header -->
+    <header class="bg-slate-900/80 border-b border-slate-800 sticky top-0 z-20 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🤖</span>
+                <h1 class="text-xl font-bold text-white tracking-tight">Engineering Hour <span class="text-cyber-purple">P11</span></h1>
+            </div>
+            <div class="text-sm font-medium text-slate-400 hidden sm:block">
+                Módulo 11: Hiper-automação com n8n & OpenClaw
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
+        
+        <!-- Sidebar Navigation -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-2 bg-slate-900/50 p-4 rounded-xl border border-slate-800 h-fit sticky top-24">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilar de Agentes</p>
+            <button onclick="navigate('leap')" id="nav-leap" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 flex items-center gap-3">
+                <span>🚀</span> Salto de Escala
+            </button>
+            <button onclick="navigate('n8n')" id="nav-n8n" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 flex items-center gap-3">
+                <span>🧩</span> Orquestração n8n
+            </button>
+            <button onclick="navigate('openclaw')" id="nav-openclaw" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 flex items-center gap-3">
+                <span>🦅</span> Execução OpenClaw
+            </button>
+            <button onclick="navigate('ecosystem')" id="nav-ecosystem" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 flex items-center gap-3">
+                <span>⚡</span> Fluxo de Agentes
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-slate-900/30 rounded-xl border border-slate-800 p-6 md:p-8">
+            
+            <!-- SECTION 1: The Productivity Leap -->
+            <section id="sec-leap" class="block animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">🚀 O Salto para a Hiper-automação</h2>
+                    <p class="text-slate-400">
+                        Até aqui, usamos a IA como assistente. Agora, ela se torna um **colaborador autônomo**. Ao combinar n8n e OpenClaw, removemos a necessidade de intervenção humana em processos repetitivos de DevOps e Codificação.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-slate-900/50 p-6 rounded-2xl border border-slate-800">
+                    <div class="chart-container">
+                        <canvas id="leapChart"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-slate-800/50 p-4 rounded-lg border-l-4 border-cyber-cyan">
+                            <h4 class="font-bold text-sm text-cyber-cyan uppercase">Processos Reativos</h4>
+                            <p class="text-xs text-slate-400">Um bug no Slack aciona o n8n -> n8n chama o OpenClaw -> OpenClaw analisa o código e propõe o fix.</p>
+                        </div>
+                        <div class="bg-slate-800/50 p-4 rounded-lg border-l-4 border-cyber-purple">
+                            <h4 class="font-bold text-sm text-cyber-purple uppercase">Agentes Pró-ativos</h4>
+                            <p class="text-xs text-slate-400 font-bold">IAs que monitoram logs e criam PRs de refatoração sozinhas durante a madrugada.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: n8n Orchestration -->
+            <section id="sec-n8n" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-2">🧩 n8n: O Sistema Nervoso</h2>
+                    <p class="text-slate-400 leading-relaxed">
+                        O n8n é o orquestrador visual. Ele conecta centenas de apps (Slack, GitHub, Jira) e define a <strong>lógica de disparo</strong> para os agentes. Ele é o cérebro organizacional que decide QUANDO um agente deve agir.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="cyber-card p-4 rounded-xl text-center">
+                        <div class="text-2xl mb-2">📥</div>
+                        <h4 class="font-bold text-sm mb-1">Gatilhos (Triggers)</h4>
+                        <p class="text-[10px] text-slate-500 italic">Webhook, Cron, GitHub PR, Slack Message.</p>
+                    </div>
+                    <div class="cyber-card p-4 rounded-xl text-center border-cyber-cyan node-pulse">
+                        <div class="text-2xl mb-2">⚙️</div>
+                        <h4 class="font-bold text-sm mb-1 text-cyber-cyan">Lógica</h4>
+                        <p class="text-[10px] text-slate-500 italic">If/Else, Loops, Data Transformation.</p>
+                    </div>
+                    <div class="cyber-card p-4 rounded-xl text-center">
+                        <div class="text-2xl mb-2">📤</div>
+                        <h4 class="font-bold text-sm mb-1">Ações</h4>
+                        <p class="text-[10px] text-slate-500 italic">Chamar OpenClaw, Enviar Email, Jira Update.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
+                    <h4 class="text-xs font-bold text-cyber-cyan uppercase mb-4 tracking-widest">Exemplo de Workflow:</h4>
+                    <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+                        <div class="p-2 border border-slate-700 rounded bg-slate-900">GitHub (New PR)</div>
+                        <div class="text-cyber-cyan">─────▶</div>
+                        <div class="p-2 border border-cyber-cyan rounded bg-slate-900">n8n: Filtra Arquivos</div>
+                        <div class="text-cyber-cyan">─────▶</div>
+                        <div class="p-2 border border-cyber-purple rounded bg-slate-900">OpenClaw: Code Review</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: OpenClaw Execution -->
+            <section id="sec-openclaw" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-2">🦅 OpenClaw: O Braço Executor</h2>
+                    <p class="text-slate-400">
+                        O OpenClaw é onde os agentes ganham vida. Ele permite criar entidades que respondem chat, executam scripts, disparam outros sub-agentes e interagem com o sistema de arquivos de forma autônoma.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="cyber-card p-6 rounded-2xl">
+                        <h3 class="font-bold text-cyber-purple mb-3 flex items-center gap-2"><span>👤</span> Agentes Especialistas</h3>
+                        <p class="text-sm text-slate-400 mb-4">Crie personas como "DB Admin Agent" ou "Refactor Expert" que mantêm sua própria memória e ferramentas.</p>
+                        <pre class="m-0 text-[10px]">
+claw.createAgent({
+  name: "DocUpdater",
+  tools: ["fs", "web_search"],
+  goal: "Sincronizar MD com código"
+});</pre>
+                    </div>
+                    <div class="cyber-card p-6 rounded-2xl">
+                        <h3 class="font-bold text-cyber-pink mb-3 flex items-center gap-2"><span>💬</span> Interatividade Total</h3>
+                        <p class="text-sm text-slate-400 mb-4">Agentes que respondem em threads de chat, mantendo o histórico da conversa e agindo sobre o código em tempo real.</p>
+                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 text-[11px] text-slate-400 italic">
+                            "Agente, vi que o teste X falhou no CI. Tente corrigir usando o estilo do nosso TECH_STACK.md."
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Agentic Ecosystem -->
+            <section id="sec-ecosystem" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-2">⚡ Fluxo de Agentes em Ação</h2>
+                    <p class="text-slate-400">
+                        Simule um fluxo real: Um desenvolvedor reporta um bug no Slack, e as máquinas cuidam do triagem inicial.
+                    </p>
+                </div>
+
+                <div class="bg-slate-950 rounded-2xl p-6 shadow-2xl border border-slate-800">
+                    <!-- Workflow Visual -->
+                    <div class="flex flex-col gap-6">
+                        <!-- Step 1: Input -->
+                        <div id="flow-1" class="flex items-center gap-4 transition-all duration-500">
+                            <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-xl">💬</div>
+                            <div class="flex-1 p-3 bg-slate-900 rounded-xl border border-slate-700 text-sm">
+                                <span class="text-cyber-cyan font-bold">Slack:</span> "Erro 404 no endpoint de busca de usuários."
+                            </div>
+                        </div>
+
+                        <!-- Connector -->
+                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-6"></div>
+
+                        <!-- Step 2: n8n -->
+                        <div id="flow-2" class="flex items-center gap-4 opacity-30 transition-all duration-500">
+                            <div class="w-10 h-10 rounded-full bg-cyber-cyan flex items-center justify-center text-xl text-slate-950 font-bold">🧩</div>
+                            <div class="flex-1 p-3 bg-slate-900 rounded-xl border border-cyber-cyan text-sm">
+                                <span class="text-cyber-cyan font-bold">n8n:</span> Identifica contexto e dispara agente OpenClaw de SRE.
+                            </div>
+                        </div>
+
+                        <!-- Connector -->
+                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-6"></div>
+
+                        <!-- Step 3: OpenClaw -->
+                        <div id="flow-3" class="flex items-center gap-4 opacity-30 transition-all duration-500">
+                            <div class="w-10 h-10 rounded-full bg-cyber-purple flex items-center justify-center text-xl text-slate-950 font-bold">🦅</div>
+                            <div class="flex-1 p-3 bg-slate-900 rounded-xl border border-cyber-purple text-sm">
+                                <span class="text-cyber-purple font-bold">OpenClaw Agent:</span> Analisa logs, encontra o erro no <code>routes.ts</code> e gera o fix.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex justify-center">
+                        <button id="run-flow-btn" onclick="runAgentFlow()" class="bg-cyber-purple hover:bg-purple-600 text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg shadow-purple-900/50">
+                            Simular Automação Ponta-a-Ponta ➔
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-6 bg-slate-900 text-slate-300 rounded-2xl border-l-8 border-cyber-pink shadow-xl italic font-serif">
+                    <h4 class="not-italic font-bold text-white mb-2 uppercase text-xs tracking-widest text-cyber-pink">Veredito da Parte 11:</h4>
+                    "A automação de workflows (n8n) e a autonomia de agentes (OpenClaw) são as chaves para desentupir o gargalo humano. O dev agora gerencia fluxos, não mais apenas arquivos."
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let currentState = { activeSection: 'leap', chart: null };
+
+        function navigate(sectionId) {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${sectionId}`).classList.add('active');
+            
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
+
+            if (sectionId === 'leap' && !currentState.chart) initChart();
+            currentState.activeSection = sectionId;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('leapChart').getContext('2d');
+            currentState.chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Manual', 'IA Assistida', 'Agentes (n8n+Claw)'],
+                    datasets: [{
+                        label: 'Tasks por Dia',
+                        data: [5, 15, 65],
+                        backgroundColor: [
+                            'rgba(71, 85, 105, 0.4)',
+                            'rgba(6, 182, 212, 0.6)',
+                            '#a855f7'
+                        ],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        let flowStep = 1;
+        function runAgentFlow() {
+            if(flowStep < 3) {
+                flowStep++;
+                document.getElementById(`flow-${flowStep}`).classList.remove('opacity-30');
+            } else {
+                document.getElementById('run-flow-btn').innerText = "Processo Finalizado!";
+                document.getElementById('run-flow-btn').classList.add('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        window.onload = () => {
+            initChart();
+        };
+    </script>
+</body>
+</html>

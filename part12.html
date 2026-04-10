@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour P12: O Dev Sênior do Futuro</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            300: '#d6d3d1',
+                            700: '#44403c',
+                            800: '#292524',
+                            900: '#1c1917',
+                        },
+                        senior: {
+                            gold: '#a16207', // golden for seniority/wisdom
+                            amber: '#d97706',
+                            slate: '#1e293b',
+                            accent: '#475569'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #fafaf9; color: #292524; }
+        .nav-item.active {
+            background-color: #e7e5e4;
+            border-left: 4px solid #a16207;
+            font-weight: 600;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        .intent-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .intent-card:hover { transform: scale(1.02); }
+        .wisdom-gradient {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        pre {
+            background-color: #1c1917;
+            color: #d6d3d1;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            font-size: 0.825rem;
+            overflow-x: auto;
+            border: 1px solid #44403c;
+        }
+        .step-line::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 40px;
+            bottom: 0;
+            width: 2px;
+            background: repeating-linear-gradient(to bottom, #d6d3d1 0, #d6d3d1 5px, transparent 5px, transparent 10px);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- Chosen Palette: Senior Gold & Slate Wisdom over Warm Stone Neutrals -->
+    
+    <!-- Application Structure Plan: The SPA is designed as a "Leadership Playbook". It focuses on the psychological and cultural shift of the developer. The structure follows: 1. The Skill Pivot (Radar chart comparing 'Coding vs Orchestration'), 2. Intent Architecture (Interactive comparison of prompt types), 3. Long-term Memory (How to feed the project brain via feedback loops), and 4. Impact: Unclogging the Bottleneck (Final bar chart showing team throughput). This ensures the developer feels empowered as an architect of systems, not just a generator of lines. -->
+
+    <!-- Visualization & Content Choices: 
+         1. Skill Pivot -> Compare -> Radar Chart -> Justification: Shows how seniority shifts from syntax mastery to architectural oversight. Method: Chart.js.
+         2. Intent Architecture -> Organize -> Toggleable Intent Cards -> Justification: Demonstrates the difference between "How" (low level) and "Why" (senior level) instructions. Method: Vanilla JS toggles.
+         3. AI Learning Cycle -> Process -> Vertical Dotted Timeline -> Justification: Visualizes the feedback loop that creates a self-improving project context. Method: HTML/CSS.
+         4. Bottleneck Impact -> Inform -> Bar Chart comparing throughput -> Justification: Final metric of success for the Engineering Hour series. Method: Chart.js.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🏛️</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">Engineering Hour <span class="text-senior-gold">P12</span></h1>
+            </div>
+            <div class="text-sm font-medium text-stone-500 hidden sm:block">
+                Módulo 12: Cultura, Gestão de Intenção e Memória Avançada
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
+        
+        <!-- Sidebar Navigation -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+            <p class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">A Nova Senioridade</p>
+            <button onclick="navigate('pivot')" id="nav-pivot" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔄</span> O Pivot de Skills
+            </button>
+            <button onclick="navigate('intent')" id="nav-intent" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🎯</span> Gestão de Intenção
+            </button>
+            <button onclick="navigate('memory')" id="nav-memory" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🧠</span> Memória do Projeto
+            </button>
+            <button onclick="navigate('impact')" id="nav-impact" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚡</span> Desentupindo o Gargalo
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+            
+            <!-- SECTION 1: Skill Pivot -->
+            <section id="sec-pivot" class="block animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🔄 O Pivot de Skills: O Fim do "Digitador"</h2>
+                    <p class="text-stone-600">
+                        O desenvolvedor sênior moderno não é mais medido por quão rápido ele digita, mas por quão bem ele **desenha o sistema**. Esta transição exige que foquemos em habilidades de nível superior.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-xl border border-stone-200">
+                    <div class="chart-container">
+                        <canvas id="pivotChart"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-senior-gold">
+                            <h4 class="font-bold text-sm text-senior-gold uppercase tracking-wider">A Nova Bússola</h4>
+                            <p class="text-xs text-stone-600">Note como a "Velocidade de Escrita" perde peso para a "Orquestração de Contexto" e "Revisão Crítica". Seu valor está no julgamento, não no código bruto.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-senior-slate">
+                            <h4 class="font-bold text-sm text-senior-slate uppercase tracking-wider">Gestão de Contexto</h4>
+                            <p class="text-xs text-stone-600">Dominar os arquivos `.md` que criamos nas sessões anteriores é agora sua ferramenta principal de desenvolvimento.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Intent Management -->
+            <section id="sec-intent" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🎯 Gestão de Intenção: O "Como" vs o "Porquê"</h2>
+                    <p class="text-stone-600">
+                        Um Sênior orquestra **intenções**. Se você gasta tempo explicando para a IA cada `if` ou cada `map`, você ainda é o gargalo. Aprenda a delegar a implementação e focar no propósito.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Bad Intent -->
+                    <div class="intent-card border border-stone-200 p-6 rounded-2xl bg-stone-50 opacity-70 grayscale hover:grayscale-0">
+                        <div class="flex items-center gap-2 mb-4 text-red-700 font-bold uppercase text-xs">
+                            <span>❌</span> Instrução de Baixo Nível (Junior)
+                        </div>
+                        <p class="text-sm text-stone-700 mb-4 font-mono italic">"Crie uma função que receba um array, filtre os ativos, some os valores e retorne um objeto formatado."</p>
+                        <p class="text-[11px] text-stone-500"><strong>Problema:</strong> Você está fazendo o trabalho da IA. Isso gera fadiga e microgerenciamento.</p>
+                    </div>
+
+                    <!-- Good Intent -->
+                    <div class="intent-card border-2 border-senior-gold p-6 rounded-2xl bg-white shadow-lg">
+                        <div class="flex items-center gap-2 mb-4 text-senior-gold font-bold uppercase text-xs">
+                            <span>✅</span> Gestão de Intenção (Sênior)
+                        </div>
+                        <p class="text-sm text-stone-800 mb-4 font-mono font-bold">"Implemente o cálculo de saldo do usuário seguindo a regra de negócio do REQUIREMENTS.md, garantindo que o log de auditoria seja gerado conforme o ARCHITECTURE.md."</p>
+                        <p class="text-[11px] text-senior-gold font-bold"><strong>Vantagem:</strong> Você define o objetivo e os limites. A IA preenche os detalhes baseando-se no contexto que você construiu.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-6 wisdom-gradient text-white rounded-2xl shadow-xl">
+                    <h4 class="font-bold text-senior-amber mb-2 uppercase text-xs">Princípio de Orquestração:</h4>
+                    <p class="text-lg italic font-serif">"Se a instrução é sobre sintaxe, você está codando. Se a instrução é sobre regras e contexto, você está arquitetando."</p>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Advanced Memory -->
+            <section id="sec-memory" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 text-3xl">🧠 Memória do Projeto: Alimentando o Cérebro</h2>
+                    <p class="text-stone-600">
+                        A IA só é tão inteligente quanto a memória que você fornece. A cada erro ou feedback, você deve atualizar a "Memória de Longo Prazo" do repositório para que ela aprenda.
+                    </p>
+                </div>
+
+                <div class="relative space-y-12 pl-4">
+                    <div class="step-line"></div>
+                    
+                    <!-- Loop 1 -->
+                    <div class="relative flex gap-6 items-start">
+                        <div class="w-10 h-10 rounded-full bg-stone-200 border-2 border-stone-400 flex items-center justify-center flex-shrink-0 z-10 text-stone-600 font-bold">1</div>
+                        <div>
+                            <h4 class="font-bold text-stone-800">O Feedback do PR</h4>
+                            <p class="text-sm text-stone-600">Ao revisar um PR feito pela IA, você identifica que ela sempre esquece de fechar conexões de DB em um caso específico.</p>
+                        </div>
+                    </div>
+
+                    <!-- Loop 2 -->
+                    <div class="relative flex gap-6 items-start">
+                        <div class="w-10 h-10 rounded-full bg-senior-gold border-2 border-yellow-700 flex items-center justify-center flex-shrink-0 z-10 text-white font-bold">2</div>
+                        <div>
+                            <h4 class="font-bold text-stone-800">Atualização de Contexto (ADR)</h4>
+                            <p class="text-sm text-stone-600 mb-3">Ao invés de apenas corrigir o código, você atualiza o <code>DECISIONS.md</code> ou o <code>CODING_GUIDELINES.md</code> com a nova regra.</p>
+                            <pre class="m-0 text-xs">## Regra de Conexões (Adicionada em 2026-03-05)
+- Sempre use o wrapper 'withConnection' para evitar leaks.</pre>
+                        </div>
+                    </div>
+
+                    <!-- Loop 3 -->
+                    <div class="relative flex gap-6 items-start">
+                        <div class="w-10 h-10 rounded-full bg-senior-slate border-2 border-slate-900 flex items-center justify-center flex-shrink-0 z-10 text-white font-bold">3</div>
+                        <div>
+                            <h4 class="font-bold text-stone-800">Crescimento Orgânico</h4>
+                            <p class="text-sm text-stone-600">Na próxima tarefa, a IA lê o histórico atualizado. Ela não repete o erro. O projeto agora tem um "cérebro" acumulativo.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Impact & Bottleneck -->
+            <section id="sec-impact" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚡ Desentupindo o Gargalo</h2>
+                    <p class="text-stone-600">
+                        O objetivo final desta jornada (da Parte 1 à 12) é remover o desenvolvedor do caminho crítico da sintaxe. O impacto final é medido em **Vazão (Throughput)** e **Felicidade**.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-xl border border-stone-200">
+                    <div class="chart-container">
+                        <canvas id="impactChart"></canvas>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm">
+                            <h4 class="font-bold text-senior-gold text-lg mb-2">O Dev "Orquestrador"</h4>
+                            <p class="text-sm text-stone-600">O gargalo de "esperar o sênior revisar cada linha" desaparece. O sênior agora revisa **objetivos**, e a automação (Hooks, MCP, AI Review) cuida da integridade.</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-stone-900 p-4 rounded-lg text-center">
+                                <p class="text-senior-gold font-bold text-2xl">+300%</p>
+                                <p class="text-[10px] text-stone-400 uppercase tracking-widest">Velocity</p>
+                            </div>
+                            <div class="bg-stone-900 p-4 rounded-lg text-center">
+                                <p class="text-senior-gold font-bold text-2xl">-80%</p>
+                                <p class="text-[10px] text-stone-400 uppercase tracking-widest">Bugs de Sintaxe</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-12 text-center p-8 bg-white border-t-4 border-senior-gold rounded-b-xl">
+                    <p class="text-2xl font-serif italic text-stone-800">"Você não está sendo substituído. Você está sendo finalmente promovido para o papel de Arquiteto que sempre deveria ter tido."</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let currentState = { activeSection: 'pivot', chartPivot: null, chartImpact: null };
+
+        function navigate(sectionId) {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${sectionId}`).classList.add('active');
+            
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
+
+            if (sectionId === 'pivot' && !currentState.chartPivot) initPivotChart();
+            if (sectionId === 'impact' && !currentState.chartImpact) initImpactChart();
+            currentState.activeSection = sectionId;
+        }
+
+        function initPivotChart() {
+            const ctx = document.getElementById('pivotChart').getContext('2d');
+            currentState.chartPivot = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Velocidade Digitação', 'Conhecimento Sintaxe', 'Review Arquitetural', 'Gestão de Intenção', 'Context Architecture'],
+                    datasets: [
+                        {
+                            label: 'Dev Sênior 2022',
+                            data: [90, 95, 60, 40, 30],
+                            backgroundColor: 'rgba(71, 85, 105, 0.2)',
+                            borderColor: '#475569',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Dev Sênior 2026',
+                            data: [20, 30, 95, 98, 95],
+                            backgroundColor: 'rgba(161, 98, 7, 0.2)',
+                            borderColor: '#a16207',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: { r: { beginAtZero: true, max: 100, ticks: { display: false } } },
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
+                }
+            });
+        }
+
+        function initImpactChart() {
+            const ctx = document.getElementById('impactChart').getContext('2d');
+            currentState.chartImpact = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Sprint 1 (Base)', 'Sprint 3 (Setup)', 'Sprint 6 (Hooks)', 'Sprint 10 (Maturity)'],
+                    datasets: [{
+                        label: 'Tasks Entregues / Sprint',
+                        data: [12, 18, 28, 45],
+                        backgroundColor: '#a16207',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Throughput' } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        window.onload = () => {
+            initPivotChart();
+        };
+    </script>
+</body>
+</html>

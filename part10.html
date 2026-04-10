@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour P10: Memória Avançada & Busca Local</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            300: '#d6d3d1',
+                            700: '#44403c',
+                            800: '#292524',
+                            900: '#1c1917',
+                        },
+                        neural: {
+                            indigo: '#4f46e5', // neural indigo for indexing
+                            violet: '#7c3aed', // violet for search/retrieval
+                            cyan: '#06b6d4',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #fafaf9; color: #292524; }
+        .nav-item.active {
+            background-color: #e7e5e4;
+            border-left: 4px solid #4f46e5;
+            font-weight: 600;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        .search-pulse { animation: pulse-border 2s infinite; }
+        @keyframes pulse-border {
+            0% { border-color: rgba(79, 70, 229, 0.3); }
+            50% { border-color: rgba(79, 70, 229, 1); }
+            100% { border-color: rgba(79, 70, 229, 0.3); }
+        }
+        .node-line { position: relative; }
+        .node-line::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            width: 2px;
+            height: 24px;
+            background: #d6d3d1;
+            transform: translateX(-50%);
+        }
+        .node-line:last-child::after { display: none; }
+        pre {
+            background-color: #1c1917;
+            color: #d6d3d1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.825rem;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- Chosen Palette: Neural Indigo & Violet Retrieval over Warm Stone Neutrals -->
+    
+    <!-- Application Structure Plan: The SPA is designed as a "Knowledge Engine Explorer". It focuses on the shift from "Full Context" to "Searchable Context" (RAG). The structure follows: 1. The Context Efficiency (Line chart comparing context usage), 2. Local RAG Concept (Explaining how tools like qmd index markdown), 3. Indexing Workflow (The 3-step process of preparing memory), and 4. Interactive Search Simulation (How the IA actually retrieves only what it needs). This helps the team understand that they don't need to load 100 files, just the right snippets. -->
+
+    <!-- Visualization & Content Choices: 
+         1. Context Efficiency -> Change -> Multi-line Chart -> Justification: Demonstrates token savings when using indexed search vs loading everything. Method: Chart.js.
+         2. Searchable Memory -> Organize -> Grid of "Memory Nodes" -> Justification: Categorizes documents that should be indexed for the LLM. Method: Tailwind Grid.
+         3. Workflow -> Process -> Step-by-step Interactive simulation -> Justification: Explains the indexing/retrieval cycle inspired by qmd. Method: JS State.
+         4. Simulation -> Experience -> Keyword Search Mock-up -> Justification: Lets the user "act" as the IA searching through folders. Method: Vanilla JS filtering.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🔍</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">Engineering Hour <span class="text-neural-indigo">P10</span></h1>
+            </div>
+            <div class="text-sm font-medium text-stone-500 hidden sm:block">
+                Módulo 10: Memória com Busca Local (RAG)
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
+        
+        <!-- Sidebar Navigation -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+            <p class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Memória Inteligente</p>
+            <button onclick="navigate('efficiency')" id="nav-efficiency" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📉</span> Eficiência de Contexto
+            </button>
+            <button onclick="navigate('qmd')" id="nav-qmd" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📂</span> O Conceito de qmd
+            </button>
+            <button onclick="navigate('indexing')" id="nav-indexing" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔄</span> Fluxo de Indexação
+            </button>
+            <button onclick="navigate('search')" id="nav-search" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚡</span> Simulação de Busca
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+            
+            <!-- SECTION 1: Efficiency -->
+            <section id="sec-efficiency" class="block animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📉 Otimizando a Janela de Contexto</h2>
+                    <p class="text-stone-600">
+                        Carregar todo o repositório em cada prompt é caro e confuso para a IA. A memória com busca local (RAG - <em>Retrieval-Augmented Generation</em>) permite que a IA busque apenas o parágrafo exato que precisa.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-2xl border border-stone-200">
+                    <div class="chart-container">
+                        <canvas id="efficiencyChart"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
+                            <h4 class="font-bold text-sm text-red-700 uppercase">Sem Busca (Full Load)</h4>
+                            <p class="text-xs text-stone-600">O contexto cresce linearmente com o número de documentos, estourando a janela rapidamente.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-neural-indigo">
+                            <h4 class="font-bold text-sm text-neural-indigo uppercase">Com Busca Local (RAG)</h4>
+                            <p class="text-xs text-stone-600 font-bold">Apenas snippets relevantes são carregados. O consumo de tokens permanece estável e preciso.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: QMD Concept -->
+            <section id="sec-qmd" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📂 O que é qmd / Memória Consultável?</h2>
+                    <p class="text-stone-600">
+                        Inspirado em ferramentas como o <code>qmd</code>, o conceito é simples: transformar seus arquivos Markdown em uma base de dados que a IA pode "perguntar" antes de responder.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border border-stone-200 p-6 rounded-2xl bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-2 flex items-center gap-2"><span>📝</span> Markdown como DB</h3>
+                        <p class="text-sm text-stone-600 mb-4">Seus arquivos de documentação (ADRs, specs, guides) são segmentados em blocos lógicos que a IA consegue identificar individualmente.</p>
+                        <ul class="text-xs text-stone-500 space-y-2">
+                            <li>• Tags de busca rápida (Keywords)</li>
+                            <li>• Metadados por arquivo</li>
+                            <li>• Links entre conceitos</li>
+                        </ul>
+                    </div>
+                    <div class="border border-stone-200 p-6 rounded-2xl bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-2 flex items-center gap-2"><span>🔍</span> Retrieval Automático</h3>
+                        <p class="text-sm text-stone-600 mb-4">Ao invés de você anexar os arquivos, a IA roda um comando interno de busca (como o grep ou busca vetorial local) para encontrar o contexto.</p>
+                        <div class="bg-stone-800 p-3 rounded font-mono text-[10px] text-neural-cyan">
+                            $ qmd search "auth flow"
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-6 bg-neural-indigo text-white rounded-2xl shadow-lg">
+                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest">A Grande Vantagem:</h4>
+                    <p class="text-lg italic font-serif">"Você não precisa que a IA saiba tudo o tempo todo. Você só precisa que ela saiba ONDE buscar quando for necessário."</p>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Indexing Workflow -->
+            <section id="sec-indexing" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🔄 Fluxo de Memória Avançada</h2>
+                    <p class="text-stone-600">
+                        Como preparar seu repositório para ser "buscável". Este fluxo garante que a IA tenha acesso a anos de decisões técnicas em milissegundos.
+                    </p>
+                </div>
+
+                <div class="flex flex-col items-center gap-4 py-6">
+                    <!-- Step 1 -->
+                    <div class="node-line w-full max-w-sm p-4 bg-white border-2 border-stone-200 rounded-xl flex items-center gap-4 shadow-sm">
+                        <span class="text-2xl">🧱</span>
+                        <div>
+                            <p class="font-bold text-xs uppercase text-stone-500">Etapa 1: Chunking</p>
+                            <p class="text-sm text-stone-800 font-bold">Dividir arquivos longos em blocos</p>
+                        </div>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="node-line w-full max-w-sm p-4 bg-white border-2 border-neural-indigo rounded-xl flex items-center gap-4 shadow-md search-pulse">
+                        <span class="text-2xl">🏷️</span>
+                        <div>
+                            <p class="font-bold text-xs uppercase text-neural-indigo">Etapa 2: Indexação</p>
+                            <p class="text-sm text-stone-800 font-bold">Gerar tags e resumos de busca</p>
+                        </div>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="node-line w-full max-w-sm p-4 bg-stone-900 border-2 border-stone-800 rounded-xl flex items-center gap-4 shadow-lg text-white">
+                        <span class="text-2xl">🤖</span>
+                        <div>
+                            <p class="font-bold text-xs uppercase text-stone-400">Etapa 3: Retrieval</p>
+                            <p class="text-sm font-bold">IA consulta o índice e puxa o snippet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h4 class="font-bold text-stone-800 mb-2">Estrutura Recomendada:</h4>
+                    <pre class="m-0 text-xs">
+/docs
+  /.memory-index  <-- Gerado por ferramentas tipo qmd
+  /adr            <-- Architecture Decisions
+  /features       <-- Histórico de funcionalidades
+  /patterns       <-- Padrões de código do time</pre>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Search Simulation -->
+            <section id="sec-search" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚡ Simulação: A IA Buscando Contexto</h2>
+                    <p class="text-stone-600">
+                        Digite uma palavra-chave para ver como a IA filtraria o contexto em vez de ler todos os documentos do projeto.
+                    </p>
+                </div>
+
+                <div class="bg-stone-50 rounded-2xl p-6 border border-stone-200">
+                    <div class="flex gap-2 mb-6">
+                        <input type="text" id="searchInput" placeholder="Ex: Auth, Database, React..." class="flex-1 p-3 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-neural-indigo font-mono text-sm">
+                        <button onclick="simulateSearch()" class="bg-neural-indigo text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all">Buscar Contexto</button>
+                    </div>
+
+                    <div id="searchResults" class="space-y-4">
+                        <div class="text-center py-10 text-stone-400 italic text-sm">
+                            Aguardando termo de busca para simular a recuperação de snippets...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-6 bg-stone-900 text-stone-100 rounded-2xl border-l-8 border-neural-cyan shadow-xl">
+                    <h4 class="font-bold mb-2">Conclusão da Parte 10:</h4>
+                    <p class="text-lg italic font-serif">"O futuro do desenvolvimento não é ter IAs com janelas de contexto infinitas, mas IAs que saibam navegar em memórias infinitas através de busca eficiente."</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let currentState = { activeSection: 'efficiency', chart: null };
+
+        const mockData = [
+            { tags: ['auth', 'seguranca', 'login'], title: 'ADR-004: Auth Strategy', snippet: 'Decidimos usar JWT com refresh tokens armazenados em cookies HttpOnly...' },
+            { tags: ['database', 'postgres', 'banco'], title: 'TECH_STACK.md: DB', snippet: 'Nossa stack utiliza PostgreSQL 16 com replicação em read-replicas para analytics...' },
+            { tags: ['react', 'componentes', 'ui'], title: 'CODING_GUIDELINES.md: React', snippet: 'Sempre utilize Composition Pattern para componentes de UI de alta complexidade...' },
+            { tags: ['api', 'rest', 'endpoints'], title: 'API_SPEC.md: V1', snippet: 'Todos os endpoints devem retornar o cabeçalho X-Request-ID para rastreabilidade...' }
+        ];
+
+        function navigate(sectionId) {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${sectionId}`).classList.add('active');
+            
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
+
+            if (sectionId === 'efficiency' && !currentState.chart) initChart();
+            currentState.activeSection = sectionId;
+        }
+
+        function simulateSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const resultsBox = document.getElementById('searchResults');
+            
+            if (!query) return;
+
+            const filtered = mockData.filter(item => 
+                item.tags.some(tag => tag.includes(query)) || 
+                item.title.toLowerCase().includes(query)
+            );
+
+            if (filtered.length > 0) {
+                resultsBox.innerHTML = filtered.map(res => `
+                    <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm animate-fade-in">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-neural-indigo text-sm">${res.title}</h4>
+                            <span class="text-[10px] bg-stone-100 text-stone-500 px-2 py-1 rounded">Relevância: 98%</span>
+                        </div>
+                        <p class="text-xs text-stone-600 italic">"...${res.snippet}..."</p>
+                    </div>
+                `).join('');
+            } else {
+                resultsBox.innerHTML = `
+                    <div class="text-center py-10 text-red-400 text-sm">
+                        Nenhum snippet relevante encontrado no índice para "${query}".
+                    </div>
+                `;
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('efficiencyChart').getContext('2d');
+            currentState.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1 Doc', '10 Docs', '50 Docs', '100 Docs', '500 Docs'],
+                    datasets: [
+                        {
+                            label: 'Consumo sem Busca (Full Load)',
+                            data: [5, 50, 250, 500, 2500],
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Consumo com Busca (RAG)',
+                            data: [2, 5, 8, 10, 12],
+                            borderColor: '#4f46e5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            fill: true,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'Milhares de Tokens', font: { size: 10 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        window.onload = () => {
+            initChart();
+        };
+    </script>
+</body>
+</html>

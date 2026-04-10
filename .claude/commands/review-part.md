@@ -6,19 +6,19 @@ Review the presentation file specified in the argument (e.g., `part2.html`) agai
 - All Claude Code config references use the real API (`PostToolUse`, `PreToolUse`, `Stop`, `Notification` events)
 - Config file path is `.claude/settings.json`, not `.claudecode/config.json` or any made-up path
 - No invented keys like `autoFix: true`
-- CLI tools named correctly: "Claude Code / Gemini CLI" — never "Codex CLI" as a current product
-- No references to "Ubivis" — this is a personal project by Paulo Griiettner
+- CLI tools named correctly: "Claude Code / Gemini CLI", never "Codex CLI" as a current product
+- No references to "Ubivis", this is a personal project by Paulo Griiettner
 
 **2. Visual consistency**
 - Nav uses group labels (`.nav-group-label`) separating sections into logical groups
 - Step cards use: `flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm` + `.step-number`
 - Code blocks use correct syntax colors: violet=keys, emerald=strings, blue=properties, orange=booleans
-- Copy buttons use `navigator.clipboard.writeText()` — never fake/simulated feedback only
+- Copy buttons use `navigator.clipboard.writeText()`, never fake/simulated feedback only
 - Accent color is distinct from other parts
 
 **3. Content completeness**
 - Each part should have a "Próximos Passos" section with concrete actionable steps
-- Interactive elements (charts, toggles, clickable cards) should have real data — no "Task 1, Task 2" labels
+- Interactive elements (charts, toggles, clickable cards) should have real data, no "Task 1, Task 2" labels
 - Before/after comparisons use `.antipattern-wrong` and `.antipattern-right` CSS classes
 
 **4. Language**
@@ -31,7 +31,7 @@ Review the presentation file specified in the argument (e.g., `part2.html`) agai
 - Emoji prefix pattern: separate `<span>` for emoji, `<span data-i18n="key">` for text
 - Key naming follows flat dot notation: `sec.{section}.{element}`, `nav.{item}`
 - `locales/en/part{N}.json` exists with all keys matching the HTML annotations
-- Keys in JSON match keys in HTML — no orphaned or missing keys
+- Keys in JSON match keys in HTML, no orphaned or missing keys
 - `i18n:applied` event listener exists if page has Chart.js charts
 - Shared keys (footer, complete, header) are NOT duplicated in part JSON (they're in `common.json`)
 
