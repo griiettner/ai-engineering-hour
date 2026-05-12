@@ -27,11 +27,13 @@ Ou arraste qualquer `partN.html` para o browser. Não há servidor necessário.
 | 7 | `part7.html` | **Agentes, Sub-Agentes & Agent Teams** — Single agent, subagentes, Agent Teams, economia de tokens | Fuchsia `#c026d3` | ✅ Concluído |
 | 8 | `part8.html` | *(planejado)* | — | 🔜 |
 | 9 | `part9.html` | *(planejado)* | — | 🔜 |
-| 10 | `part10.html` | *(planejado)* | — | 🔜 |
-| 11 | `part11.html` | *(planejado)* | — | 🔜 |
-| 12 | `part12.html` | *(planejado)* | — | 🔜 |
-| 13 | `part13.html` | *(planejado)* | — | 🔜 |
-| 14 | `part14.html` | *(planejado)* | — | 🔜 |
+| 10 | `part10.html` | **TDD com IA: Testes Como Contrato** | Lime `#65a30d` | ✅ Concluído |
+| 11 | `part11.html` | *(planejado)* | - | 🔜 |
+| 12 | `part12.html` | *(planejado)* | - | 🔜 |
+| 13 | `part13.html` | *(planejado)* | - | 🔜 |
+| 14 | `part14.html` | *(planejado)* | - | 🔜 |
+| 15 | `part15.html` | *(planejado)* | - | 🔜 |
+| 16 | `part16.html` | *(planejado)* | - | 🔜 |
 
 ---
 

@@ -4,28 +4,76 @@
 Série de apresentações interativas sobre uso de IA no desenvolvimento.
 Cada `partN.html` é uma SPA standalone em HTML + Tailwind CSS + Chart.js.
 
+---
+
+## ⚠️ Localização de Arquivos (REGRA INEGOCIÁVEL)
+
+**Tudo deste projeto vive em `.claude/` na raiz do projeto.** NUNCA em `~/.claude/`.
+
+| O quê | Caminho correto | NUNCA usar |
+|-------|-----------------|------------|
+| Memory (MEMORY.md + suporte) | `/Users/griiettner/Projects/ubivis/ai-engineering-hour/.claude/memory/` | `~/.claude/projects/-Users-griiettner-Projects-ubivis-ai-engineering-hour/memory/` |
+| Plans (planos de implementação) | `.claude/plans/` | `~/.claude/plans/` |
+| Agents (subagent definitions) | `.claude/agents/` | `~/.claude/agents/` |
+| Commands (slash commands) | `.claude/commands/` | `~/.claude/commands/` |
+| Settings | `.claude/settings.json` | `~/.claude/settings.json` |
+| Hooks scripts | `.claude/hooks/` | `~/.claude/hooks/` |
+| Skills (se houver) | `.claude/skills/` | `~/.claude/skills/` |
+
+Esta regra **OVERRIDE** o comportamento default do sistema de auto-memory que tenta gravar em `~/.claude/projects/.../memory/`. Se o sistema sugerir o caminho global, ignore: escreva em `.claude/memory/` do projeto.
+
+A única coisa que pode estar em `~/.claude/projects/.../` são os `.jsonl` de sessão (auto-gerados pelo Claude Code), que você NÃO deve criar nem deletar.
+
+**Por que:** tudo do projeto fica versionado, portátil e visível ao GitHub. Nada do projeto pode viver fora do repositório.
+
+---
+
 ## Arquivos
-- `part1.html` · Setup & Regras de Ouro (IDE vs CLI, Contexto, Guardrails, Trio, Anti-patterns)
-- `part2.html` · Memória de IA (tipos de memória, MEMORY.md, auto-memory no Claude Code)
-- `part3.html` · Planejamento Avançado & Governança
-- `part4.html` · Claude Hooks & Confiança Automatizada
-- `part5-15.html` · módulos seguintes
+Status verificado em 2026-05-12 (16 parts total após shift +1 que abriu o slot 10):
+
+| Part | Status | Tema |
+|------|--------|------|
+| `part1.html` | ✅ | Setup & Regras de Ouro |
+| `part2.html` | ✅ | Memória de IA |
+| `part3.html` | ✅ | Planejamento & Governança |
+| `part4.html` | ✅ | Hooks & Confiança Automatizada |
+| `part5.html` | ✅ | Decisões Embasadas com MCP |
+| `part6.html` | ✅ | Workspace Seguro & Guardrails |
+| `part7.html` | ✅ | Skills & Comandos Slash |
+| `part8.html` | ✅ | Agentes, Sub-Agentes & Agent Teams |
+| `part9.html` | ✅ | O Sistema Integrado |
+| `part10.html` | ✅ | TDD com IA · Testes Como Contrato |
+| `part11.html` | 📝 draft | Memória Avançada & Busca Local (era P10) |
+| `part12.html` | 📝 draft | n8n & OpenClaw |
+| `part13.html` | 📝 draft | O Dev Sênior do Futuro |
+| `part14.html` | 📝 draft | Governança e Segurança |
+| `part15.html` | 📝 draft | Métricas e ROI |
+| `part16.html` | 📝 draft | A Próxima Fronteira |
+
+Detalhes de cada sessão em `.claude/memory/project_sessions.md`.
 
 ## Stack
 - **CSS**: Tailwind CSS via CDN (tailwindcss.com)
 - **Charts**: Chart.js via CDN
 - **Fontes**: Inter (sans), Fira Code (mono), carregadas pelo sistema
 - **Sem build**: arquivos abertos direto no browser, sem bundler
+- **Shared files**: `nav.js`, `i18n.js`, `shared.css` (incluir em toda part)
 
 ## Paleta de Cores
-| Módulo    | Cor primária       | Classe Tailwind      |
-|-----------|--------------------|----------------------|
-| Part 1    | Sky Blue `#0284c7` | `accent-blue`        |
-| Part 2    | Cyan `#0891b2`     | `accent-cyan`        |
-| Part 4    | Violet `#6d28d9`   | `auto-violet`        |
-| Base      | Warm Stone         | `stone-*`            |
+| Módulo | Cor | Hex |
+|--------|-----|-----|
+| P1 | Sky Blue | `#0284c7` |
+| P2 | Cyan | `#0891b2` |
+| P3 | Gov Emerald | `#065f46` |
+| P4 | Violet | `#6d28d9` |
+| P5 | Teal | `#0d9488` |
+| P6 | Orange | `#ea580c` |
+| P7 | Indigo | `#4f46e5` |
+| P8 | Fuchsia | `#c026d3` |
+| P9 | Amber | `#d97706` |
+| P10 | Lime | `#65a30d` |
 
-Fundo body sempre `stone-50 (#fafaf9)`. Texto principal `stone-800 (#292524)`.
+Fundo body sempre `stone-50` (`#fafaf9`). Texto principal `stone-800` (`#292524`). Novas parts escolhem cor distinta e documentam aqui + em `.claude/memory/project_conventions.md`.
 
 ## Estrutura Padrão de Cada Part
 ```
@@ -37,8 +85,13 @@ layout (max-w-7xl, flex md:flex-row gap-8)
   │    ├─ nav-group-label (uppercase, text-stone-400)
   │    └─ nav-item buttons (active: border-left + bg-stone-200)
   └─ main (flex-1, bg-white, rounded-xl, p-6 md:p-8)
-       └─ sections (hidden/block via JS navigate())
+       └─ sections (hidden/block via nav.js)
+
+session-complete (banner ao chegar na última seção)
+footer (links, créditos)
 ```
+
+Navegação é controlada por `nav.js` (compartilhado). Lógica específica da página vai em `window.onNavigate`.
 
 ## Componentes Recorrentes
 
@@ -52,58 +105,33 @@ layout (max-w-7xl, flex md:flex-row gap-8)
 `.step-number` = círculo 2rem, bg accent color, texto branco bold.
 
 ### Code Blocks
-```html
-<pre class="m-0 rounded-none border-0 font-mono text-sm leading-relaxed">
-  <span class="text-violet-400">"chave"</span>: <span class="text-emerald-400">"valor"</span>
-</pre>
-```
-Cores: violet = chaves, emerald = strings/valores, blue = propriedades, orange = booleans.
+Background `#1c1917`, cores: violet = chaves, emerald = strings/valores, blue = propriedades, orange = booleans.
 
 ### Anti-pattern Cards
-- `.antipattern-wrong` = `border-left: 4px solid #e11d48` + bg-red-50
-- `.antipattern-right` = `border-left: 4px solid #059669` + bg-emerald-50
+- `.antipattern-wrong` · `border-left: 4px solid #e11d48` + bg-red-50
+- `.antipattern-right` · `border-left: 4px solid #059669` + bg-emerald-50
 
-### Info Cards com detalhe
-```html
-<div id="node-info" class="bg-white rounded-2xl shadow-md border border-stone-200 overflow-hidden">
-  <div id="node-info-header" class="flex items-center gap-3 px-6 py-4 border-b bg-stone-50">
-    icon | título | badge (ml-auto, rounded-full, bg-violet-100)
-  </div>
-  <div id="node-info-body" class="px-6 py-4 text-sm text-stone-600 leading-relaxed"></div>
-</div>
-```
-
-## Decisões Estabelecidas
-
-### Part 1
-- Chart de contexto: 2 estados toggle ("Poluído" `[15,20,65]` / "Limpo" `[55,35,10]`)
-- Copy buttons usam `navigator.clipboard.writeText()` (real, não simulado)
-- CLI card: "Claude Code / Gemini CLI" (Codex era API deprecated, não CLI agente)
-- Guardrails em 3 tabs: CLAUDE.md / .cursorrules / copilot-instructions.md
-
-### Part 2
-- Toggle "Sem Memória" vs "Com Memória" com código simulado
-- Chart.js: barras comparando tokens de contexto por conversa (com vs sem memória)
-- 4 tabs para tipos de memória: User, Feedback, Project, Reference
-- Mantra: "A memória da IA é tão boa quanto a curadoria humana por trás dela."
-
-### Part 4
-- Mantra: "A máquina valida o que é verificável. Você julga o que é intencional."
-- Config real: `PostToolUse` com `matcher` e `hooks[]` em `.claude/settings.json`
-- Não existe `autoFix: true` na API real dos hooks, remover se aparecer
-- Setas `→` entre nós do ciclo + indicador de loop abaixo
-- Badges dos nodes: "PostToolUse → Write|Edit", "Loop até exit 0"
+### Copy buttons
+Sempre `navigator.clipboard.writeText()` real, nunca simulado.
 
 ## Convenções de Conteúdo
-- **Idioma**: Português brasileiro em todo o conteúdo visível
-- **Código inline**: usar `font-mono bg-stone-100 px-1 rounded text-xs`
-- **Referências técnicas**: sempre usar nomes/paths reais (verificar antes de escrever)
+- **Idioma**: Português brasileiro em todo o conteúdo visível, código/identifiers em inglês
+- **Código inline**: `font-mono bg-stone-100 px-1 rounded text-xs`
+- **Referências técnicas**: sempre usar nomes/paths reais, verificar docs antes de escrever
 - **Hooks Claude Code**: eventos reais são `PreToolUse`, `PostToolUse`, `Stop`, `Notification`
-- **Arquivo de config**: `.claude/settings.json` (por projeto) ou `~/.claude/settings.json` (global)
+- **Settings config**: `.claude/settings.json` (projeto) ou `~/.claude/settings.json` (apenas se for global do harness, NUNCA escrever sobre este projeto lá)
+- **i18n**: toda string visível com `data-i18n` ou `data-i18n-html`, exceto dentro de `<pre>`
+- **Mantra**: toda sessão fecha com frase que preserva o julgamento humano
 
 ## O que NÃO fazer
-- **Nunca usar em dash** em nenhum arquivo (HTML, JSON, MD). Usar vírgula, dois-pontos, ponto, pipe (|) ou middle dot (·) conforme o contexto
-- Não inventar chaves de config que não existem na API real
-- Não usar `opacity-60/80` em cards apenas para "parecer desabilitado", use cores semânticas
+- **Nunca escrever em `~/.claude/`** nada relacionado a este projeto (veja regra no topo)
+- **Nunca usar em dash** em nenhum arquivo (HTML, JSON, MD). Usar vírgula, dois-pontos, ponto, pipe (`|`) ou middle dot (`·`) conforme o contexto
+- Não inventar chaves de config que não existem na API real (ex: `autoFix: true` não existe em hooks)
+- Não usar `opacity-60/80` em cards só para "parecer desabilitado", use cores semânticas
 - Não criar seções sem exemplos concretos de código ou casos de uso reais
 - Não usar labels genéricas em gráficos ("Task 1, Task 2"), usar cenários reais
+- Não referenciar "Ubivis" no conteúdo das parts, é um projeto pessoal de Paulo Griiettner
+- Não criar `locales/en/partN.json` durante scaffold, é fase 2 (após aprovação humana)
+
+## Decisões Estabelecidas
+Decisões específicas por sessão (mantras, charts, configs) ficam em `.claude/memory/project_sessions.md`. Não duplicar aqui, esse arquivo é o índice de convenções gerais.

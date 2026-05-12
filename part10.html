@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Hour P10: Memória Avançada & Busca Local</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Engineering Hour P10: TDD com IA</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="nav.js" defer></script>
+    <script src="i18n.js" defer></script>
 
     <script>
         tailwind.config = {
@@ -17,18 +16,15 @@
                 extend: {
                     colors: {
                         stone: {
-                            50: '#fafaf9',
-                            100: '#f5f5f4',
-                            200: '#e7e5e4',
-                            300: '#d6d3d1',
-                            700: '#44403c',
-                            800: '#292524',
-                            900: '#1c1917',
+                            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+                            300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
                         },
-                        neural: {
-                            indigo: '#4f46e5', // neural indigo for indexing
-                            violet: '#7c3aed', // violet for search/retrieval
-                            cyan: '#06b6d4',
+                        tdd: {
+                            lime: '#65a30d',
+                            light: '#f7fee7',
+                            border: '#a3e635',
+                            emerald: '#059669',
+                            red: '#dc2626',
                         }
                     },
                     fontFamily: {
@@ -40,319 +36,923 @@
         }
     </script>
 
+    <link rel="stylesheet" href="shared.css">
     <style>
-        body { background-color: #fafaf9; color: #292524; }
-        .nav-item.active {
-            background-color: #e7e5e4;
-            border-left: 4px solid #4f46e5;
-            font-weight: 600;
+        :root { --accent: #65a30d; }
+        .toggle-btn { transition: all 0.15s; cursor: pointer; }
+        .toggle-btn.active { background: #65a30d; color: white; font-weight: 600; }
+        .tab-btn { transition: all 0.15s; cursor: pointer; }
+        .tab-btn.active { background: #65a30d; color: white; font-weight: 600; }
+        .pipeline-node {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.85rem 1rem; border-radius: 0.85rem;
+            border: 2px solid #e7e5e4; background: white;
+            transition: all 0.2s;
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin: auto;
-            height: 300px;
-            max-height: 400px;
+        .pipeline-node:hover {
+            border-color: #65a30d;
+            box-shadow: 0 4px 12px rgba(101, 163, 13, 0.15);
         }
-        .search-pulse { animation: pulse-border 2s infinite; }
-        @keyframes pulse-border {
-            0% { border-color: rgba(79, 70, 229, 0.3); }
-            50% { border-color: rgba(79, 70, 229, 1); }
-            100% { border-color: rgba(79, 70, 229, 0.3); }
+        .pipeline-node .node-num {
+            width: 1.75rem; height: 1.75rem; border-radius: 9999px;
+            background: #65a30d; color: white; font-weight: 700; font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-        .node-line { position: relative; }
-        .node-line::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 100%;
-            width: 2px;
-            height: 24px;
-            background: #d6d3d1;
-            transform: translateX(-50%);
+        .pipeline-arrow {
+            display: flex; justify-content: center;
+            color: #a3e635; font-size: 1.5rem; line-height: 1;
         }
-        .node-line:last-child::after { display: none; }
-        pre {
-            background-color: #1c1917;
-            color: #d6d3d1;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.825rem;
-            overflow-x: auto;
+        .chart-container { max-width: 720px; height: 360px; }
+        .pyramid-row {
+            display: flex; align-items: center; gap: 0.85rem;
+            padding: 0.85rem 1rem; border-radius: 0.85rem;
+            border: 2px solid #e7e5e4; background: white;
+            transition: all 0.2s;
+        }
+        .pyramid-row.active {
+            border-color: #65a30d;
+            background: #f7fee7;
         }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
 
-    <!-- Chosen Palette: Neural Indigo & Violet Retrieval over Warm Stone Neutrals -->
-    
-    <!-- Application Structure Plan: The SPA is designed as a "Knowledge Engine Explorer". It focuses on the shift from "Full Context" to "Searchable Context" (RAG). The structure follows: 1. The Context Efficiency (Line chart comparing context usage), 2. Local RAG Concept (Explaining how tools like qmd index markdown), 3. Indexing Workflow (The 3-step process of preparing memory), and 4. Interactive Search Simulation (How the IA actually retrieves only what it needs). This helps the team understand that they don't need to load 100 files, just the right snippets. -->
-
-    <!-- Visualization & Content Choices: 
-         1. Context Efficiency -> Change -> Multi-line Chart -> Justification: Demonstrates token savings when using indexed search vs loading everything. Method: Chart.js.
-         2. Searchable Memory -> Organize -> Grid of "Memory Nodes" -> Justification: Categorizes documents that should be indexed for the LLM. Method: Tailwind Grid.
-         3. Workflow -> Process -> Step-by-step Interactive simulation -> Justification: Explains the indexing/retrieval cycle inspired by qmd. Method: JS State.
-         4. Simulation -> Experience -> Keyword Search Mock-up -> Justification: Lets the user "act" as the IA searching through folders. Method: Vanilla JS filtering.
-         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-
     <!-- Header -->
     <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="text-2xl">🔍</span>
-                <h1 class="text-xl font-bold text-stone-800 tracking-tight">Engineering Hour <span class="text-neural-indigo">P10</span></h1>
+                <span class="text-2xl">🧪</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">
+                    Engineering Hour <span style="color:#65a30d">P10</span>
+                </h1>
             </div>
-            <div class="text-sm font-medium text-stone-500 hidden sm:block">
-                Módulo 10: Memória com Busca Local (RAG)
+            <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
+                Módulo 10: TDD com IA | Testes Como Contrato
             </div>
         </div>
     </header>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
-        
-        <!-- Sidebar Navigation -->
-        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
-            <p class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Memória Inteligente</p>
-            <button onclick="navigate('efficiency')" id="nav-efficiency" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📉</span> Eficiência de Contexto
+
+        <!-- Sidebar -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+
+            <p class="nav-group-label" data-i18n="nav.group.concept">O Conceito</p>
+            <button onclick="navigate('paradoxo')" id="nav-paradoxo" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🎭</span> <span data-i18n="nav.paradoxo">O Paradoxo do Teste com IA</span>
             </button>
-            <button onclick="navigate('qmd')" id="nav-qmd" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📂</span> O Conceito de qmd
+            <button onclick="navigate('inversao')" id="nav-inversao" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔄</span> <span data-i18n="nav.inversao">Inversão Red-Green</span>
             </button>
-            <button onclick="navigate('indexing')" id="nav-indexing" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🔄</span> Fluxo de Indexação
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.practice">Na Prática</p>
+            <button onclick="navigate('pipeline')" id="nav-pipeline" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔗</span> <span data-i18n="nav.pipeline">Pipeline TDD Integrado</span>
             </button>
-            <button onclick="navigate('search')" id="nav-search" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚡</span> Simulação de Busca
+            <button onclick="navigate('mocks')" id="nav-mocks" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🪞</span> <span data-i18n="nav.mocks">Mocks vs Realidade</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.limits">Limites</p>
+            <button onclick="navigate('antipatterns')" id="nav-antipatterns" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚠️</span> <span data-i18n="nav.antipatterns">Anti-patterns</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.impact">Impacto</p>
+            <button onclick="navigate('metricas')" id="nav-metricas" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📊</span> <span data-i18n="nav.metricas">Confiança Real vs Cobertura</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.suggestion">Sugestão</p>
+            <button onclick="navigate('cucumber')" id="nav-cucumber" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🥒</span> <span data-i18n="nav.cucumber">Cucumber para Contratos Legíveis</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.action">Ação</p>
+            <button onclick="navigate('proximos')" id="nav-proximos" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> <span data-i18n="nav.proximos">Próximos Passos</span>
             </button>
         </nav>
 
         <!-- Main Content -->
         <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
-            
-            <!-- SECTION 1: Efficiency -->
-            <section id="sec-efficiency" class="block animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📉 Otimizando a Janela de Contexto</h2>
-                    <p class="text-stone-600">
-                        Carregar todo o repositório em cada prompt é caro e confuso para a IA. A memória com busca local (RAG - <em>Retrieval-Augmented Generation</em>) permite que a IA busque apenas o parágrafo exato que precisa.
+
+            <!-- ============================================================ -->
+            <!-- SECTION 1: Paradoxo do Teste com IA                            -->
+            <!-- ============================================================ -->
+            <section id="sec-paradoxo" class="block">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🎭</span> <span data-i18n="sec.paradoxo.h2">O Paradoxo do Teste com IA</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.paradoxo.intro">
+                        Pedir para a IA "gerar testes para esta função" produz testes que validam o que o código faz, não o que o código deveria fazer. A cobertura sobe rápido, a confiança não acompanha. O paradoxo está em usar a métrica errada para a pergunta certa.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-2xl border border-stone-200">
-                    <div class="chart-container">
-                        <canvas id="efficiencyChart"></canvas>
+                <!-- Two contrasting cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                        <h3 class="font-bold text-stone-400 text-sm mb-3"><span>📈</span> <span data-i18n="sec.paradoxo.card.coverage.title">Cobertura ≠ Confiança</span></h3>
+                        <p class="text-sm text-stone-500 leading-relaxed" data-i18n="sec.paradoxo.card.coverage.desc">95% de cobertura com mocks vazios e asserções tautológicas. O relatório fica verde. O bug em produção continua existindo. Cobertura mede linhas executadas, não comportamento garantido.</p>
                     </div>
-                    <div class="space-y-4">
-                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
-                            <h4 class="font-bold text-sm text-red-700 uppercase">Sem Busca (Full Load)</h4>
-                            <p class="text-xs text-stone-600">O contexto cresce linearmente com o número de documentos, estourando a janela rapidamente.</p>
+                    <div class="rounded-xl border-2 p-5" style="background:#f7fee7; border-color:#a3e635">
+                        <h3 class="font-bold text-sm mb-3" style="color:#65a30d"><span>🎯</span> <span data-i18n="sec.paradoxo.card.spec.title">Tests as Spec</span></h3>
+                        <p class="text-sm leading-relaxed" style="color:#3f6212" data-i18n="sec.paradoxo.card.spec.desc">60% de cobertura com testes que falham quando alguém quebra o contrato. Cada teste é uma frase do contrato. Se a frase está vermelha, alguma promessa foi quebrada.</p>
+                    </div>
+                </div>
+
+                <!-- Toggle interactive -->
+                <div class="mb-6">
+                    <h3 class="text-base font-semibold text-stone-800 mb-3" data-i18n="sec.paradoxo.toggle.title">Mesma função, dois estilos de teste:</h3>
+                    <div class="flex gap-2 mb-4">
+                        <button class="toggle-btn active px-4 py-2 rounded-lg text-sm border border-stone-200" id="tgl-pos" onclick="showToggle('pos')" data-i18n="sec.paradoxo.toggle.pos">Teste pós-código</button>
+                        <button class="toggle-btn px-4 py-2 rounded-lg text-sm border border-stone-200" id="tgl-spec" onclick="showToggle('spec')" data-i18n="sec.paradoxo.toggle.spec">Teste como spec</button>
+                    </div>
+
+                    <div id="toggle-pos" class="toggle-content">
+                        <pre class="m-0 text-xs"><span class="text-stone-500">// IA gera teste depois do código existir</span>
+<span class="text-blue-400">describe</span>(<span class="text-emerald-400">'parseDate'</span>, () => {
+  <span class="text-blue-400">it</span>(<span class="text-emerald-400">'returns a result'</span>, () => {
+    <span class="text-violet-400">const</span> result = <span class="text-blue-400">parseDate</span>(<span class="text-emerald-400">'2026-05-12'</span>);
+    <span class="text-blue-400">expect</span>(result).<span class="text-blue-400">toBeDefined</span>();
+  });
+
+  <span class="text-blue-400">it</span>(<span class="text-emerald-400">'handles input'</span>, () => {
+    <span class="text-violet-400">const</span> result = <span class="text-blue-400">parseDate</span>(<span class="text-emerald-400">'foo'</span>);
+    <span class="text-blue-400">expect</span>(result).<span class="text-blue-400">toBeTruthy</span>();
+  });
+});
+
+<span class="text-stone-500">// Cobertura: 100%. Bugs detectados: 0.</span></pre>
+                    </div>
+
+                    <div id="toggle-spec" class="toggle-content hidden">
+                        <pre class="m-0 text-xs"><span class="text-stone-500">// Humano escreve teste antes, define o contrato</span>
+<span class="text-blue-400">describe</span>(<span class="text-emerald-400">'parseDate'</span>, () => {
+  <span class="text-blue-400">it</span>(<span class="text-emerald-400">'parses ISO date 2026-05-12 to Date(2026, 4, 12)'</span>, () => {
+    <span class="text-blue-400">expect</span>(<span class="text-blue-400">parseDate</span>(<span class="text-emerald-400">'2026-05-12'</span>))
+      .<span class="text-blue-400">toEqual</span>(<span class="text-violet-400">new</span> <span class="text-blue-400">Date</span>(<span class="text-orange-400">2026</span>, <span class="text-orange-400">4</span>, <span class="text-orange-400">12</span>));
+  });
+
+  <span class="text-blue-400">it</span>(<span class="text-emerald-400">'rejects 2026-02-30 with day-out-of-range'</span>, () => {
+    <span class="text-blue-400">expect</span>(() => <span class="text-blue-400">parseDate</span>(<span class="text-emerald-400">'2026-02-30'</span>))
+      .<span class="text-blue-400">toThrow</span>(<span class="text-emerald-400">/day out of range/</span>);
+  });
+
+  <span class="text-blue-400">it</span>(<span class="text-emerald-400">'rejects empty string with empty-input'</span>, () => {
+    <span class="text-blue-400">expect</span>(() => <span class="text-blue-400">parseDate</span>(<span class="text-emerald-400">''</span>))
+      .<span class="text-blue-400">toThrow</span>(<span class="text-emerald-400">/empty input/</span>);
+  });
+});
+
+<span class="text-stone-500">// Cobertura: 60%. Bugs prevenidos: vários.</span></pre>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.paradoxo.chart.title">Cobertura sobe, regressões continuam</h3>
+                    <div class="chart-container mx-auto">
+                        <canvas id="paradoxoChart"></canvas>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-3 text-center italic" data-i18n="sec.paradoxo.chart.caption">Valores ilustrativos para discussão, não benchmark.</p>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 2: Inversao Red-Green                                  -->
+            <!-- ============================================================ -->
+            <section id="sec-inversao" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔄</span> <span data-i18n="sec.inversao.h2">Inversão Red-Green</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.inversao.intro">
+                        O ciclo red-green-refactor clássico assume um humano escrevendo o teste. Quando a IA entra na equação, a ordem importa muito mais. Quem escreve o teste primeiro define o contrato. Quem escreve o código primeiro define o que será testado.
+                    </p>
+                </div>
+
+                <!-- 3 columns workflow -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-stone-500" data-i18n="sec.inversao.col.classic.label">Tradicional</span>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-neural-indigo">
-                            <h4 class="font-bold text-sm text-neural-indigo uppercase">Com Busca Local (RAG)</h4>
-                            <p class="text-xs text-stone-600 font-bold">Apenas snippets relevantes são carregados. O consumo de tokens permanece estável e preciso.</p>
+                        <ul class="text-sm text-stone-600 space-y-2 leading-relaxed">
+                            <li class="flex gap-2"><span class="text-stone-400 flex-shrink-0">1.</span><span data-i18n="sec.inversao.col.classic.li.1">Humano escreve teste vermelho</span></li>
+                            <li class="flex gap-2"><span class="text-stone-400 flex-shrink-0">2.</span><span data-i18n="sec.inversao.col.classic.li.2">Humano implementa o código</span></li>
+                            <li class="flex gap-2"><span class="text-stone-400 flex-shrink-0">3.</span><span data-i18n="sec.inversao.col.classic.li.3">Humano refatora</span></li>
+                        </ul>
+                        <p class="text-xs text-stone-500 mt-3 italic" data-i18n="sec.inversao.col.classic.note">Funciona, mas é lento. Bom para projetos críticos.</p>
+                    </div>
+
+                    <div class="rounded-xl border-2 border-red-200 bg-red-50 p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-red-700" data-i18n="sec.inversao.col.bad.label">IA gerando teste depois</span>
                         </div>
+                        <ul class="text-sm text-red-800 space-y-2 leading-relaxed">
+                            <li class="flex gap-2"><span class="text-red-400 flex-shrink-0">1.</span><span data-i18n="sec.inversao.col.bad.li.1">IA escreve código</span></li>
+                            <li class="flex gap-2"><span class="text-red-400 flex-shrink-0">2.</span><span data-i18n="sec.inversao.col.bad.li.2">IA escreve teste verde</span></li>
+                            <li class="flex gap-2"><span class="text-red-400 flex-shrink-0">3.</span><span data-i18n="sec.inversao.col.bad.li.3">Coverage sobe, valor fica em zero</span></li>
+                        </ul>
+                        <p class="text-xs text-red-700 mt-3 italic" data-i18n="sec.inversao.col.bad.note">Test theater puro: validação que valida a si mesma.</p>
+                    </div>
+
+                    <div class="rounded-xl border-2 p-5" style="background:#f7fee7; border-color:#a3e635">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider" style="color:#65a30d" data-i18n="sec.inversao.col.good.label">Recomendado</span>
+                        </div>
+                        <ul class="text-sm space-y-2 leading-relaxed" style="color:#3f6212">
+                            <li class="flex gap-2"><span style="color:#84cc16" class="flex-shrink-0">1.</span><span data-i18n="sec.inversao.col.good.li.1">Humano escreve teste vermelho (define contrato)</span></li>
+                            <li class="flex gap-2"><span style="color:#84cc16" class="flex-shrink-0">2.</span><span data-i18n="sec.inversao.col.good.li.2">IA implementa para passar nos testes</span></li>
+                            <li class="flex gap-2"><span style="color:#84cc16" class="flex-shrink-0">3.</span><span data-i18n="sec.inversao.col.good.li.3">Humano revisa o código gerado</span></li>
+                        </ul>
+                        <p class="text-xs mt-3 italic" style="color:#4d7c0f" data-i18n="sec.inversao.col.good.note">Velocidade da IA, garantia do contrato humano.</p>
+                    </div>
+                </div>
+
+                <!-- Tabs with prompts -->
+                <div class="mb-4">
+                    <h3 class="text-base font-semibold text-stone-800 mb-3" data-i18n="sec.inversao.tabs.title">Três níveis de prompt para gerar testes:</h3>
+                    <div class="flex gap-2 mb-4 flex-wrap">
+                        <button class="tab-btn px-4 py-2 rounded-lg text-sm border border-stone-200" id="prompttab-bad" onclick="showPrompt('bad')" data-i18n="sec.inversao.tab.bad">Anti-pattern</button>
+                        <button class="tab-btn px-4 py-2 rounded-lg text-sm border border-stone-200" id="prompttab-ok" onclick="showPrompt('ok')" data-i18n="sec.inversao.tab.ok">Ok</button>
+                        <button class="tab-btn active px-4 py-2 rounded-lg text-sm border border-stone-200" id="prompttab-good" onclick="showPrompt('good')" data-i18n="sec.inversao.tab.good">Bom (test as spec)</button>
+                    </div>
+
+                    <div id="prompt-bad" class="prompt-content hidden">
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0" id="prompt-bad-text">Gere testes para esta função.</pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('prompt-bad-text')" data-i18n="sec.inversao.copy">copiar</button>
+                        </div>
+                        <p class="text-xs text-red-700 mt-3" data-i18n="sec.inversao.prompt.bad.note">A IA inventa cenários baseada no que vê no código. Ela não tem como conhecer o contrato real.</p>
+                    </div>
+
+                    <div id="prompt-ok" class="prompt-content hidden">
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0" id="prompt-ok-text">Gere testes para esta função cobrindo: input null, string vazia
+e valores inválidos. Use casos de borda explícitos.</pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('prompt-ok-text')" data-i18n="sec.inversao.copy">copiar</button>
+                        </div>
+                        <p class="text-xs text-stone-600 mt-3" data-i18n="sec.inversao.prompt.ok.note">Melhor que o anterior, mas ainda só cobre o que a IA enxerga. Sem contrato explícito.</p>
+                    </div>
+
+                    <div id="prompt-good" class="prompt-content">
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0 text-xs" id="prompt-good-text">Estou implementando parseDate(input: string). Os seguintes
+testes precisam passar (não altere a especificação):
+
+- parseDate('2026-05-12') retorna Date(2026, 4, 12)
+- parseDate('2026-02-30') lança InvalidDateError
+  com mensagem 'day out of range'
+- parseDate('') lança InvalidDateError
+  com mensagem 'empty input'
+- parseDate('not a date') lança InvalidDateError
+
+Implemente parseDate. Não modifique os testes. Se algum
+teste parecer errado, pergunte antes de prosseguir.</pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('prompt-good-text')" data-i18n="sec.inversao.copy">copiar</button>
+                        </div>
+                        <p class="text-xs mt-3" style="color:#4d7c0f" data-i18n="sec.inversao.prompt.good.note">Contrato explícito. A IA não pode inventar para fazer passar. Tem que implementar de verdade.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 2: QMD Concept -->
-            <section id="sec-qmd" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📂 O que é qmd / Memória Consultável?</h2>
-                    <p class="text-stone-600">
-                        Inspirado em ferramentas como o <code>qmd</code>, o conceito é simples: transformar seus arquivos Markdown em uma base de dados que a IA pode "perguntar" antes de responder.
+            <!-- ============================================================ -->
+            <!-- SECTION 3: Pipeline TDD Integrado                              -->
+            <!-- ============================================================ -->
+            <section id="sec-pipeline" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔗</span> <span data-i18n="sec.pipeline.h2">Pipeline TDD Integrado</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.pipeline.intro">
+                        Testes não vivem sozinhos. Eles participam do sistema integrado visto na sessão anterior. Hooks rodam testes, agentes corrigem o código quando falham, memórias guardam padrões. O resultado é um ciclo onde a IA propõe, o teste valida, o humano aprova.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="border border-stone-200 p-6 rounded-2xl bg-stone-50">
-                        <h3 class="font-bold text-stone-800 mb-2 flex items-center gap-2"><span>📝</span> Markdown como DB</h3>
-                        <p class="text-sm text-stone-600 mb-4">Seus arquivos de documentação (ADRs, specs, guides) são segmentados em blocos lógicos que a IA consegue identificar individualmente.</p>
-                        <ul class="text-xs text-stone-500 space-y-2">
-                            <li>• Tags de busca rápida (Keywords)</li>
-                            <li>• Metadados por arquivo</li>
-                            <li>• Links entre conceitos</li>
+                <!-- Pipeline diagram -->
+                <div class="grid grid-cols-1 gap-2 mb-8 max-w-2xl mx-auto">
+                    <div class="pipeline-node">
+                        <div class="node-num">1</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.pipeline.step.1.title">IA escreve código</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.pipeline.step.1.desc">Tools Write ou Edit alteram um arquivo do projeto</div>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow">↓</div>
+                    <div class="pipeline-node">
+                        <div class="node-num">2</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.pipeline.step.2.title">PostToolUse hook roda os testes</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.pipeline.step.2.desc">Script bash escolhe o runner adequado pelo nome do arquivo</div>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow">↓</div>
+                    <div class="pipeline-node">
+                        <div class="node-num">3</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.pipeline.step.3.title">Testes falham e devolvem stderr</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.pipeline.step.3.desc">Exit code 1 e mensagem do runner são lidos pelo Claude</div>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow">↓</div>
+                    <div class="pipeline-node">
+                        <div class="node-num">4</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.pipeline.step.4.title">Agente corrige o código (não o teste)</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.pipeline.step.4.desc">A regra é dura: o contrato definido no teste é imutável</div>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow">↓</div>
+                    <div class="pipeline-node">
+                        <div class="node-num">5</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.pipeline.step.5.title">Hook roda novamente, exit 0</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.pipeline.step.5.desc">Memory grava o padrão para evitar o mesmo erro depois</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Code blocks -->
+                <div class="grid grid-cols-1 gap-5 mb-6">
+                    <div>
+                        <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.pipeline.code.settings.title">Configuração do hook em .claude/settings.json</h3>
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0" id="code-settings">{
+  <span class="text-violet-400">"hooks"</span>: {
+    <span class="text-violet-400">"PostToolUse"</span>: [
+      {
+        <span class="text-violet-400">"matcher"</span>: <span class="text-emerald-400">"Write|Edit"</span>,
+        <span class="text-violet-400">"hooks"</span>: [
+          {
+            <span class="text-violet-400">"type"</span>: <span class="text-emerald-400">"command"</span>,
+            <span class="text-violet-400">"command"</span>: <span class="text-emerald-400">"bash .claude/hooks/run-tests.sh \"$TOOL_INPUT\""</span>
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('code-settings')" data-i18n="sec.pipeline.copy">copiar</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.pipeline.code.script.title">Script .claude/hooks/run-tests.sh</h3>
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0" id="code-script"><span class="text-stone-500">#!/usr/bin/env bash</span>
+file_path=<span class="text-emerald-400">"$1"</span>
+<span class="text-violet-400">case</span> <span class="text-emerald-400">"$file_path"</span> <span class="text-violet-400">in</span>
+  *.test.ts|*.spec.ts) npm test --silent -- <span class="text-emerald-400">"$file_path"</span> ;;
+  *_test.py|test_*.py) pytest -q <span class="text-emerald-400">"$file_path"</span> ;;
+  *_test.go) go test -run <span class="text-emerald-400">"$file_path"</span> ;;
+  *) <span class="text-violet-400">exit</span> 0 ;;
+<span class="text-violet-400">esac</span></pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('code-script')" data-i18n="sec.pipeline.copy">copiar</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.pipeline.code.memory.title">Memory de feedback em .claude/memory/feedback_tests.md</h3>
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0" id="code-memory">---
+<span class="text-violet-400">name</span>: <span class="text-emerald-400">feedback-tests</span>
+<span class="text-violet-400">description</span>: <span class="text-emerald-400">Testes deste projeto sempre batem em PostgreSQL real, nunca em mocks</span>
+<span class="text-violet-400">metadata</span>:
+  <span class="text-violet-400">type</span>: <span class="text-emerald-400">feedback</span>
+---
+
+<span class="text-stone-300">**Why:**</span> incidente em 2026-03 onde teste com mock validou
+query SQL que falhou em produção.
+
+<span class="text-stone-300">**How to apply:**</span> ao escrever testes de camada de
+dados, usar testcontainers-python para subir Postgres real.</pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('code-memory')" data-i18n="sec.pipeline.copy">copiar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insight -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">💡</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.pipeline.insight.title">A regra inquebrável</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.pipeline.insight.desc">Quando o teste falha, o agente corrige o código, nunca o teste. Se o teste estiver realmente errado, o humano altera no commit seguinte. Misturar essas duas situações gera o pior dos mundos: testes que se acomodam ao bug.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 4: Mocks vs Realidade                                  -->
+            <!-- ============================================================ -->
+            <section id="sec-mocks" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🪞</span> <span data-i18n="sec.mocks.h2">Mocks vs Realidade</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.mocks.intro">
+                        Mockar é uma decisão arquitetural, não um padrão default. Cada nível da pirâmide de testes paga um preço diferente em velocidade e ganha um valor diferente em garantia. O problema do "mocka tudo" é que velocidade vira ilusão de cobertura.
+                    </p>
+                </div>
+
+                <!-- Inverted pyramid -->
+                <div class="flex flex-col gap-3 mb-8">
+                    <div class="pyramid-row" id="pyr-contract" onclick="showPyramid('contract')" style="cursor:pointer">
+                        <div class="text-2xl">🛡️</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.mocks.pyramid.contract.title">Contract test (mais real, mais valor)</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.mocks.pyramid.contract.desc">Valida que a API real cumpre o contrato compartilhado entre serviços</div>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full" style="background:#dcfce7; color:#15803d" data-i18n="sec.mocks.pyramid.contract.badge">Pact, schema</span>
+                    </div>
+                    <div class="pyramid-row" id="pyr-integration" onclick="showPyramid('integration')" style="cursor:pointer">
+                        <div class="text-2xl">🔌</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.mocks.pyramid.integration.title">Integration test</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.mocks.pyramid.integration.desc">Postgres real via testcontainers, valida a query de verdade</div>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full" style="background:#fef9c3; color:#854d0e" data-i18n="sec.mocks.pyramid.integration.badge">testcontainers</span>
+                    </div>
+                    <div class="pyramid-row active" id="pyr-unit" onclick="showPyramid('unit')" style="cursor:pointer">
+                        <div class="text-2xl">⚙️</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.mocks.pyramid.unit.title">Unit test (mais barato, menos valor)</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.mocks.pyramid.unit.desc">Mocka tudo. Só faz sentido para lógica pura sem I/O</div>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full" style="background:#fee2e2; color:#b91c1c" data-i18n="sec.mocks.pyramid.unit.badge">jest mock</span>
+                    </div>
+                </div>
+
+                <!-- Comparison table -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 overflow-hidden mb-6">
+                    <div class="grid grid-cols-4 text-xs font-bold uppercase tracking-wider text-stone-500 border-b border-stone-200">
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.col.type">Tipo</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.col.proves">O que prova</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.col.when">Quando usar</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.col.never">Quando NÃO</div>
+                    </div>
+                    <div class="grid grid-cols-4 text-sm text-stone-700 border-b border-stone-200">
+                        <div class="px-4 py-3 font-semibold" data-i18n="sec.mocks.table.unit.type">Unit</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.unit.proves">Lógica pura</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.unit.when">Funções determinísticas sem I/O</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.unit.never">Quando há SQL, HTTP, sistema de arquivos</div>
+                    </div>
+                    <div class="grid grid-cols-4 text-sm text-stone-700 border-b border-stone-200 bg-white">
+                        <div class="px-4 py-3 font-semibold" data-i18n="sec.mocks.table.integration.type">Integration</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.integration.proves">Componentes reais juntos</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.integration.when">Camada de dados, API local</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.integration.never">Quando o problema é só de lógica</div>
+                    </div>
+                    <div class="grid grid-cols-4 text-sm text-stone-700">
+                        <div class="px-4 py-3 font-semibold" data-i18n="sec.mocks.table.contract.type">Contract</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.contract.proves">API externa cumpre o contrato</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.contract.when">Integração com serviço de terceiros</div>
+                        <div class="px-4 py-3" data-i18n="sec.mocks.table.contract.never">Quando você controla os dois lados</div>
+                    </div>
+                </div>
+
+                <!-- Insight -->
+                <div class="p-5 rounded-xl border border-amber-200 bg-amber-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">⚠️</span>
+                    <div>
+                        <h4 class="font-bold text-amber-900 mb-1" data-i18n="sec.mocks.warning.title">A inversão da pirâmide</h4>
+                        <p class="text-sm text-amber-800 leading-relaxed" data-i18n="sec.mocks.warning.desc">Times que pedem para a IA "gerar testes" geralmente recebem 95% de unit tests com mocks. A pirâmide inverte: muito mock, pouco real. O resultado é confiança falsa. Force a discussão sobre qual nível cada teste deve estar antes de gerar uma linha sequer.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 5: Anti-patterns                                       -->
+            <!-- ============================================================ -->
+            <section id="sec-antipatterns" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.antipatterns.h2">Anti-patterns</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.antipatterns.intro">
+                        Quatro armadilhas aparecem com frequência quando IA escreve testes sem supervisão de contrato. Reconhecê-las antes do code review evita test theater institucional.
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-6 mb-8">
+
+                    <!-- 1. Tautologia -->
+                    <div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-3"><span>1.</span> <span data-i18n="sec.antipatterns.card.1.title">Tautologia</span></h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="antipattern-wrong p-4 bg-red-50 rounded-xl">
+                                <p class="text-xs font-bold text-red-700 mb-2" data-i18n="sec.antipatterns.card.1.wrong.label">Errado</p>
+                                <pre class="m-0 text-xs"><span class="text-blue-400">expect</span>(<span class="text-violet-400">true</span>).<span class="text-blue-400">toBe</span>(<span class="text-violet-400">true</span>);</pre>
+                                <p class="text-xs text-red-800 mt-2" data-i18n="sec.antipatterns.card.1.wrong.note">Prova nada. Existe só para inflar coverage.</p>
+                            </div>
+                            <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                                <p class="text-xs font-bold text-emerald-700 mb-2" data-i18n="sec.antipatterns.card.1.right.label">Certo</p>
+                                <pre class="m-0 text-xs"><span class="text-blue-400">expect</span>(<span class="text-blue-400">sum</span>(<span class="text-orange-400">2</span>, <span class="text-orange-400">3</span>)).<span class="text-blue-400">toBe</span>(<span class="text-orange-400">5</span>);</pre>
+                                <p class="text-xs text-emerald-800 mt-2" data-i18n="sec.antipatterns.card.1.right.note">Verifica um comportamento específico.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Mock-everything -->
+                    <div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-3"><span>2.</span> <span data-i18n="sec.antipatterns.card.2.title">Mock-everything</span></h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="antipattern-wrong p-4 bg-red-50 rounded-xl">
+                                <p class="text-xs font-bold text-red-700 mb-2" data-i18n="sec.antipatterns.card.2.wrong.label">Errado</p>
+                                <pre class="m-0 text-xs"><span class="text-blue-400">jest</span>.<span class="text-blue-400">mock</span>(<span class="text-emerald-400">'./db'</span>);
+<span class="text-blue-400">jest</span>.<span class="text-blue-400">mock</span>(<span class="text-emerald-400">'./api'</span>);
+<span class="text-blue-400">jest</span>.<span class="text-blue-400">mock</span>(<span class="text-emerald-400">'./logger'</span>);</pre>
+                                <p class="text-xs text-red-800 mt-2" data-i18n="sec.antipatterns.card.2.wrong.note">Você está testando o mock, não o código.</p>
+                            </div>
+                            <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                                <p class="text-xs font-bold text-emerald-700 mb-2" data-i18n="sec.antipatterns.card.2.right.label">Certo</p>
+                                <pre class="m-0 text-xs"><span class="text-stone-500">// integration test</span>
+<span class="text-violet-400">const</span> db = <span class="text-blue-400">await</span> <span class="text-blue-400">startTestcontainerPostgres</span>();
+<span class="text-blue-400">expect</span>(<span class="text-blue-400">await</span> <span class="text-blue-400">findUser</span>(db, <span class="text-orange-400">42</span>))
+  .<span class="text-blue-400">toEqual</span>({ <span class="text-violet-400">id</span>: <span class="text-orange-400">42</span> });</pre>
+                                <p class="text-xs text-emerald-800 mt-2" data-i18n="sec.antipatterns.card.2.right.note">Mocka I/O externo só quando inviável testar de verdade.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Snapshot-only -->
+                    <div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-3"><span>3.</span> <span data-i18n="sec.antipatterns.card.3.title">Snapshot-only</span></h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="antipattern-wrong p-4 bg-red-50 rounded-xl">
+                                <p class="text-xs font-bold text-red-700 mb-2" data-i18n="sec.antipatterns.card.3.wrong.label">Errado</p>
+                                <pre class="m-0 text-xs"><span class="text-blue-400">expect</span>(<span class="text-blue-400">render</span>(&lt;<span class="text-orange-400">Card</span>/&gt;))
+  .<span class="text-blue-400">toMatchSnapshot</span>();</pre>
+                                <p class="text-xs text-red-800 mt-2" data-i18n="sec.antipatterns.card.3.wrong.note">Snapshot quebra a cada CSS change. Diff é aprovado sem leitura.</p>
+                            </div>
+                            <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                                <p class="text-xs font-bold text-emerald-700 mb-2" data-i18n="sec.antipatterns.card.3.right.label">Certo</p>
+                                <pre class="m-0 text-xs"><span class="text-blue-400">expect</span>(<span class="text-blue-400">screen</span>.<span class="text-blue-400">getByRole</span>(<span class="text-emerald-400">'button'</span>))
+  .<span class="text-blue-400">toHaveTextContent</span>(<span class="text-emerald-400">'Salvar'</span>);</pre>
+                                <p class="text-xs text-emerald-800 mt-2" data-i18n="sec.antipatterns.card.3.right.note">Asserção semântica, robusta a mudanças visuais.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Happy-path only -->
+                    <div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-3"><span>4.</span> <span data-i18n="sec.antipatterns.card.4.title">Happy-path only</span></h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="antipattern-wrong p-4 bg-red-50 rounded-xl">
+                                <p class="text-xs font-bold text-red-700 mb-2" data-i18n="sec.antipatterns.card.4.wrong.label">Errado</p>
+                                <pre class="m-0 text-xs"><span class="text-blue-400">it</span>(<span class="text-emerald-400">'parses a date'</span>, () => {
+  <span class="text-blue-400">expect</span>(<span class="text-blue-400">parseDate</span>(<span class="text-emerald-400">'2026-05-12'</span>))
+    .<span class="text-blue-400">toBeTruthy</span>();
+});</pre>
+                                <p class="text-xs text-red-800 mt-2" data-i18n="sec.antipatterns.card.4.wrong.note">Um teste por função, sempre com input válido. Bordas ficam descobertas.</p>
+                            </div>
+                            <div class="antipattern-right p-4 bg-emerald-50 rounded-xl">
+                                <p class="text-xs font-bold text-emerald-700 mb-2" data-i18n="sec.antipatterns.card.4.right.label">Certo</p>
+                                <pre class="m-0 text-xs"><span class="text-blue-400">it.each</span>([
+  [<span class="text-emerald-400">''</span>, <span class="text-emerald-400">/empty/</span>],
+  [<span class="text-emerald-400">'2026-02-30'</span>, <span class="text-emerald-400">/range/</span>],
+  [<span class="text-emerald-400">'foo'</span>, <span class="text-emerald-400">/invalid/</span>],
+])(<span class="text-emerald-400">'rejects %s'</span>, (i, m) => {
+  <span class="text-blue-400">expect</span>(() => <span class="text-blue-400">parseDate</span>(i)).<span class="text-blue-400">toThrow</span>(m);
+});</pre>
+                                <p class="text-xs text-emerald-800 mt-2" data-i18n="sec.antipatterns.card.4.right.note">Tabela de casos de borda explícitos, fácil de estender.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 6: Confiança Real vs Cobertura                        -->
+            <!-- ============================================================ -->
+            <section id="sec-metricas" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📊</span> <span data-i18n="sec.metricas.h2">Confiança Real vs Cobertura</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.metricas.intro">
+                        Cobertura é uma métrica de implementação: quantas linhas o teste tocou. Bugs evitados é uma métrica de produto: quantos defeitos chegaram ao usuário. Os dois números não estão correlacionados. Escolha qual deles você quer otimizar antes de pedir para a IA gerar uma única linha de teste.
+                    </p>
+                </div>
+
+                <!-- Chart -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <div class="chart-container mx-auto">
+                        <canvas id="metricasChart"></canvas>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-3 text-center italic" data-i18n="sec.metricas.chart.caption">Valores ilustrativos para discussão, não benchmark real.</p>
+                </div>
+
+                <!-- Insight cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
+                        <div class="text-2xl mb-1">⏱️</div>
+                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.metricas.card.1.title">Tempo até bug em prod</div>
+                        <div class="text-2xl font-extrabold my-1" style="color:#65a30d">+3x</div>
+                        <p class="text-xs text-stone-500" data-i18n="sec.metricas.card.1.desc">TDD-first detecta antes do merge</p>
+                    </div>
+                    <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
+                        <div class="text-2xl mb-1">🔧</div>
+                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.metricas.card.2.title">Confiança no refactor</div>
+                        <div class="text-2xl font-extrabold my-1" style="color:#65a30d">+85%</div>
+                        <p class="text-xs text-stone-500" data-i18n="sec.metricas.card.2.desc">Testes como contrato cobrem comportamento</p>
+                    </div>
+                    <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
+                        <div class="text-2xl mb-1">🐛</div>
+                        <div class="font-bold text-stone-800 text-sm" data-i18n="sec.metricas.card.3.title">Bugs antes do merge</div>
+                        <div class="text-2xl font-extrabold my-1" style="color:#65a30d">+60%</div>
+                        <p class="text-xs text-stone-500" data-i18n="sec.metricas.card.3.desc">CI roda os contratos, IA corrige</p>
+                    </div>
+                </div>
+
+                <!-- Insight -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">💡</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.metricas.insight.title">Cobertura é processo. Bugs evitados é resultado.</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.metricas.insight.desc">Cobertura mede o quanto o teste se passeou pelas linhas do código. Bugs evitados mede o quanto o usuário foi protegido. Os dois não estão correlacionados. Escolha a segunda como métrica de discussão em revisões e relatórios.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 7: Cucumber para Contratos Legíveis                   -->
+            <!-- ============================================================ -->
+            <section id="sec-cucumber" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🥒</span> <span data-i18n="sec.cucumber.h2">Cucumber para Contratos Legíveis</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.cucumber.intro">
+                        Quando o contrato precisa ser entendido por gente que não escreve código (PM, designer, QA, stakeholder do produto), Gherkin é uma escolha pragmática. O arquivo .feature vira o contrato: linguagem natural que descreve comportamento. A IA lê esse contrato e gera tanto a implementação quanto as step definitions, mas a fonte da verdade fica num arquivo que qualquer pessoa do time consegue revisar.
+                    </p>
+                </div>
+
+                <!-- Why card -->
+                <div class="rounded-xl border-2 p-5 mb-6" style="background:#f7fee7; border-color:#a3e635">
+                    <h3 class="font-bold text-sm mb-3" style="color:#65a30d"><span>👥</span> <span data-i18n="sec.cucumber.why.title">Por que considerar BDD com Cucumber</span></h3>
+                    <ul class="text-sm space-y-2 leading-relaxed" style="color:#3f6212">
+                        <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.why.li.1">PM, designer e QA conseguem ler e contribuir com cenários sem precisar abrir o IDE</span></li>
+                        <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.why.li.2">A especificação fica versionada junto com o código, na mesma branch e no mesmo PR</span></li>
+                        <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.why.li.3">A IA recebe um contrato em linguagem natural e gera implementação + step definitions</span></li>
+                        <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.why.li.4">Reduz ambiguidade: discussões entre tech e produto acontecem em cima do mesmo arquivo</span></li>
+                        <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.why.li.5">Cenários servem como documentação viva, sempre alinhada com o que o sistema realmente faz</span></li>
+                    </ul>
+                </div>
+
+                <!-- Feature file example -->
+                <div class="mb-5">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.cucumber.feature.title">Exemplo: features/parse_date.feature</h3>
+                    <div class="flex gap-2 items-start">
+                        <pre class="flex-1 m-0 text-xs" id="cucumber-feature"><span class="text-stone-500"># language: pt</span>
+<span class="text-violet-400">Funcionalidade:</span> Parsing de datas no formato ISO
+
+  <span class="text-violet-400">Como</span> desenvolvedor
+  <span class="text-violet-400">Quero</span> converter strings ISO em objetos Date
+  <span class="text-violet-400">Para</span> garantir validação consistente em toda a aplicação
+
+  <span class="text-violet-400">Cenário:</span> Data válida no formato ISO
+    <span class="text-blue-400">Dado</span> uma string <span class="text-emerald-400">"2026-05-12"</span>
+    <span class="text-blue-400">Quando</span> eu chamar parseDate
+    <span class="text-blue-400">Então</span> devo receber Date(<span class="text-orange-400">2026</span>, <span class="text-orange-400">4</span>, <span class="text-orange-400">12</span>)
+
+  <span class="text-violet-400">Cenário:</span> Data inexistente no calendário
+    <span class="text-blue-400">Dado</span> uma string <span class="text-emerald-400">"2026-02-30"</span>
+    <span class="text-blue-400">Quando</span> eu chamar parseDate
+    <span class="text-blue-400">Então</span> deve lançar InvalidDateError com mensagem <span class="text-emerald-400">"day out of range"</span>
+
+  <span class="text-violet-400">Cenário:</span> Entrada vazia
+    <span class="text-blue-400">Dado</span> uma string <span class="text-emerald-400">""</span>
+    <span class="text-blue-400">Quando</span> eu chamar parseDate
+    <span class="text-blue-400">Então</span> deve lançar InvalidDateError com mensagem <span class="text-emerald-400">"empty input"</span></pre>
+                        <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('cucumber-feature')" data-i18n="sec.cucumber.copy">copiar</button>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-2 italic" data-i18n="sec.cucumber.feature.note">Esse arquivo é o contrato. PM, QA e dev leem e revisam a mesma fonte da verdade.</p>
+                </div>
+
+                <!-- Step definitions example -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.cucumber.steps.title">Step definitions geradas pela IA: features/steps/parse_date.steps.js</h3>
+                    <div class="flex gap-2 items-start">
+                        <pre class="flex-1 m-0 text-xs" id="cucumber-steps"><span class="text-violet-400">import</span> { Given, When, Then } <span class="text-violet-400">from</span> <span class="text-emerald-400">'@cucumber/cucumber'</span>;
+<span class="text-violet-400">import</span> { strict <span class="text-violet-400">as</span> assert } <span class="text-violet-400">from</span> <span class="text-emerald-400">'node:assert'</span>;
+<span class="text-violet-400">import</span> { parseDate } <span class="text-violet-400">from</span> <span class="text-emerald-400">'../../src/parseDate.js'</span>;
+
+<span class="text-blue-400">Given</span>(<span class="text-emerald-400">'uma string {string}'</span>, <span class="text-violet-400">function</span> (input) {
+  <span class="text-violet-400">this</span>.input = input;
+});
+
+<span class="text-blue-400">When</span>(<span class="text-emerald-400">'eu chamar parseDate'</span>, <span class="text-violet-400">function</span> () {
+  <span class="text-violet-400">try</span> {
+    <span class="text-violet-400">this</span>.result = <span class="text-blue-400">parseDate</span>(<span class="text-violet-400">this</span>.input);
+  } <span class="text-violet-400">catch</span> (e) {
+    <span class="text-violet-400">this</span>.error = e;
+  }
+});
+
+<span class="text-blue-400">Then</span>(<span class="text-emerald-400">'devo receber Date\\({int}, {int}, {int}\\)'</span>, <span class="text-violet-400">function</span> (y, m, d) {
+  assert.<span class="text-blue-400">deepEqual</span>(<span class="text-violet-400">this</span>.result, <span class="text-violet-400">new</span> <span class="text-blue-400">Date</span>(y, m, d));
+});
+
+<span class="text-blue-400">Then</span>(<span class="text-emerald-400">'deve lançar InvalidDateError com mensagem {string}'</span>, <span class="text-violet-400">function</span> (msg) {
+  assert.<span class="text-blue-400">equal</span>(<span class="text-violet-400">this</span>.error.name, <span class="text-emerald-400">'InvalidDateError'</span>);
+  assert.<span class="text-blue-400">match</span>(<span class="text-violet-400">this</span>.error.message, <span class="text-violet-400">new</span> <span class="text-blue-400">RegExp</span>(msg));
+});</pre>
+                        <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('cucumber-steps')" data-i18n="sec.cucumber.copy">copiar</button>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-2 italic" data-i18n="sec.cucumber.steps.note">A IA gera o glue code a partir do .feature. Você revisa as asserções, não a sintaxe.</p>
+                </div>
+
+                <!-- Trade-offs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.cucumber.tradeoff.pros.title">Quando vale a pena</span></h4>
+                        <ul class="text-xs text-emerald-800 space-y-1 leading-relaxed">
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.tradeoff.pros.li.1">Produto define regras de negócio que mudam com frequência</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.tradeoff.pros.li.2">QA participa da escrita de cenários, não só da execução</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.tradeoff.pros.li.3">Compliance, regulação ou auditoria precisa ler a especificação</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.tradeoff.pros.li.4">Equipes distribuídas onde alinhamento assíncrono é crítico</span></li>
                         </ul>
                     </div>
-                    <div class="border border-stone-200 p-6 rounded-2xl bg-stone-50">
-                        <h3 class="font-bold text-stone-800 mb-2 flex items-center gap-2"><span>🔍</span> Retrieval Automático</h3>
-                        <p class="text-sm text-stone-600 mb-4">Ao invés de você anexar os arquivos, a IA roda um comando interno de busca (como o grep ou busca vetorial local) para encontrar o contexto.</p>
-                        <div class="bg-stone-800 p-3 rounded font-mono text-[10px] text-neural-cyan">
-                            $ qmd search "auth flow"
-                        </div>
+                    <div class="p-4 rounded-xl border border-amber-200 bg-amber-50">
+                        <h4 class="font-bold text-amber-800 text-sm mb-2"><span>⚠️</span> <span data-i18n="sec.cucumber.tradeoff.cons.title">Quando o custo supera o ganho</span></h4>
+                        <ul class="text-xs text-amber-800 space-y-1 leading-relaxed">
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.tradeoff.cons.li.1">Lógica puramente técnica sem stakeholder não-tech envolvido</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.tradeoff.cons.li.2">Time pequeno onde dev e PM são a mesma pessoa</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.tradeoff.cons.li.3">Step definitions virando salada de regex difícil de manter</span></li>
+                            <li class="flex gap-2"><span class="flex-shrink-0">•</span><span data-i18n="sec.cucumber.tradeoff.cons.li.4">Cenários se tornando dump de campos em vez de comportamento real</span></li>
+                        </ul>
                     </div>
                 </div>
 
-                <div class="mt-8 p-6 bg-neural-indigo text-white rounded-2xl shadow-lg">
-                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest">A Grande Vantagem:</h4>
-                    <p class="text-lg italic font-serif">"Você não precisa que a IA saiba tudo o tempo todo. Você só precisa que ela saiba ONDE buscar quando for necessário."</p>
+                <!-- Setup hint -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.cucumber.setup.title">Setup mínimo (Node.js)</h3>
+                    <div class="flex gap-2 items-start">
+                        <pre class="flex-1 m-0 text-xs" id="cucumber-setup">npm install --save-dev @cucumber/cucumber
+mkdir -p features/steps
+echo <span class="text-emerald-400">'features/**/*.feature'</span> &gt; cucumber.json</pre>
+                        <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('cucumber-setup')" data-i18n="sec.cucumber.copy">copiar</button>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-2" data-i18n="sec.cucumber.setup.note">Para Python use behave, para Ruby use cucumber-ruby, para Java use cucumber-jvm. A ideia é a mesma.</p>
+                </div>
+
+                <!-- Insight -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">💡</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.cucumber.insight.title">O contrato fica fora do código</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.cucumber.insight.desc">A grande vantagem não é o Cucumber em si, é onde o contrato vive. Quando ele está em Gherkin, sai do silo dos devs e vira artefato compartilhado. PM revisa, QA expande, dev implementa, IA gera glue. A fonte da verdade deixa de ser o código e passa a ser o comportamento descrito.</p>
+                    </div>
                 </div>
             </section>
 
-            <!-- SECTION 3: Indexing Workflow -->
-            <section id="sec-indexing" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🔄 Fluxo de Memória Avançada</h2>
-                    <p class="text-stone-600">
-                        Como preparar seu repositório para ser "buscável". Este fluxo garante que a IA tenha acesso a anos de decisões técnicas em milissegundos.
-                    </p>
+            <!-- ============================================================ -->
+            <!-- SECTION 8: Próximos Passos                                    -->
+            <!-- ============================================================ -->
+            <section id="sec-proximos" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.proximos.h2">Próximos Passos</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.proximos.intro">Quatro movimentos concretos para começar a tratar testes como contrato no seu projeto.</p>
                 </div>
 
-                <div class="flex flex-col items-center gap-4 py-6">
-                    <!-- Step 1 -->
-                    <div class="node-line w-full max-w-sm p-4 bg-white border-2 border-stone-200 rounded-xl flex items-center gap-4 shadow-sm">
-                        <span class="text-2xl">🧱</span>
-                        <div>
-                            <p class="font-bold text-xs uppercase text-stone-500">Etapa 1: Chunking</p>
-                            <p class="text-sm text-stone-800 font-bold">Dividir arquivos longos em blocos</p>
+                <div class="flex flex-col gap-4 mb-8">
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.1.title">Comece pelo contrato</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.1.desc">Antes de pedir código para a IA, escreva os 3 a 5 cenários de borda mais importantes como testes. Esse é o contrato que a IA precisa cumprir.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" id="step1cmd">touch tests/parseDate.spec.ts</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="copyCode('step1cmd')" data-i18n="sec.proximos.step.1.copy">copiar</button>
+                            </div>
                         </div>
                     </div>
-                    <!-- Step 2 -->
-                    <div class="node-line w-full max-w-sm p-4 bg-white border-2 border-neural-indigo rounded-xl flex items-center gap-4 shadow-md search-pulse">
-                        <span class="text-2xl">🏷️</span>
-                        <div>
-                            <p class="font-bold text-xs uppercase text-neural-indigo">Etapa 2: Indexação</p>
-                            <p class="text-sm text-stone-800 font-bold">Gerar tags e resumos de busca</p>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.2.title">Configure o hook de teste</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.2.desc">Crie .claude/hooks/run-tests.sh e registre como PostToolUse para Write|Edit em .claude/settings.json. O ciclo passa a rodar sozinho.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" id="step2cmd">mkdir -p .claude/hooks && touch .claude/hooks/run-tests.sh</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="copyCode('step2cmd')" data-i18n="sec.proximos.step.2.copy">copiar</button>
+                            </div>
                         </div>
                     </div>
-                    <!-- Step 3 -->
-                    <div class="node-line w-full max-w-sm p-4 bg-stone-900 border-2 border-stone-800 rounded-xl flex items-center gap-4 shadow-lg text-white">
-                        <span class="text-2xl">🤖</span>
-                        <div>
-                            <p class="font-bold text-xs uppercase text-stone-400">Etapa 3: Retrieval</p>
-                            <p class="text-sm font-bold">IA consulta o índice e puxa o snippet</p>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.3.title">Salve padrões na memória</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.3.desc">Quando o time decidir "todos os testes de auth usam testcontainers", grave como feedback_tests.md em .claude/memory/. Vira regra automática nas próximas sessões.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" id="step3cmd">touch .claude/memory/feedback_tests.md</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="copyCode('step3cmd')" data-i18n="sec.proximos.step.3.copy">copiar</button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="mt-8">
-                    <h4 class="font-bold text-stone-800 mb-2">Estrutura Recomendada:</h4>
-                    <pre class="m-0 text-xs">
-/docs
-  /.memory-index  <-- Gerado por ferramentas tipo qmd
-  /adr            <-- Architecture Decisions
-  /features       <-- Histórico de funcionalidades
-  /patterns       <-- Padrões de código do time</pre>
-                </div>
-            </section>
-
-            <!-- SECTION 4: Search Simulation -->
-            <section id="sec-search" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚡ Simulação: A IA Buscando Contexto</h2>
-                    <p class="text-stone-600">
-                        Digite uma palavra-chave para ver como a IA filtraria o contexto em vez de ler todos os documentos do projeto.
-                    </p>
-                </div>
-
-                <div class="bg-stone-50 rounded-2xl p-6 border border-stone-200">
-                    <div class="flex gap-2 mb-6">
-                        <input type="text" id="searchInput" placeholder="Ex: Auth, Database, React..." class="flex-1 p-3 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-neural-indigo font-mono text-sm">
-                        <button onclick="simulateSearch()" class="bg-neural-indigo text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all">Buscar Contexto</button>
-                    </div>
-
-                    <div id="searchResults" class="space-y-4">
-                        <div class="text-center py-10 text-stone-400 italic text-sm">
-                            Aguardando termo de busca para simular a recuperação de snippets...
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos.step.4.title">Audite o test suite existente</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos.step.4.desc">Use um agente para procurar tautologias, mock-everything e snapshot-only no seu repositório. O resultado costuma ser doloroso mas necessário.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" id="step4cmd">grep -rn "toMatchSnapshot\|toBeTruthy\|toBeDefined" tests/</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="copyCode('step4cmd')" data-i18n="sec.proximos.step.4.copy">copiar</button>
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
-                <div class="mt-8 p-6 bg-stone-900 text-stone-100 rounded-2xl border-l-8 border-neural-cyan shadow-xl">
-                    <h4 class="font-bold mb-2">Conclusão da Parte 10:</h4>
-                    <p class="text-lg italic font-serif">"O futuro do desenvolvimento não é ter IAs com janelas de contexto infinitas, mas IAs que saibam navegar em memórias infinitas através de busca eficiente."</p>
+                <!-- Closing mantra -->
+                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl shadow-xl" style="border-left: 8px solid #65a30d">
+                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#a3e635" data-i18n="sec.proximos.mantra.label">Mantra da Parte 10:</h4>
+                    <p class="text-lg italic font-serif" data-i18n="sec.proximos.mantra.text">"Testes não provam que o código funciona. Especificam o que ele deve fazer."</p>
                 </div>
             </section>
 
         </main>
     </div>
 
-    <!-- JavaScript Logic -->
+    <!-- Session Complete -->
+    <div id="session-complete" class="hidden border-t border-stone-200 bg-stone-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
+            <span class="text-3xl mb-3 block">🎉</span>
+            <h3 class="text-xl font-bold text-stone-800 mb-2" data-i18n="complete.title">Sessão concluída!</h3>
+            <p class="text-stone-500 mb-6 text-sm" data-i18n="complete.desc">Você completou esta sessão. Continue para a próxima ou volte ao índice.</p>
+            <div class="flex items-center justify-center gap-3">
+                <a href="index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-lg text-sm font-semibold hover:bg-stone-700 transition-colors" data-i18n="complete.home">← Voltar ao índice</a>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let currentState = { activeSection: 'efficiency', chart: null };
-
-        const mockData = [
-            { tags: ['auth', 'seguranca', 'login'], title: 'ADR-004: Auth Strategy', snippet: 'Decidimos usar JWT com refresh tokens armazenados em cookies HttpOnly...' },
-            { tags: ['database', 'postgres', 'banco'], title: 'TECH_STACK.md: DB', snippet: 'Nossa stack utiliza PostgreSQL 16 com replicação em read-replicas para analytics...' },
-            { tags: ['react', 'componentes', 'ui'], title: 'CODING_GUIDELINES.md: React', snippet: 'Sempre utilize Composition Pattern para componentes de UI de alta complexidade...' },
-            { tags: ['api', 'rest', 'endpoints'], title: 'API_SPEC.md: V1', snippet: 'Todos os endpoints devem retornar o cabeçalho X-Request-ID para rastreabilidade...' }
-        ];
-
-        function navigate(sectionId) {
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`nav-${sectionId}`).classList.add('active');
-            
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
-
-            if (sectionId === 'efficiency' && !currentState.chart) initChart();
-            currentState.activeSection = sectionId;
+        // ── Toggle (paradoxo) ─────────────────────────────────────────────
+        function showToggle(id) {
+            document.querySelectorAll('.toggle-content').forEach(function(el) { el.classList.add('hidden'); });
+            document.querySelectorAll('#sec-paradoxo .toggle-btn').forEach(function(el) { el.classList.remove('active'); });
+            document.getElementById('toggle-' + id).classList.remove('hidden');
+            document.getElementById('tgl-' + id).classList.add('active');
         }
 
-        function simulateSearch() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const resultsBox = document.getElementById('searchResults');
-            
-            if (!query) return;
-
-            const filtered = mockData.filter(item => 
-                item.tags.some(tag => tag.includes(query)) || 
-                item.title.toLowerCase().includes(query)
-            );
-
-            if (filtered.length > 0) {
-                resultsBox.innerHTML = filtered.map(res => `
-                    <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm animate-fade-in">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-bold text-neural-indigo text-sm">${res.title}</h4>
-                            <span class="text-[10px] bg-stone-100 text-stone-500 px-2 py-1 rounded">Relevância: 98%</span>
-                        </div>
-                        <p class="text-xs text-stone-600 italic">"...${res.snippet}..."</p>
-                    </div>
-                `).join('');
-            } else {
-                resultsBox.innerHTML = `
-                    <div class="text-center py-10 text-red-400 text-sm">
-                        Nenhum snippet relevante encontrado no índice para "${query}".
-                    </div>
-                `;
-            }
+        // ── Prompt tabs (inversao) ─────────────────────────────────────────
+        function showPrompt(id) {
+            document.querySelectorAll('.prompt-content').forEach(function(el) { el.classList.add('hidden'); });
+            document.querySelectorAll('#sec-inversao .tab-btn').forEach(function(el) { el.classList.remove('active'); });
+            document.getElementById('prompt-' + id).classList.remove('hidden');
+            document.getElementById('prompttab-' + id).classList.add('active');
         }
 
-        function initChart() {
-            const ctx = document.getElementById('efficiencyChart').getContext('2d');
-            currentState.chart = new Chart(ctx, {
+        // ── Pyramid highlight (mocks) ─────────────────────────────────────
+        function showPyramid(id) {
+            document.querySelectorAll('#sec-mocks .pyramid-row').forEach(function(el) { el.classList.remove('active'); });
+            document.getElementById('pyr-' + id).classList.add('active');
+        }
+
+        // ── Navigation hook (nav.js handles core logic) ───────────────────
+        window.onNavigate = function(sectionId) {
+            if (sectionId === 'paradoxo' && !window.paradoxoInit) initParadoxoChart();
+            if (sectionId === 'metricas' && !window.metricasInit) initMetricasChart();
+        };
+
+        // ── Paradoxo chart ────────────────────────────────────────────────
+        function initParadoxoChart() {
+            window.paradoxoInit = true;
+            var ctx = document.getElementById('paradoxoChart').getContext('2d');
+            window.paradoxoChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['1 Doc', '10 Docs', '50 Docs', '100 Docs', '500 Docs'],
+                    labels: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10'],
                     datasets: [
                         {
-                            label: 'Consumo sem Busca (Full Load)',
-                            data: [5, 50, 250, 500, 2500],
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            fill: true,
-                            tension: 0.1
+                            label: 'Cobertura % gerada por IA',
+                            data: [40, 55, 65, 72, 78, 84, 88, 91, 93, 95],
+                            borderColor: '#dc2626',
+                            backgroundColor: 'rgba(220, 38, 38, 0.10)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: false,
                         },
                         {
-                            label: 'Consumo com Busca (RAG)',
-                            data: [2, 5, 8, 10, 12],
-                            borderColor: '#4f46e5',
-                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                            fill: true,
-                            tension: 0.1
+                            label: 'Bugs em produção (por sprint)',
+                            data: [8, 9, 7, 8, 9, 8, 7, 8, 9, 8],
+                            borderColor: '#65a30d',
+                            backgroundColor: 'rgba(101, 163, 13, 0.10)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: false,
+                            yAxisID: 'y1',
                         }
                     ]
                 },
                 options: {
                     maintainAspectRatio: false,
                     responsive: true,
+                    interaction: { mode: 'index', intersect: false },
                     scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            title: { display: true, text: 'Milhares de Tokens', font: { size: 10 } }
+                        y: {
+                            beginAtZero: true, max: 100,
+                            title: { display: true, text: 'Cobertura %' },
+                            position: 'left'
+                        },
+                        y1: {
+                            beginAtZero: true, max: 15,
+                            title: { display: true, text: 'Bugs por sprint' },
+                            position: 'right',
+                            grid: { drawOnChartArea: false }
                         }
                     },
                     plugins: {
@@ -362,9 +962,98 @@
             });
         }
 
-        window.onload = () => {
-            initChart();
-        };
+        // ── Metricas chart ────────────────────────────────────────────────
+        function initMetricasChart() {
+            window.metricasInit = true;
+            var ctx = document.getElementById('metricasChart').getContext('2d');
+            window.metricasChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'Tempo até bug em prod',
+                        'Confiança no refactor',
+                        'Bugs detectados antes do merge'
+                    ],
+                    datasets: [
+                        {
+                            label: 'Cobertura sem TDD',
+                            data: [30, 25, 20],
+                            backgroundColor: 'rgba(168, 162, 158, 0.7)',
+                            borderColor: '#a8a29e',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'TDD-first com IA',
+                            data: [85, 82, 78],
+                            backgroundColor: 'rgba(101, 163, 13, 0.75)',
+                            borderColor: '#65a30d',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        x: { beginAtZero: true, max: 100, title: { display: true, text: 'Score (0 a 100)' } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        // ── i18n: update chart labels on language change ──────────────────
+        window.addEventListener('i18n:applied', function(e) {
+            var t = function(k) { return e.detail.t(k); };
+
+            if (window.paradoxoChart) {
+                var c = window.paradoxoChart;
+                c.data.datasets[0].label = t('chart.paradoxo.dataset.coverage') || 'Cobertura % gerada por IA';
+                c.data.datasets[1].label = t('chart.paradoxo.dataset.bugs') || 'Bugs em produção (por sprint)';
+                if (c.options.scales && c.options.scales.y && c.options.scales.y.title) {
+                    c.options.scales.y.title.text = t('chart.paradoxo.axis.y') || 'Cobertura %';
+                }
+                if (c.options.scales && c.options.scales.y1 && c.options.scales.y1.title) {
+                    c.options.scales.y1.title.text = t('chart.paradoxo.axis.y1') || 'Bugs por sprint';
+                }
+                c.update();
+            }
+
+            if (window.metricasChart) {
+                var m = window.metricasChart;
+                m.data.labels = [
+                    t('chart.metricas.label.1') || 'Tempo até bug em prod',
+                    t('chart.metricas.label.2') || 'Confiança no refactor',
+                    t('chart.metricas.label.3') || 'Bugs detectados antes do merge'
+                ];
+                m.data.datasets[0].label = t('chart.metricas.dataset.before') || 'Cobertura sem TDD';
+                m.data.datasets[1].label = t('chart.metricas.dataset.after') || 'TDD-first com IA';
+                if (m.options.scales && m.options.scales.x && m.options.scales.x.title) {
+                    m.options.scales.x.title.text = t('chart.metricas.axis.x') || 'Score (0 a 100)';
+                }
+                m.update();
+            }
+        });
+
+        // Init and hash navigation handled by nav.js
     </script>
+
+    <!-- Footer -->
+    <footer class="border-t border-stone-200 mt-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-sm text-stone-400">
+                <span class="text-base">🎓</span>
+                <span data-i18n-html="footer.brand">Engineering Hour · By <a href="https://github.com/griiettner/ai-engineering-hour" target="_blank" class="underline hover:text-stone-600">Paulo Griiettner</a></span>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-stone-400">
+                <span data-i18n="footer.stack">HTML · Tailwind CSS · Chart.js</span>
+                <span>·</span>
+                <span data-i18n="footer.tagline">Sem build. Abra e use.</span>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Hour P15: A Próxima Fronteira</title>
+    <title>Engineering Hour P15: Métricas e ROI</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,10 +25,10 @@
                             800: '#292524',
                             900: '#1c1917',
                         },
-                        future: {
-                            indigo: '#4f46e5', // future-thinking indigo
-                            purple: '#7c3aed', // innovation purple
-                            accent: '#f43f5e', // rose for calls to action
+                        success: {
+                            emerald: '#059669', // emerald for growth/ROI
+                            slate: '#1e293b',   // slate for metrics
+                            gold: '#ca8a04',
                         }
                     },
                     fontFamily: {
@@ -44,8 +44,8 @@
         body { background-color: #fafaf9; color: #1e293b; }
         .nav-item.active {
             background-color: #f1f5f9;
-            border-left: 4px solid #4f46e5;
-            color: #4f46e5;
+            border-left: 4px solid #059669;
+            color: #059669;
             font-weight: 600;
         }
         .chart-container {
@@ -56,8 +56,13 @@
             height: 300px;
             max-height: 400px;
         }
-        .roadmap-node:hover { transform: scale(1.03); }
-        .future-glow { box-shadow: 0 0 20px rgba(124, 58, 237, 0.1); }
+        .metric-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
         pre {
             background-color: #1c1917;
             color: #d6d3d1;
@@ -66,35 +71,41 @@
             font-size: 0.825rem;
             overflow-x: auto;
         }
-        .pulse-soft { animation: pulse 3s infinite; }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        .progress-bar {
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #059669;
+            transition: width 1s ease-in-out;
         }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
 
-    <!-- Chosen Palette: Innovation Indigo & Future Purple over Warm Stone Neutrals -->
+    <!-- Chosen Palette: Growth Emerald & Analytical Slate over Warm Stone Neutrals -->
     
-    <!-- Application Structure Plan: The SPA is designed as a "Career Acceleration Hub". It synthesizes the 13 parts of the series into a final vision. The structure follows: 1. Evolution Summary (Doughnut chart of the new "Seniority Mix"), 2. Tooling Radar (What's coming next in the industry), 3. Personal 30-Day Roadmap (Interactive action plan), and 4. The Maestro's Manifesto (Final cultural values). This helps the developer close the series with a clear path forward and a sense of belonging to a new class of "Augmented Engineers". -->
+    <!-- Application Structure Plan: The SPA is designed as an "Executive Impact Dashboard". It translates technical efforts into business value. The structure follows: 1. DORA Metrics (Bar chart showing Pre vs Post AI benchmarks), 2. ROI Calculator (Interactive tool to estimate hours saved), 3. Quality Index (Radar chart on defect reduction), and 4. The Value Prop (Final summary for stakeholders). This structure ensures the developer can prove their value beyond just writing code faster. -->
 
     <!-- Visualization & Content Choices: 
-         1. Seniority Mix -> Inform -> Doughnut Chart -> Justification: Re-evaluates how a developer's time is divided between Architecting, Reviewing, and Coding in the new era. Method: Chart.js.
-         2. Tech Radar -> Organize -> Interactive Grid of Trends -> Justification: Keeps the team looking ahead at upcoming tech like Local LLMs and WebGPU agents. Method: Tailwind Grid.
-         3. 30-Day Roadmap -> Process -> Interactive checklist -> Justification: Gives immediate next steps to apply all 13 modules. Method: HTML/CSS + JS state.
-         4. Final Manifesto -> Inform -> Stylized Text Blocks -> Justification: Leaves a lasting emotional and professional impact. Method: Tailwind UI.
+         1. DORA Metrics -> Compare -> Grouped Bar Chart -> Justification: Standard industry metrics to prove DevOps efficiency. Method: Chart.js.
+         2. ROI Analysis -> Change -> Interactive Calculator -> Justification: Allows the team to input their own data to see the scale of impact. Method: Vanilla JS logic.
+         3. Quality vs Velocity -> Compare -> Radar Chart -> Justification: Shows that speed didn't kill quality. Method: Chart.js.
+         4. Success Checklist -> Organize -> Interactive list -> Justification: High-level summary for the end of the series. Method: HTML/CSS.
          CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <!-- Header -->
     <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="text-2xl">🌌</span>
-                <h1 class="text-xl font-bold text-stone-800 tracking-tight">Engineering Hour <span class="text-future-indigo">P15</span></h1>
+                <span class="text-2xl">📊</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">Engineering Hour <span class="text-success-emerald">P15</span></h1>
             </div>
             <div class="text-sm font-medium text-stone-500 hidden sm:block">
-                Módulo 15: A Próxima Fronteira & O Roadmap do Maestro
+                Módulo 15: Métricas de Sucesso, ROI e DORA
             </div>
         </div>
     </header>
@@ -103,156 +114,157 @@
         
         <!-- Sidebar Navigation -->
         <nav class="md:w-64 flex-shrink-0 flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
-            <p class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Visão de Futuro</p>
-            <button onclick="navigate('evolution')" id="nav-evolution" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🧬</span> O Mix de Senioridade
+            <p class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Medição de Valor</p>
+            <button onclick="navigate('dora')" id="nav-dora" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚡</span> DORA Metrics
             </button>
-            <button onclick="navigate('radar')" id="nav-radar" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📡</span> Radar Tecnológico
+            <button onclick="navigate('roi')" id="nav-roi" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>💰</span> Calculadora de ROI
             </button>
-            <button onclick="navigate('action')" id="nav-action" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🗓️</span> Plano de 30 Dias
+            <button onclick="navigate('quality')" id="nav-quality" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>💎</span> Índice de Qualidade
             </button>
-            <button onclick="navigate('manifesto')" id="nav-manifesto" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📜</span> Manifesto do Maestro
+            <button onclick="navigate('roadmap')" id="nav-roadmap" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🏁</span> Conclusão da Jornada
             </button>
         </nav>
 
         <!-- Main Content Area -->
         <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8 min-h-[600px]">
             
-            <!-- SECTION 1: Evolution -->
-            <section id="sec-evolution" class="block animate-fade-in">
+            <!-- SECTION 1: DORA Metrics -->
+            <section id="sec-dora" class="block animate-fade-in">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                        <span>🧬</span> O Novo Mix de Senioridade (2026+)
+                        <span>⚡</span> DORA Metrics: O Impacto na Entrega
                     </h2>
                     <p class="text-stone-600 leading-relaxed">
-                        Ao final desta jornada, a forma como distribuímos nossa energia mudou radicalmente. O sênior agora foca naquilo que a máquina não pode automatizar: o <strong>Contexto Humano</strong> e o <strong>Julgamento Ético/Arquitetural</strong>.
+                        As métricas DORA são o padrão da indústria para medir a eficácia das equipas de engenharia. O gráfico abaixo compara a performance da equipa antes e depois da adopção da orquestração com IA.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-2xl border border-stone-200 future-glow">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-2xl border border-stone-200">
                     <div class="chart-container">
-                        <canvas id="evolutionChart"></canvas>
+                        <canvas id="doraChart"></canvas>
                     </div>
                     <div class="space-y-4">
-                        <div class="p-4 bg-white rounded-xl border-l-4 border-future-indigo shadow-sm">
-                            <h4 class="font-bold text-sm text-future-indigo uppercase">Arquitetura de Intenção</h4>
-                            <p class="text-xs text-stone-600">60% do seu tempo agora é desenhar como os sistemas se falam e como o contexto é alimentado.</p>
+                        <div class="p-4 bg-white rounded-xl border-l-4 border-stone-400 shadow-sm">
+                            <h4 class="font-bold text-sm text-stone-500 uppercase">Deployment Frequency</h4>
+                            <p class="text-xs text-stone-600">Com automação e Hooks, o número de implementações semanais aumenta sem sacrificar a estabilidade.</p>
                         </div>
-                        <div class="p-4 bg-white rounded-xl border-l-4 border-future-purple shadow-sm">
-                            <h4 class="font-bold text-sm text-future-purple uppercase">Curadoria de Agentes</h4>
-                            <p class="text-xs text-stone-600 font-bold">Você não escreve mais todo o código; você gere uma orquestra de agentes especialistas (Skills/Hooks).</p>
+                        <div class="p-4 bg-white rounded-xl border-l-4 border-success-emerald shadow-sm">
+                            <h4 class="font-bold text-sm text-success-emerald uppercase">Lead Time for Changes</h4>
+                            <p class="text-xs text-stone-600 font-bold">O tempo entre o primeiro commit e o código em produção é reduzido drasticamente através do AI-to-AI Review.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 2: Tech Radar -->
-            <section id="sec-radar" class="hidden animate-fade-in">
+            <!-- SECTION 2: ROI Calculator -->
+            <section id="sec-roi" class="hidden animate-fade-in">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📡 Radar: O Que Está no Horizonte?</h2>
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>💰</span> Calculadora de Impacto (ROI)
+                    </h2>
                     <p class="text-stone-600 leading-relaxed">
-                        A IA está se movendo para a borda (Edge) e para a integração nativa com o hardware. Estes são os tópicos para você ficar de olho nos próximos meses.
+                        Introduza os dados da sua equipa para estimar o retorno sobre o investimento em tempo e produtividade.
+                    </p>
+                </div>
+
+                <div class="bg-stone-50 p-6 rounded-2xl border border-stone-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Tamanho da Equipa</label>
+                                <input type="number" id="team-size" value="10" class="w-full p-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-success-emerald">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Horas de Coding / Semana</label>
+                                <input type="number" id="coding-hours" value="30" class="w-full p-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-success-emerald">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">% Ganho de Eficiência Estimado</label>
+                                <select id="efficiency-gain" class="w-full p-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-success-emerald">
+                                    <option value="0.2">20% (Fase 1-3)</option>
+                                    <option value="0.4">40% (Fase 4-6)</option>
+                                    <option value="0.7" selected>70% (Fase 8-12)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="bg-success-slate text-white p-6 rounded-2xl flex flex-col justify-center items-center text-center shadow-xl">
+                            <h4 class="text-xs font-bold text-stone-400 uppercase mb-2">Horas Poupadas / Mês</h4>
+                            <p id="hours-saved" class="text-5xl font-extrabold text-success-emerald mb-2">840</p>
+                            <p class="text-xs opacity-75">Equivalente a <span id="dev-equiv" class="font-bold">5.2</span> desenvolvedores extra na equipa.</p>
+                            <button onclick="calculateROI()" class="mt-6 bg-success-emerald hover:bg-emerald-600 px-6 py-2 rounded-full font-bold transition-all text-sm">Recalcular Valor</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Quality Index -->
+            <section id="sec-quality" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">💎 Índice de Qualidade</h2>
+                    <p class="text-stone-600">
+                        A velocidade sem qualidade é apenas dívida técnica futura. A orquestração com IA permite manter o rigor técnico enquanto se acelera a entrega.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-2xl border border-stone-200">
+                    <div class="chart-container">
+                        <canvas id="qualityChart"></canvas>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-bold"><span>Cobertura de Testes</span><span>+35%</span></div>
+                            <div class="progress-bar"><div class="progress-fill" style="width: 85%"></div></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-bold"><span>Tratamento de Erros</span><span>+50%</span></div>
+                            <div class="progress-bar"><div class="progress-fill" style="width: 92%"></div></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-bold"><span>Defect Leakage</span><span>-28%</span></div>
+                            <div class="progress-bar"><div class="progress-fill bg-success-gold" style="width: 15%"></div></div>
+                        </div>
+                        <p class="text-[10px] text-stone-500 italic">Dados baseados em estudos de caso de implementação de Multi-Agentes e Hooks de auto-correção.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Roadmap Conclusão -->
+            <section id="sec-roadmap" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🏁 Conclusão da Jornada: O Próximo Nível</h2>
+                    <p class="text-stone-600">
+                        Chegamos ao fim da nossa série. Transformámos o fluxo de trabalho de um modelo manual para um ecossistema orquestrado por IA.
                     </p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="p-5 border border-stone-200 rounded-2xl bg-white hover:border-future-indigo transition-all">
-                        <h4 class="font-bold text-stone-800 mb-2 flex items-center gap-2"><span>💾</span> Local LLMs & WebGPU</h4>
-                        <p class="text-xs text-stone-500 mb-3">Modelos rodando 100% no seu browser ou máquina local para privacidade total e latência zero.</p>
-                        <span class="text-[10px] bg-stone-100 px-2 py-1 rounded text-stone-400">#PrivacyFirst</span>
+                    <div class="p-6 bg-white border border-stone-200 rounded-2xl shadow-sm">
+                        <h4 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>✅</span> O que conquistámos</h4>
+                        <ul class="text-sm space-y-3 text-stone-600">
+                            <li>• <strong>Contexto Infinito:</strong> Uso de qmd e RAG local.</li>
+                            <li>• <strong>Zero Chute:</strong> Conectividade via MCP.</li>
+                            <li>• <strong>Auto-Correção:</strong> Ciclos de Hooks no terminal.</li>
+                            <li>• <strong>Segurança:</strong> Governança de prompt e Sandbox.</li>
+                        </ul>
                     </div>
-                    <div class="p-5 border border-stone-200 rounded-2xl bg-white hover:border-future-purple transition-all">
-                        <h4 class="font-bold text-stone-800 mb-2 flex items-center gap-2"><span>🤖</span> Agentes Multi-Modais</h4>
-                        <p class="text-xs text-stone-500 mb-3">IAs que não apenas lêem código, mas assistem vídeos de bugs e interagem com telas de UI sozinhas.</p>
-                        <span class="text-[10px] bg-stone-100 px-2 py-1 rounded text-stone-400">#AgenticUI</span>
-                    </div>
-                    <div class="p-5 border border-stone-200 rounded-2xl bg-white hover:border-future-indigo transition-all">
-                        <h4 class="font-bold text-stone-800 mb-2 flex items-center gap-2"><span>🌉</span> Cross-Org MCP Servers</h4>
-                        <p class="text-xs text-stone-500 mb-3">Protocolos unificados para conectar IAs de diferentes empresas de forma segura via MCP.</p>
-                        <span class="text-[10px] bg-stone-100 px-2 py-1 rounded text-stone-400">#Ecosystem</span>
-                    </div>
-                    <div class="p-5 border border-stone-200 rounded-2xl bg-white hover:border-future-purple transition-all">
-                        <h4 class="font-bold text-stone-800 mb-2 flex items-center gap-2"><span>✨</span> Prompt Engineering 2.0</h4>
-                        <p class="text-xs text-stone-500 mb-3">O fim dos prompts manuais; IAs que otimizam as suas próprias instruções baseadas em métricas de ROI.</p>
-                        <span class="text-[10px] bg-stone-100 px-2 py-1 rounded text-stone-400">#MetaPrompting</span>
+                    <div class="p-6 bg-success-emerald text-white rounded-2xl shadow-xl">
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><span>🚀</span> O Próximo Passo</h4>
+                        <p class="text-sm mb-6">A tecnologia continuará a evoluir. O seu papel como <strong>Maestro de Intenções</strong> é manter-se actualizado sobre novos agentes e modelos de raciocínio.</p>
+                        <div class="bg-white/20 p-3 rounded-lg text-xs font-mono">
+                            Próxima Meta: Integração Total com Agentes Autónomos de Deploy.
+                        </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- SECTION 3: Action Plan -->
-            <section id="sec-action" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🗓️ Plano de Ação: Os Primeiros 30 Dias</h2>
-                    <p class="text-stone-600 leading-relaxed">
-                        Não deixe o conhecimento esfriar. Aqui está o seu roadmap pessoal para aplicar tudo o que vimos nestas 13 sessões.
+                <div class="mt-12 text-center p-10 bg-stone-900 text-white rounded-3xl border-t-8 border-success-emerald shadow-2xl">
+                    <h3 class="text-3xl font-serif italic mb-4">"A engenharia não mudou. A escala sim."</h3>
+                    <p class="text-stone-400 font-light max-w-xl mx-auto">
+                        Obrigado por participar nestas 12 sessões. Agora, você é o arquiteto da produtividade da sua equipa.
                     </p>
-                </div>
-
-                <div class="space-y-4">
-                    <!-- Week 1 -->
-                    <div class="p-4 bg-stone-50 rounded-xl border-l-4 border-future-indigo">
-                        <h4 class="font-bold text-stone-800 text-sm">Semana 1: Fundação & Regras</h4>
-                        <div class="mt-2 space-y-2">
-                            <label class="flex items-center gap-3 text-xs text-stone-600">
-                                <input type="checkbox" class="rounded text-future-indigo"> Criar o <code>.cursorrules</code> ou <code>CLAUDE.md</code> no projeto principal.
-                            </label>
-                            <label class="flex items-center gap-3 text-xs text-stone-600">
-                                <input type="checkbox" class="rounded text-future-indigo"> Estruturar o "Trio Essencial" (Arch, Tech, Req) em Markdown.
-                            </label>
-                        </div>
-                    </div>
-                    <!-- Week 2 -->
-                    <div class="p-4 bg-stone-50 rounded-xl border-l-4 border-future-purple">
-                        <h4 class="font-bold text-stone-800 text-sm">Semana 2: Automação & Verdade</h4>
-                        <div class="mt-2 space-y-2">
-                            <label class="flex items-center gap-3 text-xs text-stone-600">
-                                <input type="checkbox" class="rounded text-future-purple"> Configurar o primeiro <strong>Claude Hook</strong> para Lint/Testes.
-                            </label>
-                            <label class="flex items-center gap-3 text-xs text-stone-600">
-                                <input type="checkbox" class="rounded text-future-purple"> Conectar um MCP Server básico (ex: Postgres ou Google Search).
-                            </label>
-                        </div>
-                    </div>
-                    <!-- Week 3-4 -->
-                    <div class="p-4 bg-stone-900 text-white rounded-xl border-l-4 border-future-accent shadow-lg">
-                        <h4 class="font-bold text-sm">Semana 3-4: Orquestração & Senioridade</h4>
-                        <div class="mt-2 space-y-2">
-                            <label class="flex items-center gap-3 text-xs text-stone-400">
-                                <input type="checkbox" class="rounded text-future-accent"> Delegar uma feature inteira via <code>plan.md</code> antes de codar.
-                            </label>
-                            <label class="flex items-center gap-3 text-xs text-stone-400">
-                                <input type="checkbox" class="rounded text-future-accent"> Realizar um AI-to-AI review em um PR complexo.
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECTION 4: Manifesto -->
-            <section id="sec-manifesto" class="hidden animate-fade-in">
-                <div class="text-center py-12 px-6 bg-future-indigo rounded-3xl text-white shadow-2xl relative overflow-hidden">
-                    <div class="relative z-10">
-                        <h2 class="text-4xl font-serif italic mb-8">Manifesto do Engenheiro Maestro</h2>
-                        <div class="max-w-xl mx-auto space-y-6 text-lg font-light leading-relaxed">
-                            <p class="pulse-soft">1. Eu orquestro intenções, não apenas digito sintaxe.</p>
-                            <p class="pulse-soft">2. Minha senioridade é medida pela clareza do meu contexto.</p>
-                            <p class="pulse-soft">3. Eu delego o que é repetitivo para focar no que é criativo.</p>
-                            <p class="pulse-soft">4. Eu protejo os dados e a segurança como um arquiteto, não como um operário.</p>
-                            <p class="pulse-soft">5. Eu nunca paro de aprender, pois o futuro é uma conversa constante.</p>
-                        </div>
-                        <div class="mt-12 text-sm uppercase tracking-widest font-bold opacity-60">
-                            Engineering Hour 2026 • Fim da Série
-                        </div>
-                    </div>
-                    <!-- Background Decoration -->
-                    <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-                </div>
-
-                <div class="mt-12 text-center text-stone-400 text-xs">
-                    Parabéns por completar as 13 sessões. A jornada da Engenharia Aumentada começou agora.
                 </div>
             </section>
 
@@ -261,7 +273,7 @@
 
     <!-- JavaScript Logic -->
     <script>
-        let currentState = { activeSection: 'evolution', chart: null };
+        let currentState = { activeSection: 'dora', chartDora: null, chartQuality: null };
 
         function navigate(sectionId) {
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
@@ -270,41 +282,90 @@
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
             document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
 
-            if (sectionId === 'evolution' && !currentState.chart) initChart();
+            if (sectionId === 'dora' && !currentState.chartDora) initDoraChart();
+            if (sectionId === 'quality' && !currentState.chartQuality) initQualityChart();
             currentState.activeSection = sectionId;
         }
 
-        function initChart() {
-            const ctx = document.getElementById('evolutionChart').getContext('2d');
-            currentState.chart = new Chart(ctx, {
-                type: 'doughnut',
+        function calculateROI() {
+            const size = parseFloat(document.getElementById('team-size').value) || 0;
+            const hours = parseFloat(document.getElementById('coding-hours').value) || 0;
+            const gain = parseFloat(document.getElementById('efficiency-gain').value) || 0;
+
+            const saved = Math.round(size * hours * 4 * gain); // hours per month
+            const equiv = (saved / (40 * 4)).toFixed(1); // 40h week, 4 weeks
+
+            document.getElementById('hours-saved').innerText = saved;
+            document.getElementById('dev-equiv').innerText = equiv;
+        }
+
+        function initDoraChart() {
+            const ctx = document.getElementById('doraChart').getContext('2d');
+            currentState.chartDora = new Chart(ctx, {
+                type: 'bar',
                 data: {
-                    labels: ['Contexto & Arch', 'Review & Julgamento', 'Coding Bruto', 'Métricas & ROI'],
-                    datasets: [{
-                        data: [50, 30, 10, 10],
-                        backgroundColor: [
-                            '#4f46e5', // indigo
-                            '#7c3aed', // purple
-                            '#f43f5e', // accent
-                            '#d6d3d1'  // stone
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#ffffff',
-                        hoverOffset: 15
-                    }]
+                    labels: ['Deploy Freq.', 'Lead Time', 'MTTR (Recovery)', 'Change Fail Rate'],
+                    datasets: [
+                        {
+                            label: 'Antes (Manual)',
+                            data: [30, 80, 60, 25],
+                            backgroundColor: 'rgba(71, 85, 105, 0.4)',
+                        },
+                        {
+                            label: 'Depois (AI-Orchestrated)',
+                            data: [95, 20, 15, 8],
+                            backgroundColor: '#059669',
+                        }
+                    ]
                 },
                 options: {
                     maintainAspectRatio: false,
                     responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10, family: 'Inter' } } }
+                    scales: {
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Pontuação de Eficiência (%)', font: { size: 10 } } }
                     },
-                    cutout: '70%'
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
                 }
             });
         }
 
-        window.onload = () => initChart();
+        function initQualityChart() {
+            const ctx = document.getElementById('qualityChart').getContext('2d');
+            currentState.chartQuality = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Consistência', 'Segurança', 'Manutenibilidade', 'Estabilidade', 'Performance'],
+                    datasets: [
+                        {
+                            label: 'Fluxo Manual',
+                            data: [60, 50, 40, 70, 65],
+                            backgroundColor: 'rgba(71, 85, 105, 0.2)',
+                            borderColor: '#475569',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Fluxo AI-Agentic',
+                            data: [95, 90, 92, 85, 95],
+                            backgroundColor: 'rgba(5, 150, 105, 0.2)',
+                            borderColor: '#059669',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: { r: { beginAtZero: true, max: 100, ticks: { display: false } } },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        window.onload = () => {
+            initDoraChart();
+            calculateROI();
+        };
     </script>
 </body>
 </html>

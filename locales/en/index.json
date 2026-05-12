@@ -5,8 +5,8 @@
   "hero.series": "Open-Source Series",
   "hero.h2": "Use AI like<br class=\"hidden md:block\"> a senior engineer",
   "hero.desc": "15 hands-on sessions on integrating AI tools into your development workflow, from basic setup to agents and advanced automations.",
-  "hero.available": "9 sessions available",
-  "hero.upcoming": "6 coming soon",
+  "hero.available": "10 sessions available",
+  "hero.upcoming": "5 coming soon",
 
   "card.p1.badge": "Module 1",
   "card.p1.status": "Available",
@@ -66,7 +66,10 @@
   "card.upcoming.desc": "Next session in the series. Content to be defined.",
 
   "card.p10.badge": "Module 10",
-  "card.p10.status": "Coming soon",
+  "card.p10.status": "Available",
+  "card.p10.title": "TDD with AI: Tests as Contract",
+  "card.p10.desc": "Inverting red-green with AI, a test pipeline integrated with hooks and memory, test-theater anti-patterns, and mocks vs reality.",
+  "card.p10.cta": "Open session",
 
   "card.p11_15.badge": "Modules 11–15",
   "card.p11_15.status": "Coming soon",
