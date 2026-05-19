@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Hour P11: Memória Avançada & Busca Local</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Engineering Hour P11: Memória Viva · RAG Local + Reflect</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="nav.js" defer></script>
+    <script src="i18n.js" defer></script>
 
     <script>
         tailwind.config = {
@@ -17,18 +16,16 @@
                 extend: {
                     colors: {
                         stone: {
-                            50: '#fafaf9',
-                            100: '#f5f5f4',
-                            200: '#e7e5e4',
-                            300: '#d6d3d1',
-                            700: '#44403c',
-                            800: '#292524',
-                            900: '#1c1917',
+                            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+                            300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
                         },
-                        neural: {
-                            indigo: '#4f46e5', // neural indigo for indexing
-                            violet: '#7c3aed', // violet for search/retrieval
-                            cyan: '#06b6d4',
+                        rag: {
+                            blue: '#2563eb',
+                            light: '#eff6ff',
+                            border: '#93c5fd',
+                            deep: '#1d4ed8',
+                            slate: '#94a3b8',
+                            red: '#dc2626'
                         }
                     },
                     fontFamily: {
@@ -40,319 +37,1466 @@
         }
     </script>
 
+    <link rel="stylesheet" href="shared.css">
     <style>
-        body { background-color: #fafaf9; color: #292524; }
-        .nav-item.active {
-            background-color: #e7e5e4;
-            border-left: 4px solid #4f46e5;
-            font-weight: 600;
+        :root { --accent: #2563eb; }
+        .toggle-btn { transition: all 0.15s; cursor: pointer; }
+        .toggle-btn.active { background: #2563eb; color: white; font-weight: 600; }
+        .tab-btn { transition: all 0.15s; cursor: pointer; }
+        .tab-btn.active { background: #2563eb; color: white; font-weight: 600; }
+        .pipeline-node {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.85rem 1rem; border-radius: 0.85rem;
+            border: 2px solid #e7e5e4; background: white;
+            transition: all 0.2s;
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin: auto;
-            height: 300px;
-            max-height: 400px;
+        .pipeline-node:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
         }
+        .pipeline-node .node-num {
+            width: 1.75rem; height: 1.75rem; border-radius: 9999px;
+            background: #2563eb; color: white; font-weight: 700; font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .pipeline-node.highlight {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        .pipeline-arrow {
+            display: flex; justify-content: center;
+            color: #93c5fd; font-size: 1.5rem; line-height: 1;
+        }
+        .chart-container { max-width: 720px; height: 360px; }
         .search-pulse { animation: pulse-border 2s infinite; }
         @keyframes pulse-border {
-            0% { border-color: rgba(79, 70, 229, 0.3); }
-            50% { border-color: rgba(79, 70, 229, 1); }
-            100% { border-color: rgba(79, 70, 229, 0.3); }
+            0%   { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+            70%  { box-shadow: 0 0 0 14px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
         }
-        .node-line { position: relative; }
-        .node-line::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 100%;
-            width: 2px;
-            height: 24px;
-            background: #d6d3d1;
-            transform: translateX(-50%);
+
+        /* Vector space animation (Section 2) */
+        .vec-space {
+            position: relative;
+            background: linear-gradient(135deg, #f0f9ff 0%, #eff6ff 60%, #dbeafe 100%);
+            border: 1px solid #bfdbfe;
+            border-radius: 1rem;
+            overflow: hidden;
         }
-        .node-line:last-child::after { display: none; }
-        pre {
-            background-color: #1c1917;
-            color: #d6d3d1;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.825rem;
-            overflow-x: auto;
+        .vec-space.is-paused *,
+        .vec-space.is-paused {
+            animation-play-state: paused !important;
         }
+        .vec-toggle {
+            position: absolute; top: 0.75rem; right: 0.75rem; z-index: 2;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.4rem 0.75rem; border-radius: 9999px;
+            background: white; border: 1px solid #93c5fd;
+            color: #1d4ed8; font-size: 0.72rem; font-weight: 600;
+            letter-spacing: 0.04em; cursor: pointer;
+            box-shadow: 0 1px 3px rgba(30, 64, 175, 0.12);
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .vec-toggle:hover { background: #eff6ff; border-color: #60a5fa; }
+        .vec-toggle .vec-toggle-icon { font-size: 0.85rem; line-height: 1; }
+        @media (prefers-reduced-motion: reduce) {
+            .vec-node, .vec-node-soft, .vec-node-teal, .vec-node-deep,
+            .vec-node-match, .vec-query-ring, .vec-beam {
+                animation-play-state: paused !important;
+            }
+        }
+        .vec-grid line { stroke: #bfdbfe; stroke-width: 1; opacity: 0.55; }
+        .vec-axis  { stroke: #1e3a8a; stroke-width: 1.4; opacity: 0.65; }
+        .vec-node       { fill: #2563eb; animation: vec-twinkle 4.5s ease-in-out infinite; }
+        .vec-node-soft  { fill: #60a5fa; animation: vec-twinkle 6s ease-in-out infinite; }
+        .vec-node-teal  { fill: #0891b2; animation: vec-twinkle 5s ease-in-out infinite; }
+        .vec-node-deep  { fill: #1d4ed8; animation: vec-twinkle 7s ease-in-out infinite; }
+        .vec-node-match {
+            fill: #2563eb;
+            transform-origin: center;
+            transform-box: fill-box;
+            filter: drop-shadow(0 0 5px #2563eb);
+            animation: vec-match-pulse 1.6s ease-in-out infinite;
+        }
+        .vec-query-core { fill: #1d4ed8; }
+        .vec-query-ring {
+            fill: none; stroke: #2563eb; stroke-width: 2;
+            transform-origin: center; transform-box: fill-box;
+            animation: vec-query-pulse 2.4s ease-out infinite;
+        }
+        .vec-beam {
+            stroke: #2563eb; stroke-width: 1.6; stroke-linecap: round;
+            stroke-dasharray: 5 5; fill: none; opacity: 0;
+            animation: vec-beam-draw 3.6s ease-in-out infinite;
+        }
+        .vec-beam-b { animation-delay: 1.2s; }
+        .vec-beam-c { animation-delay: 2.4s; }
+        .vec-label {
+            font-family: 'Fira Code', monospace; font-size: 10px;
+            fill: #1e3a8a; font-weight: 700; letter-spacing: 0.04em;
+        }
+        .vec-vector-text {
+            font-family: 'Fira Code', monospace; font-size: 9px;
+            fill: #1d4ed8; font-weight: 600;
+        }
+        .vec-caption {
+            font-family: 'Fira Code', monospace; font-size: 9px;
+            fill: #475569; letter-spacing: 0.05em;
+        }
+
+        @keyframes vec-twinkle {
+            0%, 100% { opacity: 0.3; }
+            50%      { opacity: 0.85; }
+        }
+        @keyframes vec-match-pulse {
+            0%, 100% { opacity: 1;    transform: scale(1); }
+            50%      { opacity: 0.75; transform: scale(1.35); }
+        }
+        @keyframes vec-query-pulse {
+            0%   { opacity: 0.75; transform: scale(0.4); }
+            100% { opacity: 0;    transform: scale(3.4); }
+        }
+        @keyframes vec-beam-draw {
+            0%   { stroke-dashoffset: 80; opacity: 0; }
+            15%  { opacity: 0.95; }
+            70%  { opacity: 0.95; }
+            100% { stroke-dashoffset: 0; opacity: 0; }
+        }
+        .lifecycle-row {
+            display: flex; align-items: center; gap: 0.85rem;
+            padding: 0.85rem 1rem; border-radius: 0.85rem;
+            border: 2px solid #e7e5e4; background: white;
+            transition: all 0.2s;
+        }
+        .lifecycle-row.active {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        details summary { cursor: pointer; }
+        details summary::-webkit-details-marker { display: none; }
+        details summary::before {
+            content: '▶';
+            display: inline-block;
+            margin-right: 0.5rem;
+            transition: transform 0.15s;
+            color: #2563eb;
+            font-size: 0.7rem;
+        }
+        details[open] summary::before { transform: rotate(90deg); }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
-
-    <!-- Chosen Palette: Neural Indigo & Violet Retrieval over Warm Stone Neutrals -->
-    
-    <!-- Application Structure Plan: The SPA is designed as a "Knowledge Engine Explorer". It focuses on the shift from "Full Context" to "Searchable Context" (RAG). The structure follows: 1. The Context Efficiency (Line chart comparing context usage), 2. Local RAG Concept (Explaining how tools like qmd index markdown), 3. Indexing Workflow (The 3-step process of preparing memory), and 4. Interactive Search Simulation (How the IA actually retrieves only what it needs). This helps the team understand that they don't need to load 100 files, just the right snippets. -->
-
-    <!-- Visualization & Content Choices: 
-         1. Context Efficiency -> Change -> Multi-line Chart -> Justification: Demonstrates token savings when using indexed search vs loading everything. Method: Chart.js.
-         2. Searchable Memory -> Organize -> Grid of "Memory Nodes" -> Justification: Categorizes documents that should be indexed for the LLM. Method: Tailwind Grid.
-         3. Workflow -> Process -> Step-by-step Interactive simulation -> Justification: Explains the indexing/retrieval cycle inspired by qmd. Method: JS State.
-         4. Simulation -> Experience -> Keyword Search Mock-up -> Justification: Lets the user "act" as the IA searching through folders. Method: Vanilla JS filtering.
-         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <!-- Header -->
     <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="text-2xl">🔍</span>
-                <h1 class="text-xl font-bold text-stone-800 tracking-tight">Engineering Hour <span class="text-neural-indigo">P11</span></h1>
+                <span class="text-2xl">🧠</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">
+                    Engineering Hour <span style="color:#2563eb">P11</span>
+                </h1>
             </div>
-            <div class="text-sm font-medium text-stone-500 hidden sm:block">
-                Módulo 11: Memória com Busca Local (RAG)
+            <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
+                Módulo 11: Memória Viva | RAG Local + Reflect
             </div>
         </div>
     </header>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
-        
-        <!-- Sidebar Navigation -->
-        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
-            <p class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Memória Inteligente</p>
-            <button onclick="navigate('efficiency')" id="nav-efficiency" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📉</span> Eficiência de Contexto
+
+        <!-- Sidebar -->
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+
+            <p class="nav-group-label" data-i18n="nav.group.concept">O Conceito</p>
+            <button onclick="navigate('problema')" id="nav-problema" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🪨</span> <span data-i18n="nav.problema">O Problema da Memória Carregada</span>
             </button>
+            <button onclick="navigate('rag-fundamentos')" id="nav-rag-fundamentos" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔍</span> <span data-i18n="nav.rag-fundamentos">RAG em 90 Segundos</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.practice">Na Prática</p>
             <button onclick="navigate('qmd')" id="nav-qmd" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>📂</span> O Conceito de qmd
+                <span>📚</span> <span data-i18n="nav.qmd">QMD · Seu RAG Local</span>
             </button>
-            <button onclick="navigate('indexing')" id="nav-indexing" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🔄</span> Fluxo de Indexação
+            <button onclick="navigate('memoria-estatica')" id="nav-memoria-estatica" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📁</span> <span data-i18n="nav.memoria-estatica">Memória Indexável</span>
             </button>
-            <button onclick="navigate('search')" id="nav-search" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚡</span> Simulação de Busca
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.ceiling">O Teto</p>
+            <button onclick="navigate('limite-estatico')" id="nav-limite-estatico" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🪤</span> <span data-i18n="nav.limite-estatico">O Limite do Estático</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.evolution">A Evolução</p>
+            <button onclick="navigate('reflect')" id="nav-reflect" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>♻️</span> <span data-i18n="nav.reflect">Reflect · Memória Auto-Aprendente</span>
+            </button>
+            <button onclick="navigate('lifecycle')" id="nav-lifecycle" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔄</span> <span data-i18n="nav.lifecycle">Ciclo de Vida das Lições</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.limits">Limites</p>
+            <button onclick="navigate('anti-patterns')" id="nav-anti-patterns" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚠️</span> <span data-i18n="nav.anti-patterns">Anti-patterns</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.action">Ação</p>
+            <button onclick="navigate('proximos-passos')" id="nav-proximos-passos" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> <span data-i18n="nav.proximos-passos">Próximos Passos</span>
             </button>
         </nav>
 
         <!-- Main Content -->
         <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
-            
-            <!-- SECTION 1: Efficiency -->
-            <section id="sec-efficiency" class="block animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📉 Otimizando a Janela de Contexto</h2>
-                    <p class="text-stone-600">
-                        Carregar todo o repositório em cada prompt é caro e confuso para a IA. A memória com busca local (RAG - <em>Retrieval-Augmented Generation</em>) permite que a IA busque apenas o parágrafo exato que precisa.
+
+            <!-- ============================================================ -->
+            <!-- SECTION 1: Problema da Memória Carregada                       -->
+            <!-- ============================================================ -->
+            <section id="sec-problema" class="block">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🪨</span> <span data-i18n="sec.problema.h2">O Problema da Memória Sempre Carregada</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.problema.intro">
+                        Na sessão 2 você viu os quatro tipos de memória. Funciona. Até o dia em que o projeto tem 200 arquivos curados, e a IA carrega tudo antes da primeira pergunta. Memória estática tem um teto, e ele chega rápido.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-2xl border border-stone-200">
-                    <div class="chart-container">
+                <!-- Two contrasting cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                        <h3 class="font-bold text-stone-400 text-sm mb-3"><span>📦</span> <span data-i18n="sec.problema.card.load.title">Memória Estática · Load All</span></h3>
+                        <p class="text-sm text-stone-500 leading-relaxed mb-3" data-i18n="sec.problema.card.load.desc">A IA lê todos os .md no startup. Funciona para 10 arquivos. Em 200, o contexto fica saturado antes de você digitar a primeira pergunta. Toda chamada paga o preço de carregar o que provavelmente não vai usar.</p>
+                        <div class="text-xs text-stone-400 font-mono" data-i18n="sec.problema.card.load.metric">~18.000 tokens · todo turno</div>
+                    </div>
+                    <div class="rounded-xl border-2 p-5" style="background:#eff6ff; border-color:#93c5fd">
+                        <h3 class="font-bold text-sm mb-3" style="color:#2563eb"><span>🎯</span> <span data-i18n="sec.problema.card.query.title">Memória RAG · Query on Demand</span></h3>
+                        <p class="text-sm leading-relaxed mb-3" style="color:#1e3a8a" data-i18n="sec.problema.card.query.desc">A IA não carrega memória. Ela consulta. AGENTS.md fica em ~500 tokens e responde "vou buscar". O resto chega chunk a chunk, só quando relevante. Startup constante. Contexto enxuto.</p>
+                        <div class="text-xs font-mono" style="color:#1d4ed8" data-i18n="sec.problema.card.query.metric">~600 tokens · startup · queries sob demanda</div>
+                    </div>
+                </div>
+
+                <!-- Toggle interactive -->
+                <div class="mb-6">
+                    <h3 class="text-base font-semibold text-stone-800 mb-3" data-i18n="sec.problema.toggle.title">Mesmo cenário, dois modelos de memória:</h3>
+                    <p class="text-xs text-stone-500 mb-3" data-i18n="sec.problema.toggle.scenario">Dev pergunta: "qual a convenção de timestamps no projeto?"</p>
+                    <div class="flex gap-2 mb-4">
+                        <button class="toggle-btn active px-4 py-2 rounded-lg text-sm border border-stone-200" id="tgl-load" onclick="showToggle('load')" data-i18n="sec.problema.toggle.load">Memória Estática</button>
+                        <button class="toggle-btn px-4 py-2 rounded-lg text-sm border border-stone-200" id="tgl-rag" onclick="showToggle('rag')" data-i18n="sec.problema.toggle.rag">Memória RAG</button>
+                    </div>
+
+                    <div id="toggle-load" class="toggle-content">
+                        <pre class="m-0 text-xs" data-i18n-html="sec.problema.pre.load"><span class="text-stone-500"># Startup do agente (load-all)</span>
+<span class="text-blue-400">[load]</span> .claude/memory/MEMORY.md          <span class="text-stone-500">→ 320 tokens</span>
+<span class="text-blue-400">[load]</span> .claude/memory/user_role.md        <span class="text-stone-500">→ 180 tokens</span>
+<span class="text-blue-400">[load]</span> .claude/memory/feedback_tests.md   <span class="text-stone-500">→ 640 tokens</span>
+<span class="text-blue-400">[load]</span> .claude/memory/feedback_db.md      <span class="text-stone-500">→ 820 tokens</span>
+<span class="text-blue-400">[load]</span> .claude/memory/project_auth.md     <span class="text-stone-500">→ 1.240 tokens</span>
+<span class="text-blue-400">[load]</span> .claude/memory/project_api.md      <span class="text-stone-500">→ 1.560 tokens</span>
+<span class="text-blue-400">[load]</span> .claude/memory/reference_jira.md   <span class="text-stone-500">→ 410 tokens</span>
+<span class="text-stone-500">... mais 193 arquivos ...</span>
+<span class="text-violet-400">TOTAL</span> contexto inicial:                <span class="text-orange-400">~18.000 tokens</span>
+
+<span class="text-stone-500"># Pergunta: "qual a convenção de timestamps?"</span>
+<span class="text-stone-500"># A IA já viu tudo. Responde. Mas pagou o preço de carregar tudo,</span>
+<span class="text-stone-500"># incluindo 199 arquivos irrelevantes pra essa pergunta.</span></pre>
+                    </div>
+
+                    <div id="toggle-rag" class="toggle-content hidden">
+                        <pre class="m-0 text-xs" data-i18n-html="sec.problema.pre.rag"><span class="text-stone-500"># Startup do agente (RAG)</span>
+<span class="text-blue-400">[load]</span> .agents/AGENTS.md                   <span class="text-stone-500">→ 480 tokens</span>
+<span class="text-blue-400">[load]</span> .agents/state/STATE.md              <span class="text-stone-500">→ 220 tokens</span>
+<span class="text-violet-400">TOTAL</span> contexto inicial:                <span class="text-emerald-400">~700 tokens</span>
+
+<span class="text-stone-500"># Pergunta: "qual a convenção de timestamps?"</span>
+<span class="text-blue-400">[query]</span> qmd query agent-memory <span class="text-emerald-400">"timestamp utc convention"</span>
+
+<span class="text-blue-400">→ top-3 chunks retornados:</span>
+  <span class="text-stone-500">1.</span> project/timestamps.md   <span class="text-emerald-400">rank 0.94</span>  ~180 tokens
+  <span class="text-stone-500">2.</span> project/api-spec.md     <span class="text-emerald-400">rank 0.71</span>  ~120 tokens
+  <span class="text-stone-500">3.</span> reflections/2026-04-01  <span class="text-emerald-400">rank 0.65</span>   ~90 tokens
+
+<span class="text-stone-500"># Contexto final usado: 700 + 390 = ~1.090 tokens</span>
+<span class="text-stone-500"># 94% mais leve. E só carregou o que era relevante.</span></pre>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.problema.chart.title">Tokens de startup conforme a memória cresce</h3>
+                    <div class="chart-container mx-auto">
                         <canvas id="efficiencyChart"></canvas>
                     </div>
-                    <div class="space-y-4">
-                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
-                            <h4 class="font-bold text-sm text-red-700 uppercase">Sem Busca (Full Load)</h4>
-                            <p class="text-xs text-stone-600">O contexto cresce linearmente com o número de documentos, estourando a janela rapidamente.</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-neural-indigo">
-                            <h4 class="font-bold text-sm text-neural-indigo uppercase">Com Busca Local (RAG)</h4>
-                            <p class="text-xs text-stone-600 font-bold">Apenas snippets relevantes são carregados. O consumo de tokens permanece estável e preciso.</p>
-                        </div>
+                    <p class="text-xs text-stone-500 mt-3 text-center italic" data-i18n="sec.problema.chart.caption">Valores ilustrativos. O ponto não é o número, é a curva.</p>
+                </div>
+
+                <div class="mt-6 p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">🔁</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.problema.insight.title">P2 ensinou o quê. P11 ensina o como em escala.</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.problema.insight.desc">Não é "P2 estava errado". Os quatro tipos de memória continuam válidos. O que muda é a estratégia de acesso: em vez de a IA carregar tudo, ela aprende a consultar. E mais: aprende a aprender, sem você reescrever os .md à mão.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 2: QMD Concept -->
-            <section id="sec-qmd" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">📂 O que é qmd / Memória Consultável?</h2>
-                    <p class="text-stone-600">
-                        Inspirado em ferramentas como o <code>qmd</code>, o conceito é simples: transformar seus arquivos Markdown em uma base de dados que a IA pode "perguntar" antes de responder.
+            <!-- ============================================================ -->
+            <!-- SECTION 2: RAG em 90 Segundos                                  -->
+            <!-- ============================================================ -->
+            <section id="sec-rag-fundamentos" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔍</span> <span data-i18n="sec.rag-fundamentos.h2">RAG em 90 Segundos</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.rag-fundamentos.intro">
+                        RAG significa Retrieval-Augmented Generation. A IA não responde com o que sabe de cor. Ela busca antes, depois responde. Não é mágica, é índice de biblioteca turbinado. Três operações, três conceitos. Em noventa segundos você tem o suficiente para conversar.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="border border-stone-200 p-6 rounded-2xl bg-stone-50">
-                        <h3 class="font-bold text-stone-800 mb-2 flex items-center gap-2"><span>📝</span> Markdown como DB</h3>
-                        <p class="text-sm text-stone-600 mb-4">Seus arquivos de documentação (ADRs, specs, guides) são segmentados em blocos lógicos que a IA consegue identificar individualmente.</p>
-                        <ul class="text-xs text-stone-500 space-y-2">
-                            <li>• Tags de busca rápida (Keywords)</li>
-                            <li>• Metadados por arquivo</li>
-                            <li>• Links entre conceitos</li>
+                <!-- 3 ops cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-2xl">🔢</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-stone-500" data-i18n="sec.rag-fundamentos.op.embed.label">Embed</span>
+                        </div>
+                        <p class="text-sm text-stone-600 leading-relaxed mb-2" data-i18n="sec.rag-fundamentos.op.embed.desc">Texto vira vetor. Cada chunk de texto recebe coordenadas num espaço de muitas dimensões.</p>
+                        <p class="text-xs text-stone-500 italic" data-i18n="sec.rag-fundamentos.op.embed.note">"autenticação" e "login" ficam vizinhos. "autenticação" e "café" ficam longe.</p>
+                    </div>
+                    <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-2xl">🗂️</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-stone-500" data-i18n="sec.rag-fundamentos.op.index.label">Index</span>
+                        </div>
+                        <p class="text-sm text-stone-600 leading-relaxed mb-2" data-i18n="sec.rag-fundamentos.op.index.desc">Vetor e texto vão para um banco com BM25 (busca lexical) e índice vetorial (busca semântica).</p>
+                        <p class="text-xs text-stone-500 italic" data-i18n="sec.rag-fundamentos.op.index.note">Os dois índices coexistem no mesmo SQLite. Sem servidor, sem nuvem.</p>
+                    </div>
+                    <div class="rounded-xl border-2 p-5" style="background:#eff6ff; border-color:#93c5fd">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-2xl">🎯</span>
+                            <span class="text-xs font-bold uppercase tracking-wider" style="color:#2563eb" data-i18n="sec.rag-fundamentos.op.search.label">Search</span>
+                        </div>
+                        <p class="text-sm leading-relaxed mb-2" style="color:#1e3a8a" data-i18n="sec.rag-fundamentos.op.search.desc">Pergunta vira vetor. Banco devolve os chunks mais próximos. LLM pequeno reordena por relevância real.</p>
+                        <p class="text-xs italic" style="color:#1d4ed8" data-i18n="sec.rag-fundamentos.op.search.note">Top-3 ou top-5 entram no contexto. O resto fica de fora.</p>
+                    </div>
+                </div>
+
+                <!-- Hybrid pipeline diagram -->
+                <div class="mb-8">
+                    <h3 class="text-base font-semibold text-stone-800 mb-3" data-i18n="sec.rag-fundamentos.pipeline.title">O pipeline híbrido em diagrama</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-2 items-center max-w-4xl mx-auto">
+                        <div class="md:col-span-1 p-4 rounded-xl border-2 border-stone-200 bg-white text-center">
+                            <div class="text-3xl mb-1">❓</div>
+                            <div class="text-xs font-bold text-stone-700" data-i18n="sec.rag-fundamentos.pipeline.query">Query</div>
+                            <div class="text-[10px] text-stone-500" data-i18n="sec.rag-fundamentos.pipeline.query.note">pergunta do usuário</div>
+                        </div>
+                        <div class="md:col-span-1 text-center text-stone-400 text-xl">→</div>
+                        <div class="md:col-span-1 p-4 rounded-xl border-2 search-pulse text-center" style="border-color:#93c5fd; background:#eff6ff">
+                            <div class="flex flex-col gap-1 text-xs">
+                                <div class="font-semibold" style="color:#1d4ed8" data-i18n="sec.rag-fundamentos.pipeline.bm25">BM25</div>
+                                <div class="text-[10px]" style="color:#1e40af" data-i18n="sec.rag-fundamentos.pipeline.bm25.note">lexical · termos exatos</div>
+                                <div class="font-semibold mt-1" style="color:#1d4ed8" data-i18n="sec.rag-fundamentos.pipeline.vector">Vetor</div>
+                                <div class="text-[10px]" style="color:#1e40af" data-i18n="sec.rag-fundamentos.pipeline.vector.note">semântico · significado</div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-1 text-center text-stone-400 text-xl">→</div>
+                        <div class="md:col-span-1 p-4 rounded-xl border-2 border-stone-200 bg-white text-center">
+                            <div class="text-3xl mb-1">🏆</div>
+                            <div class="text-xs font-bold text-stone-700" data-i18n="sec.rag-fundamentos.pipeline.rerank">Rerank + Top-K</div>
+                            <div class="text-[10px] text-stone-500" data-i18n="sec.rag-fundamentos.pipeline.rerank.note">LLM pequeno reordena</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vector space visualization -->
+                <div class="mb-8">
+                    <h3 class="text-base font-semibold text-stone-800 mb-2" data-i18n="sec.rag-fundamentos.vecspace.title">O espaço vetorial em ação</h3>
+                    <p class="text-sm text-stone-500 mb-3" data-i18n="sec.rag-fundamentos.vecspace.desc">Cada ponto é um chunk indexado. Quando a query chega, o pipeline dispara feixes em busca dos vizinhos mais próximos. Os três que iluminam são o top-K que entra no contexto.</p>
+                    <div class="vec-space is-paused" id="vec-space">
+                        <button type="button" class="vec-toggle" id="vec-toggle-btn" aria-pressed="false" onclick="toggleVecAnim()">
+                            <span class="vec-toggle-icon" id="vec-toggle-icon">▶</span>
+                            <span id="vec-toggle-label" data-i18n="sec.rag-fundamentos.vecspace.play">Animar</span>
+                        </button>
+                        <svg viewBox="0 0 800 360" preserveAspectRatio="xMidYMid meet" class="w-full h-auto" aria-hidden="true">
+                            <!-- Perspective grid -->
+                            <g class="vec-grid">
+                                <line x1="60"  y1="60"  x2="740" y2="60"  />
+                                <line x1="60"  y1="120" x2="740" y2="120" />
+                                <line x1="60"  y1="180" x2="740" y2="180" />
+                                <line x1="60"  y1="240" x2="740" y2="240" />
+                                <line x1="60"  y1="300" x2="740" y2="300" />
+                                <line x1="60"  y1="60"  x2="60"  y2="320" />
+                                <line x1="180" y1="60"  x2="180" y2="320" />
+                                <line x1="300" y1="60"  x2="300" y2="320" />
+                                <line x1="420" y1="60"  x2="420" y2="320" />
+                                <line x1="540" y1="60"  x2="540" y2="320" />
+                                <line x1="660" y1="60"  x2="660" y2="320" />
+                                <line x1="740" y1="60"  x2="740" y2="320" />
+                            </g>
+
+                            <!-- Axis cross -->
+                            <line class="vec-axis" x1="400" y1="20"  x2="400" y2="340" />
+                            <line class="vec-axis" x1="40"  y1="200" x2="760" y2="200" />
+
+                            <!-- Background twinkle nodes -->
+                            <circle class="vec-node-soft" cx="110" cy="80"  r="3" />
+                            <circle class="vec-node-soft" cx="250" cy="70"  r="4" style="animation-delay: 0.6s" />
+                            <circle class="vec-node-soft" cx="345" cy="55"  r="3" style="animation-delay: 1.2s" />
+                            <circle class="vec-node-soft" cx="495" cy="65"  r="4" style="animation-delay: 1.8s" />
+                            <circle class="vec-node-soft" cx="620" cy="55"  r="3" style="animation-delay: 2.4s" />
+                            <circle class="vec-node-soft" cx="720" cy="90"  r="4" style="animation-delay: 0.3s" />
+                            <circle class="vec-node-soft" cx="90"  cy="220" r="3" style="animation-delay: 0.9s" />
+                            <circle class="vec-node-soft" cx="295" cy="250" r="3" style="animation-delay: 1.5s" />
+                            <circle class="vec-node-soft" cx="475" cy="245" r="4" style="animation-delay: 2.1s" />
+                            <circle class="vec-node-soft" cx="700" cy="240" r="3" style="animation-delay: 0.4s" />
+                            <circle class="vec-node-soft" cx="135" cy="310" r="3" style="animation-delay: 1.0s" />
+                            <circle class="vec-node-soft" cx="370" cy="305" r="3" style="animation-delay: 1.6s" />
+                            <circle class="vec-node-soft" cx="555" cy="315" r="4" style="animation-delay: 2.2s" />
+                            <circle class="vec-node-soft" cx="685" cy="300" r="3" style="animation-delay: 0.5s" />
+
+                            <!-- Cluster: timestamps (top right) -->
+                            <circle class="vec-node-teal" cx="565" cy="100" r="6" style="animation-delay: 0.2s" />
+                            <circle class="vec-node-teal" cx="600" cy="125" r="5" style="animation-delay: 0.8s" />
+                            <circle class="vec-node-teal" cx="630" cy="95"  r="7" style="animation-delay: 1.4s" />
+                            <text class="vec-label" x="615" y="85">TIMESTAMPS</text>
+                            <text class="vec-label" x="565" y="145">ISO8601</text>
+
+                            <!-- Cluster: rate-limit (bottom right) -->
+                            <circle class="vec-node-deep" cx="580" cy="270" r="6" style="animation-delay: 0.5s" />
+                            <circle class="vec-node-deep" cx="615" cy="295" r="5" style="animation-delay: 1.1s" />
+                            <circle class="vec-node-deep" cx="645" cy="265" r="6" style="animation-delay: 1.7s" />
+                            <text class="vec-label" x="595" y="255">RATE LIMIT</text>
+
+                            <!-- Cluster: deploy (bottom left) -->
+                            <circle class="vec-node-deep" cx="155" cy="265" r="6" style="animation-delay: 0.7s" />
+                            <circle class="vec-node-deep" cx="195" cy="290" r="5" style="animation-delay: 1.3s" />
+                            <circle class="vec-node-deep" cx="225" cy="260" r="6" style="animation-delay: 1.9s" />
+                            <text class="vec-label" x="160" y="250">DEPLOY · CI</text>
+
+                            <!-- Cluster: AUTH (top left) · top-3 matches -->
+                            <circle class="vec-node-match" cx="170" cy="110" r="8" />
+                            <circle class="vec-node-match" cx="210" cy="85"  r="7" style="animation-delay: 0.4s" />
+                            <circle class="vec-node-match" cx="155" cy="145" r="6" style="animation-delay: 0.8s" />
+                            <text class="vec-label" x="170" y="170">AUTH · LOGIN</text>
+
+                            <!-- Query origin (center) with pulsing rings -->
+                            <circle class="vec-query-ring" cx="400" cy="200" r="14" />
+                            <circle class="vec-query-ring" cx="400" cy="200" r="14" style="animation-delay: 0.8s" />
+                            <circle class="vec-query-ring" cx="400" cy="200" r="14" style="animation-delay: 1.6s" />
+                            <circle class="vec-query-core" cx="400" cy="200" r="6" />
+                            <text class="vec-label" x="370" y="232" text-anchor="start" data-i18n="sec.rag-fundamentos.vecspace.query">QUERY</text>
+
+                            <!-- Search beams to top-3 matches -->
+                            <path class="vec-beam"          d="M 400 200 Q 290 160 170 110" />
+                            <path class="vec-beam vec-beam-b" d="M 400 200 Q 320 130 210 85"  />
+                            <path class="vec-beam vec-beam-c" d="M 400 200 Q 280 175 155 145" />
+
+                            <!-- Vector text caption -->
+                            <text class="vec-vector-text" x="565" y="40">[0.52, 5.12, 9.31, ...]</text>
+                            <line class="vec-grid" x1="560" y1="44" x2="565" y2="80" stroke-dasharray="2 2" />
+
+                            <!-- Caption footer -->
+                            <text class="vec-caption" x="60"  y="345">CHUNKS · 300 DIMENSÕES PROJETADAS EM 2D</text>
+                            <text class="vec-caption" x="740" y="345" text-anchor="end">TOP-K = 3 · MATCH POR PROXIMIDADE SEMÂNTICA</text>
+                        </svg>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-2 italic" data-i18n="sec.rag-fundamentos.vecspace.caption">A query "como autenticar usuário?" não procura a palavra. Procura o vizinho. Por isso "login", "auth" e "credentials" iluminam mesmo sem aparecer no texto da pergunta.</p>
+                </div>
+
+                <!-- Insight -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">💡</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.rag-fundamentos.insight.title">Três acertos, três responsabilidades</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.rag-fundamentos.insight.desc">BM25 acerta termos. Vetor acerta intenção. Rerank acerta prioridade. Sozinhos cada um falha em casos óbvios. Juntos cobrem a maior parte do espaço de busca real. Essa combinação é o que separa um RAG decente de um RAG que te decepciona depois de duas semanas.</p>
+                    </div>
+                </div>
+
+                <!-- Aside: o que é embedding -->
+                <details class="mt-6 p-4 rounded-xl bg-stone-50 border border-stone-200">
+                    <summary class="text-sm font-semibold text-stone-700"><span data-i18n="sec.rag-fundamentos.aside.title">Espera, o que é "embedding" mesmo?</span></summary>
+                    <p class="text-sm text-stone-600 leading-relaxed mt-3" data-i18n="sec.rag-fundamentos.aside.desc">Pense num mapa onde palavras são pontos. Palavras com significado parecido ficam perto, palavras sem relação ficam longe. Um embedding é a coordenada do ponto. Modelos como embeddinggemma transformam qualquer texto numa coordenada de algumas centenas de dimensões. Você não precisa entender as dimensões, só saber que distância no espaço significa semelhança no significado.</p>
+                </details>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 3: QMD                                                 -->
+            <!-- ============================================================ -->
+            <section id="sec-qmd" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📚</span> <span data-i18n="sec.qmd.h2">QMD · Seu RAG Local</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.qmd.intro">
+                        QMD é o motor de busca local criado por Tobias Lütke. Roda 100% offline depois do setup. Hybrid search com BM25, vetor e rerank, tudo dentro de um único arquivo SQLite. Sem servidor, sem nuvem, sem API key. Você dá a ele uma pasta de markdown e ele te devolve um índice consultável.
+                    </p>
+                </div>
+
+                <!-- Stack table -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+                    <div class="p-4 rounded-xl border border-stone-200 bg-white">
+                        <div class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2" data-i18n="sec.qmd.stack.embedding.label">Embedding</div>
+                        <div class="text-sm font-mono text-stone-800 mb-1">embeddinggemma 300M</div>
+                        <div class="text-xs text-stone-500" data-i18n="sec.qmd.stack.embedding.note">~300MB · embedding-only · não generativo</div>
+                    </div>
+                    <div class="p-4 rounded-xl border border-stone-200 bg-white">
+                        <div class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2" data-i18n="sec.qmd.stack.bm25.label">Busca Lexical</div>
+                        <div class="text-sm font-mono text-stone-800 mb-1">SQLite FTS5</div>
+                        <div class="text-xs text-stone-500" data-i18n="sec.qmd.stack.bm25.note">termos exatos, idiomas, prefixos</div>
+                    </div>
+                    <div class="p-4 rounded-xl border border-stone-200 bg-white">
+                        <div class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2" data-i18n="sec.qmd.stack.vector.label">Busca Vetorial</div>
+                        <div class="text-sm font-mono text-stone-800 mb-1">sqlite-vec</div>
+                        <div class="text-xs text-stone-500" data-i18n="sec.qmd.stack.vector.note">vizinhos próximos no espaço semântico</div>
+                    </div>
+                    <div class="rounded-xl border-2 p-4" style="background:#eff6ff; border-color:#93c5fd">
+                        <div class="text-xs font-bold uppercase tracking-wider mb-2" style="color:#2563eb" data-i18n="sec.qmd.stack.rerank.label">Rerank</div>
+                        <div class="text-sm font-mono mb-1" style="color:#1e3a8a">qwen3-reranker 0.6B</div>
+                        <div class="text-xs" style="color:#1d4ed8" data-i18n="sec.qmd.stack.rerank.note">LLM pequeno reordena top-30</div>
+                    </div>
+                </div>
+
+                <!-- Storage card -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 mb-6">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.qmd.storage.title">Onde mora o índice</h3>
+                    <div class="flex gap-2 items-start">
+                        <pre class="flex-1 m-0 text-xs" id="qmd-storage" data-i18n-html="sec.qmd.pre.storage">~/.cache/qmd/index.sqlite
+
+<span class="text-stone-500"># Tudo num arquivo só.</span>
+<span class="text-stone-500"># 10MB para projeto pequeno.</span>
+<span class="text-stone-500"># 30 a 50MB para repositórios grandes com docs + código.</span>
+<span class="text-stone-500"># Backup é cp. Reset é rm.</span></pre>
+                        <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('qmd-storage')" data-i18n="sec.qmd.copy">copiar</button>
+                    </div>
+                </div>
+
+                <!-- Smart chunking -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 mb-6">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.qmd.chunking.title">Smart chunking, não corte burro</h3>
+                    <p class="text-sm text-stone-600 leading-relaxed mb-3" data-i18n="sec.qmd.chunking.desc">QMD não corta texto a cada N caracteres. Ele pontua os boundaries: heading vale 50 a 100, code block 80, parágrafo 20. Tenta chunks de ~900 tokens com 15% de overlap. Para código, usa tree-sitter (TypeScript, Python, Go, Rust) e respeita fronteiras de função.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 rounded-lg bg-white border border-stone-200">
+                            <div class="font-semibold text-stone-700 mb-1" data-i18n="sec.qmd.chunking.bad">Chunker burro</div>
+                            <div class="text-stone-500" data-i18n="sec.qmd.chunking.bad.desc">Corta no meio da frase. Embedding fica diluído. Retrieval traz pedaços inúteis.</div>
+                        </div>
+                        <div class="p-3 rounded-lg" style="background:#eff6ff">
+                            <div class="font-semibold mb-1" style="color:#1d4ed8" data-i18n="sec.qmd.chunking.good">Smart chunking</div>
+                            <div style="color:#1e40af" data-i18n="sec.qmd.chunking.good.desc">Corta em heading ou fim de bloco. Cada chunk fica coerente. Embedding representa um conceito real.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Commands tabs -->
+                <div class="mb-6">
+                    <h3 class="text-base font-semibold text-stone-800 mb-3" data-i18n="sec.qmd.commands.title">Os comandos que você vai usar de verdade:</h3>
+                    <div class="flex gap-2 mb-4 flex-wrap">
+                        <button class="tab-btn active px-4 py-2 rounded-lg text-sm border border-stone-200" id="qmdtab-setup" onclick="showQmdTab('setup')" data-i18n="sec.qmd.tab.setup">Setup</button>
+                        <button class="tab-btn px-4 py-2 rounded-lg text-sm border border-stone-200" id="qmdtab-search" onclick="showQmdTab('search')" data-i18n="sec.qmd.tab.search">Busca</button>
+                        <button class="tab-btn px-4 py-2 rounded-lg text-sm border border-stone-200" id="qmdtab-mcp" onclick="showQmdTab('mcp')" data-i18n="sec.qmd.tab.mcp">MCP</button>
+                    </div>
+
+                    <div id="qmd-setup" class="qmd-content">
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0 text-xs" id="qmd-setup-text" data-i18n-html="sec.qmd.pre.setup"><span class="text-stone-500"># Registra a pasta de memória como uma coleção</span>
+qmd collection add agent-memory ~/.agents/memory --mask <span class="text-emerald-400">"**/*.md"</span>
+
+<span class="text-stone-500"># Gera embeddings (uma vez, depois é incremental)</span>
+qmd embed agent-memory
+
+<span class="text-stone-500"># Reindex manual (quando você edita .md fora do fluxo normal)</span>
+qmd embed agent-memory --force</pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('qmd-setup-text')" data-i18n="sec.qmd.copy">copiar</button>
+                        </div>
+                        <p class="text-xs text-stone-600 mt-3" data-i18n="sec.qmd.tab.setup.note">A primeira vez baixa os modelos (~300MB embedding + ~600MB reranker). Da segunda em diante é instantâneo.</p>
+                    </div>
+
+                    <div id="qmd-search" class="qmd-content hidden">
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0 text-xs" id="qmd-search-text" data-i18n-html="sec.qmd.pre.search"><span class="text-stone-500"># Busca lexical pura (rápida, para termos exatos)</span>
+qmd search agent-memory <span class="text-emerald-400">"timestamp utc"</span>
+
+<span class="text-stone-500"># Busca vetorial pura (semântica)</span>
+qmd vsearch agent-memory <span class="text-emerald-400">"como serializar datas"</span>
+
+<span class="text-stone-500"># Busca híbrida + rerank (o caminho recomendado)</span>
+qmd query agent-memory <span class="text-emerald-400">"convenção de datas no projeto"</span> --top 5
+
+<span class="text-stone-500"># JSON estruturado para consumo por agente</span>
+qmd query agent-memory <span class="text-emerald-400">"auth refresh flow"</span> --json -n 3</pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('qmd-search-text')" data-i18n="sec.qmd.copy">copiar</button>
+                        </div>
+                        <p class="text-xs text-stone-600 mt-3" data-i18n="sec.qmd.tab.search.note">90% do uso prático é qmd query. Os outros dois servem para tunar o pipeline ou debugar resultado ruim.</p>
+                    </div>
+
+                    <div id="qmd-mcp" class="qmd-content hidden">
+                        <div class="flex gap-2 items-start">
+                            <pre class="flex-1 m-0 text-xs" id="qmd-mcp-text" data-i18n-html="sec.qmd.pre.mcp"><span class="text-stone-500"># Sobe o QMD como servidor MCP (gancho com Sessão 5)</span>
+qmd mcp --http --port 8080
+
+<span class="text-stone-500"># O agente conversa via MCP, expõe tools:</span>
+<span class="text-stone-500">#   query     · busca híbrida</span>
+<span class="text-stone-500">#   get       · busca documento por path</span>
+<span class="text-stone-500">#   multi_get · busca vários paths</span>
+<span class="text-stone-500">#   status    · saúde do índice</span>
+
+<span class="text-stone-500"># No .claude/settings.json ou .cursor/mcp:</span>
+{
+  <span class="text-blue-400">"mcpServers"</span>: {
+    <span class="text-blue-400">"qmd"</span>: {
+      <span class="text-blue-400">"transport"</span>: <span class="text-emerald-400">"http"</span>,
+      <span class="text-blue-400">"url"</span>: <span class="text-emerald-400">"http://localhost:8080"</span>
+    }
+  }
+}</pre>
+                            <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('qmd-mcp-text')" data-i18n="sec.qmd.copy">copiar</button>
+                        </div>
+                        <p class="text-xs text-stone-600 mt-3" data-i18n="sec.qmd.tab.mcp.note">Via MCP, o agente chama qmd como qualquer outra ferramenta, sem você precisar escrever wrappers. Conecta com Claude Code, Cursor, Codex.</p>
+                    </div>
+                </div>
+
+                <!-- Hook to next -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">📦</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.qmd.hook.title">QMD é o motor. Falta o combustível.</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.qmd.hook.desc">O índice só vale se a memória que entra nele é boa. A próxima seção mostra como estruturar .agents/memory para o QMD chunkar bem e retornar resposta útil. Se a memória entra ruim, sai ruim. Garbage in, garbage retrieved.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 4: Memória Indexável (.agents/memory)                   -->
+            <!-- ============================================================ -->
+            <section id="sec-memoria-estatica" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📁</span> <span data-i18n="sec.memoria-estatica.h2">Memória Indexável · O .agents/memory/</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.memoria-estatica.intro">
+                        Na sessão 6 você viu o .claude/ como workspace seguro. Funciona, mas trava o conhecimento dentro do Claude. Trocar para Cursor ou Codex é perder tudo. A solução é tirar a memória do silo do tool: ela mora em .agents/, que é tool-agnostic. Claude Code, Cursor, Codex, todos apontam para o mesmo lugar.
+                    </p>
+                </div>
+
+                <!-- Tool-agnostic diagram -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 mb-6">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3" data-i18n="sec.memoria-estatica.toolagnostic.title">Uma única memória, várias tools</h3>
+                    <pre class="m-0 text-xs" data-i18n-html="sec.memoria-estatica.pre.agnostic"><span class="text-stone-500"># Cada tool aponta para .agents/, não para a sua própria pasta</span>
+Claude Code ──► <span class="text-blue-400">CLAUDE.md</span>           ──► <span class="text-emerald-400">.agents/AGENTS.md</span>
+Cursor      ──► <span class="text-blue-400">.cursor/rules/...</span>   ──► <span class="text-emerald-400">.agents/AGENTS.md</span>
+Codex / Oz   ──► <span class="text-blue-400">qmd MCP + skills</span>    ──► <span class="text-emerald-400">.agents/</span>
+
+<span class="text-stone-500"># .claude/ vira só um redirecionador com 3 arquivos:</span>
+<span class="text-stone-500">#   settings.json, settings.local.json, REDIRECT.md</span></pre>
+                </div>
+
+                <!-- Folder tree -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 mb-6">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3" data-i18n="sec.memoria-estatica.tree.title">Anatomia do .agents/memory/</h3>
+                    <pre class="m-0 text-xs" data-i18n-html="sec.memoria-estatica.pre.tree">.agents/
+├─ AGENTS.md                  <span class="text-stone-500"># índice master · ~500 tokens · sempre lido</span>
+├─ memory/
+│  ├─ project/                <span class="text-stone-500"># conhecimento de domínio</span>
+│  │  ├─ auth-flow.md
+│  │  ├─ timestamps.md
+│  │  └─ api-contracts.md
+│  ├─ brain/                  <span class="text-stone-500"># conhecimento da infraestrutura de IA</span>
+│  ├─ lessons/
+│  │  ├─ lessons.jsonl        <span class="text-stone-500"># source of truth (estruturado)</span>
+│  │  ├─ LESSONS.md           <span class="text-stone-500"># view humana (auto-gerada)</span>
+│  │  ├─ candidates/          <span class="text-stone-500"># pendentes de review</span>
+│  │  └─ rejected/            <span class="text-stone-500"># histórico de decisões</span>
+│  └─ reflections/            <span class="text-stone-500"># 1 arquivo por sessão significativa</span>
+├─ state/
+│  ├─ STATE.md                <span class="text-stone-500"># o que está sendo trabalhado agora</span>
+│  └─ pending-analysis.md     <span class="text-stone-500"># gerado por post-commit hook</span>
+└─ engine/                    <span class="text-stone-500"># o motor qmd</span></pre>
+                </div>
+
+                <!-- Memory file format example -->
+                <div class="mb-6">
+                    <h3 class="text-base font-semibold text-stone-800 mb-3" data-i18n="sec.memoria-estatica.format.title">Formato obrigatório · YAML frontmatter + dense bullets</h3>
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed" data-i18n="sec.memoria-estatica.format.desc">QMD chunkeia esses arquivos, então a regra é simples: todo bullet precisa fazer sentido sozinho como fato pesquisável. Prose é veneno. Cada token tem que carregar sinal.</p>
+                    <div class="flex gap-2 items-start">
+                        <pre class="flex-1 m-0 text-xs" id="memory-example">---
+topic: timestamps
+last_updated: 2026-05-19
+tags: [date, serialization, utc, postgres]
+---
+
+<span class="text-violet-400"># Timestamp Conventions</span>
+
+<span class="text-violet-400">## Storage</span>
+- All DB timestamps are TIMESTAMPTZ in PostgreSQL
+- Application code never writes naive datetimes
+- Convert to UTC at the API boundary, not in the DB layer
+
+<span class="text-violet-400">## Serialization</span>
+- API responses use ISO-8601 with explicit Z suffix
+- Frontend converts to user TZ at render time only
+- Logs always print UTC, never local
+
+<span class="text-violet-400">## Gotchas</span>
+- node-postgres returns timestamps as Date objects with local TZ
+- pg-protocol-v2 fixes this; v1 needs manual handling
+- Snake-case columns in PG, camelCase in app, mapped in repo layer</pre>
+                        <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('memory-example')" data-i18n="sec.memoria-estatica.copy">copiar</button>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-3 italic" data-i18n="sec.memoria-estatica.format.note">Cada bullet acima cabe num único chunk se necessário. Cada um responde uma busca diferente.</p>
+                </div>
+
+                <!-- Prose vs dense -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 rounded-xl border border-red-200 bg-red-50">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-lg">❌</span>
+                            <h4 class="font-bold text-red-700 text-sm" data-i18n="sec.memoria-estatica.prose.bad.title">Prose-heavy (não indexável)</h4>
+                        </div>
+                        <pre class="m-0 text-xs" data-i18n="sec.memoria-estatica.pre.prose-bad">No nosso projeto a gente costuma
+guardar timestamps em UTC porque
+isso evita problemas de timezone
+quando a gente faz deploys em
+diferentes regiões. Acho que isso
+foi decidido em algum momento mas
+não lembro exatamente quando.</pre>
+                        <p class="text-xs text-red-700 mt-3" data-i18n="sec.memoria-estatica.prose.bad.note">42 palavras para dizer "UTC sempre". O chunker corta no meio, o embedding dilui, a busca falha.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border-2" style="border-color:#93c5fd; background:#eff6ff">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-lg">✅</span>
+                            <h4 class="font-bold text-sm" style="color:#1d4ed8" data-i18n="sec.memoria-estatica.prose.good.title">Dense bullets (indexável)</h4>
+                        </div>
+                        <pre class="m-0 text-xs">- All timestamps stored in UTC
+- Decision: avoid TZ drift across
+  multi-region deploys
+- Convert to local TZ only at
+  render time on frontend</pre>
+                        <p class="text-xs mt-3" style="color:#1e40af" data-i18n="sec.memoria-estatica.prose.good.note">17 palavras, 3 fatos pesquisáveis. Cada um vira chunk útil. Cada um responde uma pergunta diferente.</p>
+                    </div>
+                </div>
+
+                <!-- The "query first" rule -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">🛑</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.memoria-estatica.rule.title">Regra de ouro · query first, write second</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed mb-2" data-i18n="sec.memoria-estatica.rule.desc">Antes de criar um arquivo novo, sempre rode <span class="font-mono bg-stone-100 px-1 rounded text-xs">qmd query agent-memory "&lt;topic&gt;"</span>. Se já existe algo cobrindo o tema, atualize o arquivo existente. Memória duplicada degrada o rerank: a IA fica entre dois chunks contraditórios e responde mal os dois.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 5: O Limite do Estático (virada)                       -->
+            <!-- ============================================================ -->
+            <section id="sec-limite-estatico" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🪤</span> <span data-i18n="sec.limite-estatico.h2">O Teto da Memória Estática</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.limite-estatico.intro">
+                        Memória estática resolve o problema de carregamento. Não resolve o problema de captura. Você ainda escreve cada .md à mão. E aqui aparece o verdadeiro teto: a maior parte do conhecimento que sua sessão gera nunca é registrado, porque você está ocupado fazendo o trabalho, não documentando.
+                    </p>
+                </div>
+
+                <!-- The lost knowledge -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-stone-50 rounded-xl border border-stone-200 p-5">
+                        <h3 class="font-bold text-stone-400 text-sm mb-3 uppercase tracking-wider" data-i18n="sec.limite-estatico.what.title">O que acontece numa sessão real</h3>
+                        <ul class="text-sm text-stone-600 space-y-2 leading-relaxed">
+                            <li class="flex gap-2"><span class="text-stone-400 flex-shrink-0">→</span><span data-i18n="sec.limite-estatico.what.li.1">Você descobre que o pg-protocol-v1 ignora TZ no insert</span></li>
+                            <li class="flex gap-2"><span class="text-stone-400 flex-shrink-0">→</span><span data-i18n="sec.limite-estatico.what.li.2">Aplica fix, testa, mergeia, fecha o ticket</span></li>
+                            <li class="flex gap-2"><span class="text-stone-400 flex-shrink-0">→</span><span data-i18n="sec.limite-estatico.what.li.3">Decide com o time: refresh tokens sempre rotacionam, sem grace period</span></li>
+                            <li class="flex gap-2"><span class="text-stone-400 flex-shrink-0">→</span><span data-i18n="sec.limite-estatico.what.li.4">Faz refactor, percebe que connection pooling deveria ser global</span></li>
+                            <li class="flex gap-2"><span class="text-stone-400 flex-shrink-0">→</span><span data-i18n="sec.limite-estatico.what.li.5">Fim do dia: cabeça cheia, ninguém escreveu nada em .md</span></li>
                         </ul>
                     </div>
-                    <div class="border border-stone-200 p-6 rounded-2xl bg-stone-50">
-                        <h3 class="font-bold text-stone-800 mb-2 flex items-center gap-2"><span>🔍</span> Retrieval Automático</h3>
-                        <p class="text-sm text-stone-600 mb-4">Ao invés de você anexar os arquivos, a IA roda um comando interno de busca (como o grep ou busca vetorial local) para encontrar o contexto.</p>
-                        <div class="bg-stone-800 p-3 rounded font-mono text-[10px] text-neural-cyan">
-                            $ qmd search "auth flow"
-                        </div>
+                    <div class="rounded-xl border-2 p-5" style="background:#fef2f2; border-color:#fecaca">
+                        <h3 class="font-bold text-sm mb-3 uppercase tracking-wider text-red-700" data-i18n="sec.limite-estatico.lost.title">Resultado em 3 meses</h3>
+                        <ul class="text-sm space-y-2 leading-relaxed text-red-800">
+                            <li class="flex gap-2"><span class="text-red-400 flex-shrink-0">✗</span><span data-i18n="sec.limite-estatico.lost.li.1">Outro dev cai no mesmo bug do pg-protocol-v1</span></li>
+                            <li class="flex gap-2"><span class="text-red-400 flex-shrink-0">✗</span><span data-i18n="sec.limite-estatico.lost.li.2">A decisão sobre refresh tokens vira "alguém lembra por que isso?"</span></li>
+                            <li class="flex gap-2"><span class="text-red-400 flex-shrink-0">✗</span><span data-i18n="sec.limite-estatico.lost.li.3">Connection pooling continua local em três serviços diferentes</span></li>
+                            <li class="flex gap-2"><span class="text-red-400 flex-shrink-0">✗</span><span data-i18n="sec.limite-estatico.lost.li.4">O git log tem a verdade mas ninguém vai ler 240 commits</span></li>
+                            <li class="flex gap-2"><span class="text-red-400 flex-shrink-0">✗</span><span data-i18n="sec.limite-estatico.lost.li.5">A IA não tem como saber. Você não escreveu.</span></li>
+                        </ul>
                     </div>
                 </div>
 
-                <div class="mt-8 p-6 bg-neural-indigo text-white rounded-2xl shadow-lg">
-                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest">A Grande Vantagem:</h4>
-                    <p class="text-lg italic font-serif">"Você não precisa que a IA saiba tudo o tempo todo. Você só precisa que ela saiba ONDE buscar quando for necessário."</p>
+                <!-- Cross-tool problem -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 mb-6">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-3" data-i18n="sec.limite-estatico.cross.title">E pior: troque de tool e perca tudo de novo</h3>
+                    <pre class="m-0 text-xs" data-i18n-html="sec.limite-estatico.pre.terminal"><span class="text-stone-500"># Você passou 6 meses curando .cursor/rules/...</span>
+$ cd projeto-x
+$ codex
+<span class="text-red-400">→</span> Codex não lê .cursor/rules
+<span class="text-red-400">→</span> Suas regras curadas viram contexto morto
+<span class="text-red-400">→</span> Você reescreve no formato do Codex
+<span class="text-red-400">→</span> 6 meses depois, troca pro Claude Code
+<span class="text-red-400">→</span> Reescreve de novo</pre>
+                    <p class="text-xs text-stone-500 mt-3 italic" data-i18n="sec.limite-estatico.cross.note">Conhecimento preso em formato proprietário é conhecimento condenado a virar custo recorrente.</p>
+                </div>
+
+                <!-- Chart -->
+                <div class="bg-stone-50 rounded-xl border border-stone-200 p-5 mb-6">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.limite-estatico.chart.title">Captura manual vs captura automática · por tipo de lição</h3>
+                    <div class="chart-container mx-auto">
+                        <canvas id="capturaChart"></canvas>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-3 text-center italic" data-i18n="sec.limite-estatico.chart.caption">Workaround temporário fica baixo de propósito. Não é tudo que vira lição.</p>
+                </div>
+
+                <!-- Turn question -->
+                <div class="p-5 rounded-2xl text-white" style="background:#2563eb">
+                    <div class="flex gap-4 items-start">
+                        <span class="text-3xl flex-shrink-0">🪄</span>
+                        <div>
+                            <h4 class="font-bold mb-2 text-lg" data-i18n="sec.limite-estatico.turn.title">A pergunta de virada</h4>
+                            <p class="text-sm leading-relaxed" data-i18n="sec.limite-estatico.turn.desc">E se a captura fosse automática? E se, no fim de cada sessão, alguém reconciliasse o git log, o seu STATE.md e a conversa, e gravasse o que vale a pena, sem você sair do flow? E se a IA fizesse isso, mas você ainda decidisse o que vira regra de verdade?</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- SECTION 3: Indexing Workflow -->
-            <section id="sec-indexing" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🔄 Fluxo de Memória Avançada</h2>
-                    <p class="text-stone-600">
-                        Como preparar seu repositório para ser "buscável". Este fluxo garante que a IA tenha acesso a anos de decisões técnicas em milissegundos.
+            <!-- ============================================================ -->
+            <!-- SECTION 6: Reflect                                             -->
+            <!-- ============================================================ -->
+            <section id="sec-reflect" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>♻️</span> <span data-i18n="sec.reflect.h2">Reflect · Memória que se Captura Sozinha</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.reflect.intro">
+                        Reflect é uma skill (gancho com a Sessão 7) que roda no fim de qualquer sessão significativa, em qualquer tool. Em uns dois minutos ela faz a leitura do que aconteceu, decide o que vale guardar, propõe candidatos e atualiza a memória. Você não para o flow. Você só revisa os candidatos depois.
                     </p>
                 </div>
 
-                <div class="flex flex-col items-center gap-4 py-6">
-                    <!-- Step 1 -->
-                    <div class="node-line w-full max-w-sm p-4 bg-white border-2 border-stone-200 rounded-xl flex items-center gap-4 shadow-sm">
-                        <span class="text-2xl">🧱</span>
-                        <div>
-                            <p class="font-bold text-xs uppercase text-stone-500">Etapa 1: Chunking</p>
-                            <p class="text-sm text-stone-800 font-bold">Dividir arquivos longos em blocos</p>
+                <!-- Pipeline 5 steps -->
+                <div class="grid grid-cols-1 gap-2 mb-8 max-w-2xl mx-auto">
+                    <div class="pipeline-node">
+                        <div class="node-num">1</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.reflect.step.1.title">Lê o contexto da sessão</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.reflect.step.1.desc">.agents/state/STATE.md + git log -20 + git status --short</div>
                         </div>
                     </div>
-                    <!-- Step 2 -->
-                    <div class="node-line w-full max-w-sm p-4 bg-white border-2 border-neural-indigo rounded-xl flex items-center gap-4 shadow-md search-pulse">
-                        <span class="text-2xl">🏷️</span>
-                        <div>
-                            <p class="font-bold text-xs uppercase text-neural-indigo">Etapa 2: Indexação</p>
-                            <p class="text-sm text-stone-800 font-bold">Gerar tags e resumos de busca</p>
+                    <div class="pipeline-arrow">↓</div>
+                    <div class="pipeline-node">
+                        <div class="node-num">2</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.reflect.step.2.title">Identifica 1 a 3 lições reais</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.reflect.step.2.desc">regra confirmada por evidência · padrão observado · decisão arquitetural</div>
                         </div>
                     </div>
-                    <!-- Step 3 -->
-                    <div class="node-line w-full max-w-sm p-4 bg-stone-900 border-2 border-stone-800 rounded-xl flex items-center gap-4 shadow-lg text-white">
-                        <span class="text-2xl">🤖</span>
-                        <div>
-                            <p class="font-bold text-xs uppercase text-stone-400">Etapa 3: Retrieval</p>
-                            <p class="text-sm font-bold">IA consulta o índice e puxa o snippet</p>
+                    <div class="pipeline-arrow">↓</div>
+                    <div class="pipeline-node">
+                        <div class="node-num">3</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.reflect.step.3.title">Roteia por confidence</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.reflect.step.3.desc">alta → learn.py (graduate imediato) · média → stage.py (review queue)</div>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow">↓</div>
+                    <div class="pipeline-node highlight">
+                        <div class="node-num">4</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.reflect.step.4.title">Escreve reflection file</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.reflect.step.4.desc">.agents/memory/reflections/YYYY-MM-DD-&lt;slug&gt;.md · &lt; 20 linhas · dense bullets</div>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow">↓</div>
+                    <div class="pipeline-node">
+                        <div class="node-num">5</div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm text-stone-800" data-i18n="sec.reflect.step.5.title">Reindexa o QMD</div>
+                            <div class="text-xs text-stone-500" data-i18n="sec.reflect.step.5.desc">próxima sessão já consulta o conhecimento novo no first query</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-8">
-                    <h4 class="font-bold text-stone-800 mb-2">Estrutura Recomendada:</h4>
-                    <pre class="m-0 text-xs">
-/docs
-  /.memory-index  <-- Gerado por ferramentas tipo qmd
-  /adr            <-- Architecture Decisions
-  /features       <-- Histórico de funcionalidades
-  /patterns       <-- Padrões de código do time</pre>
+                <!-- Reflection file example -->
+                <div class="mb-6">
+                    <h3 class="text-base font-semibold text-stone-800 mb-3" data-i18n="sec.reflect.example.title">Como fica um reflection file de verdade:</h3>
+                    <p class="text-sm text-stone-600 mb-3 leading-relaxed" data-i18n="sec.reflect.example.desc">Exemplo de uma sessão real (anonimizada) de hotfix em refresh token. Menos de 20 linhas. Sem prose. Cada bullet é fato auditável contra commit ou teste.</p>
+                    <div class="flex gap-2 items-start">
+                        <pre class="flex-1 m-0 text-xs" id="reflect-example">---
+date: 2026-05-19
+session: jwt-rotation-bug
+tags: [auth, jwt, refresh, bug]
+---
+
+<span class="text-violet-400"># JWT Rotation Hotfix</span>
+
+<span class="text-violet-400">## What changed</span>
+- Fixed refresh token race in POST /auth/refresh
+- Added DB-level lock on user_sessions row during rotation
+
+<span class="text-violet-400">## Decisions made</span>
+- Refresh always rotates; no grace period for the old token
+- 5-second clock skew tolerance documented in adr/004
+
+<span class="text-violet-400">## Lessons staged</span>
+- "Refresh endpoints must hold row-level lock during rotation" → staged
+- "Clock skew below 10s breaks under our deploy latency" → graduated</pre>
+                        <button class="copy-btn flex-shrink-0 self-start mt-2" onclick="copyCode('reflect-example')" data-i18n="sec.reflect.copy">copiar</button>
+                    </div>
+                </div>
+
+                <!-- Complementary -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 rounded-xl border border-stone-200 bg-white">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-2xl">♻️</span>
+                            <h4 class="font-bold text-stone-800 text-sm" data-i18n="sec.reflect.skill.reflect.title">reflect</h4>
+                        </div>
+                        <p class="text-xs text-stone-600 leading-relaxed mb-2" data-i18n="sec.reflect.skill.reflect.desc">Dispara no fim da sessão automaticamente ou via comando. Usa git log e STATE.md como evidência principal.</p>
+                        <p class="text-[10px] text-stone-400 italic font-mono" data-i18n="sec.reflect.skill.reflect.trigger">trigger: "session end", "/reflect", post-commit hook</p>
+                    </div>
+                    <div class="p-4 rounded-xl border-2" style="border-color:#93c5fd; background:#eff6ff">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-2xl">💬</span>
+                            <h4 class="font-bold text-sm" style="color:#1d4ed8" data-i18n="sec.reflect.skill.digest.title">conversation-digest</h4>
+                        </div>
+                        <p class="text-xs leading-relaxed mb-2" style="color:#1e40af" data-i18n="sec.reflect.skill.digest.desc">Dispara quando você pede explicitamente "save what we discussed". Olha a conversa inteira, filtra impiedoso, escreve só o que vale.</p>
+                        <p class="text-[10px] italic font-mono" style="color:#2563eb" data-i18n="sec.reflect.skill.digest.trigger">trigger: "learn from this", "digest this session"</p>
+                    </div>
+                </div>
+
+                <!-- Hook to next -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start">
+                    <span class="text-2xl flex-shrink-0">⚖️</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.reflect.hook.title">Reflect propõe. Você grada.</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.reflect.hook.desc">A automação está em capturar e propor. O julgamento continua humano: quais lições viram regra permanente, quais ficam em quarentena, quais são descartadas. A próxima seção mostra esse ciclo de governança em detalhe.</p>
+                    </div>
                 </div>
             </section>
 
-            <!-- SECTION 4: Search Simulation -->
-            <section id="sec-search" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">⚡ Simulação: A IA Buscando Contexto</h2>
-                    <p class="text-stone-600">
-                        Digite uma palavra-chave para ver como a IA filtraria o contexto em vez de ler todos os documentos do projeto.
+            <!-- ============================================================ -->
+            <!-- SECTION 7: Ciclo de Vida das Lições                            -->
+            <!-- ============================================================ -->
+            <section id="sec-lifecycle" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔄</span> <span data-i18n="sec.lifecycle.h2">Ciclo de Vida das Lições</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.lifecycle.intro">
+                        Nem toda lição vira regra. Nem toda lição é descartada. Reflect e auto-learn produzem candidatos. O lifecycle separa o joio do trigo com uma regra simples: confidence routing. Alta confiança grada direto, média entra na fila, baixa some. E cada graduate precisa de rationale, sem exceção.
                     </p>
                 </div>
 
-                <div class="bg-stone-50 rounded-2xl p-6 border border-stone-200">
-                    <div class="flex gap-2 mb-6">
-                        <input type="text" id="searchInput" placeholder="Ex: Auth, Database, React..." class="flex-1 p-3 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-neural-indigo font-mono text-sm">
-                        <button onclick="simulateSearch()" class="bg-neural-indigo text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all">Buscar Contexto</button>
-                    </div>
-
-                    <div id="searchResults" class="space-y-4">
-                        <div class="text-center py-10 text-stone-400 italic text-sm">
-                            Aguardando termo de busca para simular a recuperação de snippets...
+                <!-- Routing tree -->
+                <div class="mb-6">
+                    <h3 class="text-base font-semibold text-stone-800 mb-3" data-i18n="sec.lifecycle.routing.title">Confidence routing em uma decisão</h3>
+                    <div class="max-w-3xl mx-auto">
+                        <div class="p-4 rounded-xl border-2 mx-auto max-w-xs text-center mb-3" style="border-color:#93c5fd; background:#eff6ff">
+                            <div class="text-xs uppercase tracking-wider font-bold" style="color:#2563eb" data-i18n="sec.lifecycle.routing.candidate">Candidato detectado</div>
+                            <div class="text-xs" style="color:#1e40af" data-i18n="sec.lifecycle.routing.candidate.note">reflect ou auto-learn</div>
+                        </div>
+                        <div class="flex justify-center text-stone-400 text-2xl mb-3">↓</div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="p-4 rounded-xl border-2 border-emerald-200 bg-emerald-50 text-center">
+                                <div class="text-xs uppercase tracking-wider font-bold text-emerald-700 mb-1" data-i18n="sec.lifecycle.routing.high">Alta confiança</div>
+                                <div class="text-xs text-emerald-800 mb-2" data-i18n="sec.lifecycle.routing.high.desc">regra confirmada por evidência clara · bug fixado, teste passando, decisão validada</div>
+                                <div class="text-xs font-mono text-emerald-700">learn.py</div>
+                                <div class="text-[10px] text-emerald-600 mt-1" data-i18n="sec.lifecycle.routing.high.action">graduate imediato</div>
+                            </div>
+                            <div class="p-4 rounded-xl border-2 border-amber-200 bg-amber-50 text-center">
+                                <div class="text-xs uppercase tracking-wider font-bold text-amber-700 mb-1" data-i18n="sec.lifecycle.routing.medium">Média confiança</div>
+                                <div class="text-xs text-amber-800 mb-2" data-i18n="sec.lifecycle.routing.medium.desc">padrão observado uma ou duas vezes · faltam mais casos para confirmar</div>
+                                <div class="text-xs font-mono text-amber-700">stage.py</div>
+                                <div class="text-[10px] text-amber-600 mt-1" data-i18n="sec.lifecycle.routing.medium.action">fila de review humano</div>
+                            </div>
+                            <div class="p-4 rounded-xl border-2 border-stone-200 bg-stone-50 text-center">
+                                <div class="text-xs uppercase tracking-wider font-bold text-stone-500 mb-1" data-i18n="sec.lifecycle.routing.low">Baixa confiança</div>
+                                <div class="text-xs text-stone-600 mb-2" data-i18n="sec.lifecycle.routing.low.desc">chute, intuição sem evidência, detalhe específico da sessão</div>
+                                <div class="text-xs font-mono text-stone-500" data-i18n="sec.lifecycle.routing.low.action">skip · não escreve nada</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-8 p-6 bg-stone-900 text-stone-100 rounded-2xl border-l-8 border-neural-cyan shadow-xl">
-                    <h4 class="font-bold mb-2">Conclusão da Parte 10:</h4>
-                    <p class="text-lg italic font-serif">"O futuro do desenvolvimento não é ter IAs com janelas de contexto infinitas, mas IAs que saibam navegar em memórias infinitas através de busca eficiente."</p>
+                <!-- Tools table -->
+                <div class="mb-6">
+                    <h3 class="text-base font-semibold text-stone-800 mb-3" data-i18n="sec.lifecycle.tools.title">Os 8 scripts do brain (Python stdlib only)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b-2 border-stone-200">
+                                    <th class="text-left py-2 px-3 text-xs uppercase tracking-wider text-stone-500" data-i18n="sec.lifecycle.tools.col.tool">Script</th>
+                                    <th class="text-left py-2 px-3 text-xs uppercase tracking-wider text-stone-500" data-i18n="sec.lifecycle.tools.col.purpose">Para quê</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-stone-600">
+                                <tr class="border-b border-stone-100">
+                                    <td class="py-2 px-3 font-mono text-xs">learn.py</td>
+                                    <td class="py-2 px-3 text-xs" data-i18n="sec.lifecycle.tools.row.learn">graduate imediato · stages e graduates em um passo</td>
+                                </tr>
+                                <tr class="border-b border-stone-100">
+                                    <td class="py-2 px-3 font-mono text-xs">stage.py</td>
+                                    <td class="py-2 px-3 text-xs" data-i18n="sec.lifecycle.tools.row.stage">enfileira candidato para review humano</td>
+                                </tr>
+                                <tr class="border-b border-stone-100">
+                                    <td class="py-2 px-3 font-mono text-xs">recall.py</td>
+                                    <td class="py-2 px-3 text-xs" data-i18n="sec.lifecycle.tools.row.recall">busca lições graduadas antes de trabalho de risco</td>
+                                </tr>
+                                <tr class="border-b border-stone-100">
+                                    <td class="py-2 px-3 font-mono text-xs">graduate.py</td>
+                                    <td class="py-2 px-3 text-xs" data-i18n="sec.lifecycle.tools.row.graduate">aceita candidato staged · --rationale obrigatório</td>
+                                </tr>
+                                <tr class="border-b border-stone-100">
+                                    <td class="py-2 px-3 font-mono text-xs">reject.py</td>
+                                    <td class="py-2 px-3 text-xs" data-i18n="sec.lifecycle.tools.row.reject">rejeita com motivo · preserva histórico em rejected/</td>
+                                </tr>
+                                <tr class="border-b border-stone-100">
+                                    <td class="py-2 px-3 font-mono text-xs">reopen.py</td>
+                                    <td class="py-2 px-3 text-xs" data-i18n="sec.lifecycle.tools.row.reopen">reenfileira candidato rejeitado</td>
+                                </tr>
+                                <tr class="border-b border-stone-100">
+                                    <td class="py-2 px-3 font-mono text-xs">list_candidates.py</td>
+                                    <td class="py-2 px-3 text-xs" data-i18n="sec.lifecycle.tools.row.list">lista pendentes ordenados por prioridade</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3 font-mono text-xs">show.py</td>
+                                    <td class="py-2 px-3 text-xs" data-i18n="sec.lifecycle.tools.row.show">dashboard · grad count, pending, last grad</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Terminal mocks -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <h4 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.lifecycle.terminal.list.title">$ list_candidates.py</h4>
+                        <pre class="m-0 text-xs" data-i18n-html="sec.lifecycle.pre.list"><span class="text-blue-400">ID:</span> c-2026-05-18-001  <span class="text-orange-400">priority: high</span>
+   staged: 2 days ago · source: reflect
+   <span class="text-violet-400">claim:</span> "Always serialize timestamps
+     as UTC ISO-8601 at the API boundary"
+   conditions: [api, serialization]
+
+<span class="text-blue-400">ID:</span> c-2026-05-17-003  <span class="text-orange-400">priority: medium</span>
+   staged: 3 days ago · source: auto-learn
+   <span class="text-violet-400">claim:</span> "Prefer connection pooling
+     for FastAPI DB access"
+   conditions: [fastapi, db]
+
+<span class="text-blue-400">ID:</span> c-2026-05-15-007  <span class="text-orange-400">priority: low</span>
+   staged: 5 days ago · source: auto-learn
+   <span class="text-violet-400">claim:</span> "Reuse Pydantic schema
+     between handlers"
+   conditions: [pydantic, refactor]</pre>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.lifecycle.terminal.recall.title">$ recall.py "add created_at column"</h4>
+                        <pre class="m-0 text-xs" data-i18n-html="sec.lifecycle.pre.recall"><span class="text-stone-500"># Top matches em lições já graduadas</span>
+
+<span class="text-emerald-400">[Match 0.82]</span>
+  "Always serialize timestamps as UTC
+   ISO-8601 at the API boundary"
+  graduated: 2026-05-18
+  conditions: [api, serialization]
+
+<span class="text-emerald-400">[Match 0.71]</span>
+  "Migration columns added in
+   transactions, never inline"
+  graduated: 2026-04-22
+  conditions: [migration, db]
+
+<span class="text-emerald-400">[Match 0.58]</span>
+  "All DB timestamps are TIMESTAMPTZ
+   in PostgreSQL"
+  graduated: 2026-03-10
+  conditions: [postgres, schema]
+
+<span class="text-stone-500"># 3 lições aplicáveis. Leia antes do trabalho.</span></pre>
+                    </div>
+                </div>
+
+                <!-- Auto-learn daemon -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 mb-6">
+                    <h3 class="text-sm font-semibold text-stone-700 mb-2" data-i18n="sec.lifecycle.daemon.title">Auto-learn · o daemon que estuda enquanto você trabalha</h3>
+                    <p class="text-sm text-stone-600 leading-relaxed mb-3" data-i18n="sec.lifecycle.daemon.desc">launchd dispara <span class="font-mono bg-stone-100 px-1 rounded text-xs">dev.brain.auto-learn</span> a cada 30 minutos. O daemon varre git activity, chama Gemma 4 local (Ollama, localhost:11434), extrai 0 a 3 lições e roteia. Se Ollama não está rodando, ele falha silenciosamente. Nunca bloqueia o seu commit.</p>
+                    <pre class="m-0 text-xs" data-i18n-html="sec.lifecycle.pre.daemon"><span class="text-stone-500"># Manual: scan dry-run dos últimos 30 minutos</span>
+$ python3 .agents/tools/auto-learn.py --dry-run
+
+<span class="text-stone-500"># Force: ignora last-run, varre 4h atrás</span>
+$ python3 .agents/tools/auto-learn.py --force
+
+<span class="text-stone-500"># Real-time log</span>
+$ tail -f .agents/state/auto-learn.log</pre>
+                </div>
+
+                <!-- Curadoria periódica (memory-steward) -->
+                <div class="p-5 rounded-xl border-2 mb-6" style="border-color:#93c5fd; background:#eff6ff">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xl">🧹</span>
+                        <h3 class="text-sm font-semibold" style="color:#1e3a8a" data-i18n="sec.lifecycle.steward.title">Curadoria periódica · o memory-steward</h3>
+                    </div>
+                    <p class="text-sm leading-relaxed mb-3" style="color:#1e40af" data-i18n="sec.lifecycle.steward.desc">Captura automática é só metade do ciclo. Sem revisão periódica, a memória acumula duplicatas com palavras diferentes, lições obsoletas que ninguém rejeita e contradições que o rerank tenta conciliar e falha. O memory-steward é um agente manual que você invoca de tempos em tempos para fazer essa limpeza. Ele não escreve memória nova; ele audita o que já existe.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3 text-xs">
+                        <div class="p-3 rounded-lg bg-white border border-blue-200">
+                            <div class="font-bold mb-1" style="color:#1d4ed8" data-i18n="sec.lifecycle.steward.step1.title">1 · Audit</div>
+                            <div class="text-stone-600" data-i18n="sec.lifecycle.steward.step1.desc">Lista candidates pendentes via <span class="font-mono">list_candidates.py</span>. Roda <span class="font-mono">show.py</span> para ver dashboard de stale e graduated por idade.</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-white border border-blue-200">
+                            <div class="font-bold mb-1" style="color:#1d4ed8" data-i18n="sec.lifecycle.steward.step2.title">2 · Flag</div>
+                            <div class="text-stone-600" data-i18n="sec.lifecycle.steward.step2.desc">Identifica duplicatas (qmd query no claim), lições contraditórias (mesma área, decisões opostas) e memória stale (last_updated &gt; 90 dias e zero hit em recall).</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-white border border-blue-200">
+                            <div class="font-bold mb-1" style="color:#1d4ed8" data-i18n="sec.lifecycle.steward.step3.title">3 · Decide</div>
+                            <div class="text-stone-600" data-i18n="sec.lifecycle.steward.step3.desc"><span class="font-mono">graduate.py</span> com rationale para promover, <span class="font-mono">reject.py --reason</span> para arquivar duplicata, edição manual para realinhar contexto contraditório. Reindex no fim.</div>
+                        </div>
+                    </div>
+                    <pre class="m-0 text-xs" data-i18n-html="sec.lifecycle.pre.steward"><span class="text-stone-500"># Ciclo típico de curadoria (semanal ou quando recall fica ruim)</span>
+$ python3 .agents/tools/brain/list_candidates.py --priority high
+$ python3 .agents/tools/brain/show.py --stale-days 90
+
+<span class="text-stone-500"># Rejeitar duplicata identificada</span>
+$ python3 .agents/tools/brain/reject.py L-2026-04-12-a <span class="text-orange-400">\</span>
+    --reason <span class="text-emerald-400">"Duplicata de L-2026-03-08-c, mesmo claim sobre rate limits"</span>
+
+<span class="text-stone-500"># Promover candidate validado</span>
+$ python3 .agents/tools/brain/graduate.py L-2026-05-01-b <span class="text-orange-400">\</span>
+    --rationale <span class="text-emerald-400">"Confirmado em PR #312 e tests/auth/test_refresh.py"</span>
+
+<span class="text-stone-500"># Reindex para o qmd refletir as mudanças</span>
+$ .agents/engine/bin/qmd-reindex.sh</pre>
+                    <p class="text-xs mt-3 italic" style="color:#1e40af" data-i18n="sec.lifecycle.steward.cadence">Cadência sugerida: rode quando <span class="font-mono">recall.py</span> começar a retornar matches contraditórios, ou semanalmente em projetos ativos. O sinal mais claro é quando o agente busca e cita duas lições que se contradizem. É a memória pedindo ajuda.</p>
+                </div>
+
+                <!-- Roles table -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                    <div class="p-4 rounded-xl border border-stone-200 bg-white">
+                        <div class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2" data-i18n="sec.lifecycle.roles.skill.label">Skill</div>
+                        <div class="text-sm font-bold text-stone-800 mb-1">reflect</div>
+                        <div class="text-xs text-stone-500" data-i18n="sec.lifecycle.roles.skill.desc">dispara no fim da sessão · captura 1 a 3 lições da sessão atual</div>
+                    </div>
+                    <div class="p-4 rounded-xl border border-stone-200 bg-white">
+                        <div class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2" data-i18n="sec.lifecycle.roles.daemon.label">Daemon</div>
+                        <div class="text-sm font-bold text-stone-800 mb-1">auto-learn</div>
+                        <div class="text-xs text-stone-500" data-i18n="sec.lifecycle.roles.daemon.desc">roda a cada 30min · varre git activity entre sessões</div>
+                    </div>
+                    <div class="p-4 rounded-xl border border-stone-200 bg-white">
+                        <div class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2" data-i18n="sec.lifecycle.roles.skill2.label">Skill on-demand</div>
+                        <div class="text-sm font-bold text-stone-800 mb-1">conversation-digest</div>
+                        <div class="text-xs text-stone-500" data-i18n="sec.lifecycle.roles.skill2.desc">você pede explicitamente · extrai conhecimento da conversa toda</div>
+                    </div>
+                    <div class="p-4 rounded-xl border border-stone-200 bg-white">
+                        <div class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2" data-i18n="sec.lifecycle.roles.agent.label">Agent (manual)</div>
+                        <div class="text-sm font-bold text-stone-800 mb-1">memory-steward</div>
+                        <div class="text-xs text-stone-500" data-i18n="sec.lifecycle.roles.agent.desc">curadoria periódica · audita stale, flagra contradições</div>
+                    </div>
+                </div>
+
+                <!-- Rationale insight -->
+                <div class="p-5 rounded-xl border-2 bg-stone-50" style="border-color:#93c5fd">
+                    <div class="flex gap-4 items-start">
+                        <span class="text-2xl flex-shrink-0">📌</span>
+                        <div>
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.lifecycle.rationale.title">--rationale não é rubber-stamp</h4>
+                            <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.lifecycle.rationale.desc">"Evidence holds" não é rationale. "PR #234 corrige o bug, teste em tests/auth/test_refresh.py passa" é. O sistema obriga texto livre justamente para forçar evidência citável. Quem grada hoje precisa explicar para quem vai consultar amanhã.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 8: Anti-patterns                                       -->
+            <!-- ============================================================ -->
+            <section id="sec-anti-patterns" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.anti-patterns.h2">Anti-patterns da Memória Viva</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.anti-patterns.intro">
+                        Memória viva é frágil. Cinco erros fazem o sistema degradar em semanas. Quatro são fáceis de cair sem perceber. Conhecer cada um economiza meses de busca dando resposta errada.
+                    </p>
+                </div>
+
+                <!-- AP 1: duplicate memory -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                    <div class="p-4 rounded-xl antipattern-wrong bg-red-50">
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.anti-patterns.ap1.bad.title">1. Duplicar memória sem buscar antes</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap1.bad.desc">Você cria <span class="font-mono">project/timestamps.md</span> sem rodar <span class="font-mono">qmd search</span>. Mês depois, alguém criou <span class="font-mono">project/date-conventions.md</span>. Ambos dizem coisas levemente diferentes.</p>
+                        <p class="text-[10px] text-red-700 italic" data-i18n="sec.anti-patterns.ap1.bad.consequence">Consequência: rerank fica confuso. Top-3 vem com chunks contraditórios. A IA responde mal.</p>
+                    </div>
+                    <div class="p-4 rounded-xl antipattern-right bg-emerald-50">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.anti-patterns.ap1.good.title">Query first, write second</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap1.good.desc">Antes de criar arquivo novo, sempre <span class="font-mono">qmd query agent-memory "&lt;topic&gt;"</span>. Se já existe algo, atualize o existente.</p>
+                        <p class="text-[10px] text-emerald-700 italic" data-i18n="sec.anti-patterns.ap1.good.action">Reuse > create. Atualize com last_updated. Mantenha um arquivo por domínio.</p>
+                    </div>
+                </div>
+
+                <!-- AP 2: prose-heavy -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                    <div class="p-4 rounded-xl antipattern-wrong bg-red-50">
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.anti-patterns.ap2.bad.title">2. Memória prose-heavy</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap2.bad.desc">Você escreve parágrafos contando a história da decisão. Fica bonito para humano, péssimo para chunker. Boundary cai no meio da frase, embedding fica diluído.</p>
+                        <p class="text-[10px] text-red-700 italic" data-i18n="sec.anti-patterns.ap2.bad.consequence">Consequência: busca semântica falha. O chunk retornado não responde a pergunta sozinho.</p>
+                    </div>
+                    <div class="p-4 rounded-xl antipattern-right bg-emerald-50">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.anti-patterns.ap2.good.title">1 bullet = 1 fato</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap2.good.desc">Cada bullet precisa fazer sentido sozinho. Sem "isso", "aquilo", "como falei acima". Cada linha é uma busca em potencial.</p>
+                        <p class="text-[10px] text-emerald-700 italic" data-i18n="sec.anti-patterns.ap2.good.action">Teste mental: se esse bullet vier sozinho num search, faz sentido? Se não, reescreva.</p>
+                    </div>
+                </div>
+
+                <!-- AP 3: graduate sem evidência -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                    <div class="p-4 rounded-xl antipattern-wrong bg-red-50">
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.anti-patterns.ap3.bad.title">3. Graduate sem evidência</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap3.bad.desc">Auto-learn enfileira 8 candidatos. Você grada todos com <span class="font-mono">--rationale "evidence holds"</span>. Mês depois, a IA recall lições falsas que viram regra.</p>
+                        <p class="text-[10px] text-red-700 italic" data-i18n="sec.anti-patterns.ap3.bad.consequence">Consequência: o sistema confia em alucinações destiladas. Cada erro vira lei.</p>
+                    </div>
+                    <div class="p-4 rounded-xl antipattern-right bg-emerald-50">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.anti-patterns.ap3.good.title">Rationale com link auditável</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap3.good.desc">Todo graduate cita PR, commit ou arquivo de teste. <span class="font-mono">"PR #234, tests/auth/test_refresh.py passa"</span>. Se você não consegue citar, rejeite ou stage.</p>
+                        <p class="text-[10px] text-emerald-700 italic" data-i18n="sec.anti-patterns.ap3.good.action">Aceitar 2 lições por semana com rationale forte vale mais que 20 com "evidence holds".</p>
+                    </div>
+                </div>
+
+                <!-- AP 4: tool-specific lock -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                    <div class="p-4 rounded-xl antipattern-wrong bg-red-50">
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.anti-patterns.ap4.bad.title">4. Lock em diretório de tool</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap4.bad.desc">Memória mora em <span class="font-mono">.claude/memory/</span>. Quando o time abre Cursor ou Codex, ninguém acha. Cada tool recria a sua versão. Triplica o trabalho.</p>
+                        <p class="text-[10px] text-red-700 italic" data-i18n="sec.anti-patterns.ap4.bad.consequence">Consequência: conhecimento preso por escolha de tool. Switching cost vira proibitivo.</p>
+                    </div>
+                    <div class="p-4 rounded-xl antipattern-right bg-emerald-50">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.anti-patterns.ap4.good.title">Tool-agnostic em .agents/</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap4.good.desc">Memória em <span class="font-mono">.agents/memory/</span>. <span class="font-mono">.claude/REDIRECT.md</span>, <span class="font-mono">.cursor/rules/project.mdc</span> e MCP do Codex apontam para lá.</p>
+                        <p class="text-[10px] text-emerald-700 italic" data-i18n="sec.anti-patterns.ap4.good.action">Migra de tool sem perder uma linha. O conhecimento é do projeto, não do editor.</p>
+                    </div>
+                </div>
+
+                <!-- AP 5: reflect sem dedup -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                    <div class="p-4 rounded-xl antipattern-wrong bg-red-50">
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.anti-patterns.ap5.bad.title">5. Reflect sem dedup</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap5.bad.desc">Reflect roda sem consultar reflections recentes. Em duas semanas você tem 5 reflection files dizendo "refresh tokens devem rotacionar" com palavras ligeiramente diferentes.</p>
+                        <p class="text-[10px] text-red-700 italic" data-i18n="sec.anti-patterns.ap5.bad.consequence">Consequência: bloat na memória. Rerank degrada porque embeddings ficam saturados de variações.</p>
+                    </div>
+                    <div class="p-4 rounded-xl antipattern-right bg-emerald-50">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.anti-patterns.ap5.good.title">Query antes de escrever reflection</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap5.good.desc">Reflect consulta git log curto e roda qmd query no tema. Se já existe lesson cobrindo, atualiza last_updated em vez de criar arquivo novo.</p>
+                        <p class="text-[10px] text-emerald-700 italic" data-i18n="sec.anti-patterns.ap5.good.action">Reflection nova só quando o tema é novo. Refinamento atualiza o existente.</p>
+                    </div>
+                </div>
+
+                <!-- AP 6: memória sem curadoria -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                    <div class="p-4 rounded-xl antipattern-wrong bg-red-50">
+                        <h4 class="font-bold text-red-700 text-sm mb-2"><span>❌</span> <span data-i18n="sec.anti-patterns.ap6.bad.title">6. Memória sem curadoria periódica</span></h4>
+                        <p class="text-xs text-red-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap6.bad.desc">Reflect e auto-learn escrevem, ninguém revisa. Em três meses a memória tem duplicatas com palavras diferentes, lições obsoletas que contradizem decisões novas e arquivos stale que ninguém mais consulta. O agente busca, recebe matches conflitantes e o rerank tenta conciliar o que não tem conciliação.</p>
+                        <p class="text-[10px] text-red-700 italic" data-i18n="sec.anti-patterns.ap6.bad.consequence">Consequência: qualidade do retrieval degrada silenciosamente. Você só percebe quando o agente cita lição obsoleta como verdade atual.</p>
+                    </div>
+                    <div class="p-4 rounded-xl antipattern-right bg-emerald-50">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2"><span>✅</span> <span data-i18n="sec.anti-patterns.ap6.good.title">Memory-steward em cadência fixa</span></h4>
+                        <p class="text-xs text-emerald-800 leading-relaxed mb-2" data-i18n="sec.anti-patterns.ap6.good.desc">Rode o memory-steward semanalmente, ou quando recall.py retornar matches contraditórios. Ciclo curto: list_candidates → flag duplicatas via qmd query → reject.py com --reason ou graduate.py com --rationale → reindex. Trinta minutos a cada duas semanas evitam dívida que leva dias para limpar.</p>
+                        <p class="text-[10px] text-emerald-700 italic" data-i18n="sec.anti-patterns.ap6.good.action">Curadoria não é overhead. É o que separa memória viva de cemitério de notas.</p>
+                    </div>
+                </div>
+
+                <!-- Bottom summary -->
+                <div class="p-5 rounded-xl border border-stone-200 bg-stone-50 flex gap-4 items-start mt-6">
+                    <span class="text-2xl flex-shrink-0">🧭</span>
+                    <div>
+                        <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.anti-patterns.summary.title">Padrão dos seis erros: economizar julgamento humano</h4>
+                        <p class="text-sm text-stone-600 leading-relaxed" data-i18n="sec.anti-patterns.summary.desc">Todos os seis vêm da mesma raiz: querer pular a etapa de revisão. Duplicar acontece quando você não busca. Prose acontece quando você não edita. Graduate sem evidência acontece quando você bate olho rápido. Lock em tool acontece quando você não pensa em portabilidade. Reflect sem dedup acontece quando você confia 100% na automação. Memória sem curadoria acontece quando você confunde "automatizar captura" com "automatizar julgamento". A memória viva só vive porque o humano ainda decide.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 9: Próximos Passos                                     -->
+            <!-- ============================================================ -->
+            <section id="sec-proximos-passos" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.proximos-passos.h2">Próximos Passos · Comece em 4 movimentos</span></h2>
+                    <p class="text-stone-600" data-i18n="sec.proximos-passos.intro">Quatro passos para sair de memória estática para memória viva ainda esta semana. Cada passo é independente, cada um já entrega valor.</p>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-8">
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">1</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos-passos.step.1.title">Instale o QMD</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos-passos.step.1.desc">Siga o setup oficial em github.com/tobi/qmd. O repo cuida do download dos modelos (embeddinggemma e reranker) na primeira execução. Confirme com qmd --version.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" id="step1cmd">git clone https://github.com/tobi/qmd.git
+cd qmd && ./install.sh
+qmd --version</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="copyCode('step1cmd')" data-i18n="sec.proximos-passos.copy">copiar</button>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n="sec.proximos-passos.step.1.note">A primeira execução pode levar uns minutos para baixar os modelos. Da segunda em diante é instantâneo.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">2</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos-passos.step.2.title">Crie a primeira memória</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos-passos.step.2.desc">Mova o que já está em .claude/memory/ ou .cursor/rules/ para .agents/memory/project/. Use o formato YAML frontmatter + dense bullets. Comece com 1 ou 2 arquivos. Não precisa migrar tudo de uma vez.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" id="step2cmd">mkdir -p .agents/memory/project
+cat &gt; .agents/memory/project/timestamps.md &lt;&lt;'EOF'
+---
+topic: timestamps
+last_updated: 2026-05-19
+tags: [date, utc]
+---
+
+# Timestamp Conventions
+## Storage
+- All DB timestamps are TIMESTAMPTZ
+- Convert to UTC at the API boundary
+EOF</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="copyCode('step2cmd')" data-i18n="sec.proximos-passos.copy">copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">3</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos-passos.step.3.title">Indexe e teste a busca</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos-passos.step.3.desc">Registre a coleção, gere os embeddings, faça a primeira query. Se o top-1 retornar o chunk relevante, você está pronto. Se vier algo estranho, revise o formato do .md.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" id="step3cmd">qmd collection add agent-memory .agents/memory --mask <span class="text-emerald-400">"**/*.md"</span>
+qmd embed agent-memory
+qmd query agent-memory <span class="text-emerald-400">"timestamp utc"</span> --top 3</pre>
+                                <button class="copy-btn flex-shrink-0" onclick="copyCode('step3cmd')" data-i18n="sec.proximos-passos.copy">copiar</button>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n="sec.proximos-passos.step.3.note">Para reindex futuro, escolha um dos dois: <span class="font-mono">qmd embed agent-memory --force</span> direto, ou crie um wrapper <span class="font-mono">.agents/engine/bin/qmd-reindex.sh</span> que também roda triggers do seu fluxo.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">4</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.proximos-passos.step.4.title">Ative reflect no fim das sessões</h4>
+                            <p class="text-sm text-stone-600 mb-3" data-i18n="sec.proximos-passos.step.4.desc">Crie a skill reflect em .agents/skills/reflect/SKILL.md com o protocolo de 5 passos. Rode manualmente no fim das primeiras sessões para calibrar. Depois automatize via post-commit hook ou daemon.</p>
+                            <div class="flex gap-2 items-center">
+                                <pre class="flex-1 m-0 rounded text-xs" id="step4cmd" data-i18n-html="sec.proximos-passos.pre.step4">mkdir -p .agents/skills/reflect
+mkdir -p .agents/memory/reflections
+mkdir -p .agents/tools/brain
+<span class="text-stone-500"># adicione learn.py, stage.py, recall.py, graduate.py</span>
+<span class="text-stone-500"># a partir da documentação .agents/AGENTS.md</span></pre>
+                                <button class="copy-btn flex-shrink-0" onclick="copyCode('step4cmd')" data-i18n="sec.proximos-passos.copy">copiar</button>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2" data-i18n="sec.proximos-passos.step.4.note">Comece manual. Quando estiver confortável com o formato dos reflection files, adicione o daemon auto-learn (Ollama + Gemma 4) para capturar entre sessões.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Bonus interativo: brain.html -->
+                <a href="brain.html" target="_blank" rel="noopener" class="block mb-6 p-6 rounded-2xl shadow-xl group transition-all hover:shadow-2xl hover:-translate-y-0.5"
+                   style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%); border: 1px solid #4338ca;">
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-5">
+                        <div class="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
+                             style="background: rgba(99, 102, 241, 0.15); border: 1px solid #6366f1; box-shadow: 0 0 24px rgba(99, 102, 241, 0.25);">
+                            🧠
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+                                      style="background:#312e81; color:#c7d2fe" data-i18n="sec.proximos-passos.bonus.badge">Bonus interativo</span>
+                                <span class="text-[10px] text-indigo-300/70 font-mono">brain.html</span>
+                            </div>
+                            <h4 class="text-lg font-bold mb-1"
+                                style="background: linear-gradient(to right, #818cf8, #c084fc, #f0abfc); -webkit-background-clip: text; background-clip: text; color: transparent;"
+                                data-i18n="sec.proximos-passos.bonus.title">Agent Brain OS · Blueprint Interativo</h4>
+                            <p class="text-sm text-indigo-100/80 leading-relaxed mb-3" data-i18n="sec.proximos-passos.bonus.desc">Toda a arquitetura desta lição em um único diagrama clicável. Dispare cada um dos quatro fluxos (auto-learn, reflect, conversation-digest, context-retrieval) e veja pacotes de dados atravessarem o sistema em tempo real, com snippets de CLI e config explicando o que está acontecendo.</p>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-300 group-hover:text-indigo-200 transition">
+                                <span data-i18n="sec.proximos-passos.bonus.cta">Abrir blueprint em nova aba</span>
+                                <span>↗</span>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Closing mantra -->
+                <div class="p-6 bg-stone-900 text-stone-100 rounded-2xl shadow-xl" style="border-left: 8px solid #2563eb">
+                    <h4 class="font-bold mb-2 uppercase text-xs tracking-widest" style="color:#93c5fd" data-i18n="sec.proximos-passos.mantra.label">Mantra da Parte 11:</h4>
+                    <p class="text-lg italic font-serif" data-i18n="sec.proximos-passos.mantra.text">"A IA não precisa lembrar tudo. Precisa lembrar o que importa, e você precisa decidir o que importa."</p>
                 </div>
             </section>
 
         </main>
     </div>
 
-    <!-- JavaScript Logic -->
+    <!-- Session Complete -->
+    <div id="session-complete" class="hidden border-t border-stone-200 bg-stone-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
+            <span class="text-3xl mb-3 block">🎉</span>
+            <h3 class="text-xl font-bold text-stone-800 mb-2" data-i18n="complete.title">Sessão concluída!</h3>
+            <p class="text-stone-500 mb-6 text-sm" data-i18n="complete.desc">Você completou esta sessão. Continue para a próxima ou volte ao índice.</p>
+            <div class="flex items-center justify-center gap-3">
+                <a href="index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-lg text-sm font-semibold hover:bg-stone-700 transition-colors" data-i18n="complete.home">← Voltar ao índice</a>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let currentState = { activeSection: 'efficiency', chart: null };
-
-        const mockData = [
-            { tags: ['auth', 'seguranca', 'login'], title: 'ADR-004: Auth Strategy', snippet: 'Decidimos usar JWT com refresh tokens armazenados em cookies HttpOnly...' },
-            { tags: ['database', 'postgres', 'banco'], title: 'TECH_STACK.md: DB', snippet: 'Nossa stack utiliza PostgreSQL 16 com replicação em read-replicas para analytics...' },
-            { tags: ['react', 'componentes', 'ui'], title: 'CODING_GUIDELINES.md: React', snippet: 'Sempre utilize Composition Pattern para componentes de UI de alta complexidade...' },
-            { tags: ['api', 'rest', 'endpoints'], title: 'API_SPEC.md: V1', snippet: 'Todos os endpoints devem retornar o cabeçalho X-Request-ID para rastreabilidade...' }
-        ];
-
-        function navigate(sectionId) {
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`nav-${sectionId}`).classList.add('active');
-            
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
-
-            if (sectionId === 'efficiency' && !currentState.chart) initChart();
-            currentState.activeSection = sectionId;
+        // ── Toggle (problema) ─────────────────────────────────────────────
+        function showToggle(id) {
+            document.querySelectorAll('.toggle-content').forEach(function(el) { el.classList.add('hidden'); });
+            document.querySelectorAll('#sec-problema .toggle-btn').forEach(function(el) { el.classList.remove('active'); });
+            document.getElementById('toggle-' + id).classList.remove('hidden');
+            document.getElementById('tgl-' + id).classList.add('active');
         }
 
-        function simulateSearch() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const resultsBox = document.getElementById('searchResults');
-            
-            if (!query) return;
-
-            const filtered = mockData.filter(item => 
-                item.tags.some(tag => tag.includes(query)) || 
-                item.title.toLowerCase().includes(query)
-            );
-
-            if (filtered.length > 0) {
-                resultsBox.innerHTML = filtered.map(res => `
-                    <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm animate-fade-in">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-bold text-neural-indigo text-sm">${res.title}</h4>
-                            <span class="text-[10px] bg-stone-100 text-stone-500 px-2 py-1 rounded">Relevância: 98%</span>
-                        </div>
-                        <p class="text-xs text-stone-600 italic">"...${res.snippet}..."</p>
-                    </div>
-                `).join('');
-            } else {
-                resultsBox.innerHTML = `
-                    <div class="text-center py-10 text-red-400 text-sm">
-                        Nenhum snippet relevante encontrado no índice para "${query}".
-                    </div>
-                `;
-            }
+        // ── Vector space animation toggle ─────────────────────────────────
+        function toggleVecAnim() {
+            var box = document.getElementById('vec-space');
+            var icon = document.getElementById('vec-toggle-icon');
+            var label = document.getElementById('vec-toggle-label');
+            var btn = document.getElementById('vec-toggle-btn');
+            if (!box) return;
+            var paused = box.classList.toggle('is-paused');
+            icon.textContent = paused ? '▶' : '⏸';
+            btn.setAttribute('aria-pressed', paused ? 'false' : 'true');
+            var key = paused ? 'sec.rag-fundamentos.vecspace.play' : 'sec.rag-fundamentos.vecspace.pause';
+            var fallback = paused ? 'Animar' : 'Pausar animação';
+            label.setAttribute('data-i18n', key);
+            label.textContent = (window.i18n && window.i18n.t) ? (window.i18n.t(key) || fallback) : fallback;
+        }
+        // ── QMD tabs ──────────────────────────────────────────────────────
+        function showQmdTab(id) {
+            document.querySelectorAll('.qmd-content').forEach(function(el) { el.classList.add('hidden'); });
+            document.querySelectorAll('#sec-qmd .tab-btn').forEach(function(el) { el.classList.remove('active'); });
+            document.getElementById('qmd-' + id).classList.remove('hidden');
+            document.getElementById('qmdtab-' + id).classList.add('active');
         }
 
-        function initChart() {
-            const ctx = document.getElementById('efficiencyChart').getContext('2d');
-            currentState.chart = new Chart(ctx, {
+        // ── Navigation hook (nav.js handles core logic) ───────────────────
+        window.onNavigate = function(sectionId) {
+            if (sectionId === 'problema' && !window.efficiencyInit) initEfficiencyChart();
+            if (sectionId === 'limite-estatico' && !window.capturaInit) initCapturaChart();
+        };
+
+        // ── Efficiency chart ──────────────────────────────────────────────
+        function initEfficiencyChart() {
+            window.efficiencyInit = true;
+            var ctx = document.getElementById('efficiencyChart').getContext('2d');
+            window.efficiencyChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['1 Doc', '10 Docs', '50 Docs', '100 Docs', '500 Docs'],
+                    labels: ['Sessão 1', 'Sessão 5', 'Sessão 20', 'Sessão 50', 'Sessão 100'],
                     datasets: [
                         {
-                            label: 'Consumo sem Busca (Full Load)',
-                            data: [5, 50, 250, 500, 2500],
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            fill: true,
-                            tension: 0.1
+                            label: 'Memória estática (load all)',
+                            data: [18, 22, 35, 62, 95],
+                            borderColor: '#dc2626',
+                            backgroundColor: 'rgba(220, 38, 38, 0.10)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
                         },
                         {
-                            label: 'Consumo com Busca (RAG)',
-                            data: [2, 5, 8, 10, 12],
-                            borderColor: '#4f46e5',
-                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                            fill: true,
-                            tension: 0.1
+                            label: 'Memória com RAG (query)',
+                            data: [3, 3, 3, 4, 4],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.10)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
                         }
                     ]
                 },
                 options: {
                     maintainAspectRatio: false,
                     responsive: true,
+                    interaction: { mode: 'index', intersect: false },
                     scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            title: { display: true, text: 'Milhares de Tokens', font: { size: 10 } }
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Tokens no startup (mil)' }
                         }
                     },
                     plugins: {
@@ -362,9 +1506,106 @@
             });
         }
 
-        window.onload = () => {
-            initChart();
-        };
+        // ── Captura chart ─────────────────────────────────────────────────
+        function initCapturaChart() {
+            window.capturaInit = true;
+            var ctx = document.getElementById('capturaChart').getContext('2d');
+            window.capturaChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'Bug fix raciocinado',
+                        'Decisão arquitetural',
+                        'Convenção descoberta',
+                        'Trade-off discutido',
+                        'Workaround temporário'
+                    ],
+                    datasets: [
+                        {
+                            label: 'Captura manual',
+                            data: [15, 30, 20, 10, 5],
+                            backgroundColor: 'rgba(148, 163, 184, 0.7)',
+                            borderColor: '#94a3b8',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Captura via reflect + auto-learn',
+                            data: [85, 90, 75, 65, 20],
+                            backgroundColor: 'rgba(37, 99, 235, 0.75)',
+                            borderColor: '#2563eb',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        x: { beginAtZero: true, max: 100, title: { display: true, text: '% capturado em memória durável' } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        // ── i18n: update chart labels on language change ──────────────────
+        window.addEventListener('i18n:applied', function(e) {
+            var t = function(k) { return e.detail.t(k); };
+
+            if (window.efficiencyChart) {
+                var c = window.efficiencyChart;
+                c.data.labels = [
+                    t('chart.efficiency.label.1') || 'Sessão 1',
+                    t('chart.efficiency.label.2') || 'Sessão 5',
+                    t('chart.efficiency.label.3') || 'Sessão 20',
+                    t('chart.efficiency.label.4') || 'Sessão 50',
+                    t('chart.efficiency.label.5') || 'Sessão 100'
+                ];
+                c.data.datasets[0].label = t('chart.efficiency.dataset.load') || 'Memória estática (load all)';
+                c.data.datasets[1].label = t('chart.efficiency.dataset.rag') || 'Memória com RAG (query)';
+                if (c.options.scales && c.options.scales.y && c.options.scales.y.title) {
+                    c.options.scales.y.title.text = t('chart.efficiency.axis.y') || 'Tokens no startup (mil)';
+                }
+                c.update();
+            }
+
+            if (window.capturaChart) {
+                var m = window.capturaChart;
+                m.data.labels = [
+                    t('chart.captura.label.1') || 'Bug fix raciocinado',
+                    t('chart.captura.label.2') || 'Decisão arquitetural',
+                    t('chart.captura.label.3') || 'Convenção descoberta',
+                    t('chart.captura.label.4') || 'Trade-off discutido',
+                    t('chart.captura.label.5') || 'Workaround temporário'
+                ];
+                m.data.datasets[0].label = t('chart.captura.dataset.manual') || 'Captura manual';
+                m.data.datasets[1].label = t('chart.captura.dataset.auto') || 'Captura via reflect + auto-learn';
+                if (m.options.scales && m.options.scales.x && m.options.scales.x.title) {
+                    m.options.scales.x.title.text = t('chart.captura.axis.x') || '% capturado em memória durável';
+                }
+                m.update();
+            }
+        });
+
+        // Init and hash navigation handled by nav.js
     </script>
+
+    <!-- Footer -->
+    <footer class="border-t border-stone-200 mt-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-sm text-stone-400">
+                <span class="text-base">🎓</span>
+                <span data-i18n-html="footer.brand">Engineering Hour · By <a href="https://github.com/griiettner/ai-engineering-hour" target="_blank" class="underline hover:text-stone-600">Paulo Griiettner</a></span>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-stone-400">
+                <span data-i18n="footer.stack">HTML · Tailwind CSS · Chart.js</span>
+                <span>·</span>
+                <span data-i18n="footer.tagline">Sem build. Abra e use.</span>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

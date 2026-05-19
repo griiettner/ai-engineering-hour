@@ -42,7 +42,7 @@ metadata:
 - **Charts**: Chart.js lazy-init (só inicializa ao navegar para a seção, flag `window.xyzInit`)
 - Toda part precisa ter: Limites & Cuidados + Próximos Passos + ao menos 1 elemento interativo
 
-## Paleta de cores por parte (atualizada 2026-04-09)
+## Paleta de cores por parte (atualizada 2026-05-19)
 | Parte | Cor | Hex |
 |-------|-----|-----|
 | P1 | Sky Blue | `#0284c7` |
@@ -54,7 +54,8 @@ metadata:
 | P7 | Indigo | `#4f46e5` |
 | P8 | Fuchsia | `#c026d3` |
 | P9 | Amber | `#d97706` |
-| P10 (proposta) | Lime | `#65a30d` |
+| P10 | Lime | `#65a30d` |
+| P11 | Blue | `#2563eb` |
 
 Novas partes escolhem cor distinta das anteriores e documentam aqui.
 

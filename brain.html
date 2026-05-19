@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour · Agent Brain OS · Blueprint Interativo</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧠%3C/text%3E%3C/svg%3E">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font-Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="i18n.js" defer></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        /* Pulsing node animation */
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(99, 102, 241, 0.2), 0 0 10px rgba(99, 102, 241, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 15px rgba(99, 102, 241, 0.6), 0 0 25px rgba(99, 102, 241, 0.3);
+            }
+        }
+        .node-active {
+            animation: pulse-glow 2s infinite;
+        }
+        /* Path dashed animation */
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -40;
+            }
+        }
+        .animate-dash {
+            stroke-dasharray: 8, 4;
+            animation: dash 1.5s linear infinite;
+        }
+        /* Connection path fade-in */
+        .connection-line {
+            transition: stroke 0.4s ease, stroke-width 0.4s ease, opacity 0.4s ease;
+        }
+        .node-card:focus-visible,
+        .flow-btn:focus-visible,
+        button:focus-visible,
+        a:focus-visible,
+        select:focus-visible {
+            outline: 2px solid #818cf8;
+            outline-offset: 3px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col overflow-x-hidden antialiased">
+
+    <!-- Top Navigation Header -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-2 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-brain text-xl text-white"></i>
+                </div>
+                <div>
+                    <a href="part11.html" class="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-indigo-300 hover:text-indigo-200 transition mb-0.5">
+                        <i class="fa-solid fa-arrow-left text-[9px]"></i>
+                        <span data-i18n="header.lesson">Engineering Hour · Parte 11</span>
+                    </a>
+                    <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent leading-tight">
+                        Agent Brain OS
+                    </h1>
+                    <p class="text-xs text-slate-400" data-i18n="header.subtitle">Camada operacional local-first e agnóstica a ferramentas · Bônus interativo</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="part11.html" class="hidden md:inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-indigo-300 transition px-3 py-1.5 rounded-full border border-slate-800 bg-slate-950">
+                    <i class="fa-solid fa-graduation-cap text-[10px]"></i>
+                    <span data-i18n="header.back">Voltar para a aula</span>
+                </a>
+                <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-full border border-slate-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span class="text-xs text-slate-300 font-medium" data-i18n="header.services">5 Serviços Locais</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left Sidebar: Flow Controller & CLI Simulator -->
+        <section class="lg:col-span-3 flex flex-col gap-6 h-full">
+            
+            <!-- Protocol Simulator Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fa-solid fa-route text-indigo-400"></i>
+                    <h2 class="font-semibold text-slate-200" data-i18n="flow.title">Visualizador de Protocolos Ativos</h2>
+                </div>
+                <p class="text-xs text-slate-400 mb-4" data-i18n="flow.desc">Clique em um loop sistêmico abaixo para rastrear como os dados se movem pelo ecossistema local.</p>
+                
+                <div class="flex flex-col gap-2.5">
+                    <!-- Flow 1 -->
+                    <button type="button" onclick="activateFlow('auto-learn')" id="btn-flow-auto-learn" class="flow-btn w-full text-left px-3 py-2.5 rounded-lg border border-slate-800 bg-slate-950/40 hover:bg-slate-800/60 hover:border-slate-700 transition flex items-center justify-between group">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-105 transition">
+                                <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200" data-i18n="flow.auto.title">Auto-Learn 30 min</div>
+                                <div class="text-[10px] text-slate-400" data-i18n="flow.auto.note">Git Scan ➜ Ollama ➜ Staging</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-play text-[10px] text-slate-500 group-hover:text-indigo-400"></i>
+                    </button>
+                    <!-- Flow 2 -->
+                    <button type="button" onclick="activateFlow('reflect')" id="btn-flow-reflect" class="flow-btn w-full text-left px-3 py-2.5 rounded-lg border border-slate-800 bg-slate-950/40 hover:bg-slate-800/60 hover:border-slate-700 transition flex items-center justify-between group">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition">
+                                <i class="fa-solid fa-file-pen text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200" data-i18n="flow.reflect.title">Reflect de fim de sessão</div>
+                                <div class="text-[10px] text-slate-400" data-i18n="flow.reflect.note">Reflections ➜ Learn/Stage ➜ qmd</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-play text-[10px] text-slate-500 group-hover:text-indigo-400"></i>
+                    </button>
+                    <!-- Flow 3 -->
+                    <button type="button" onclick="activateFlow('conversation-digest')" id="btn-flow-conversation-digest" class="flow-btn w-full text-left px-3 py-2.5 rounded-lg border border-slate-800 bg-slate-950/40 hover:bg-slate-800/60 hover:border-slate-700 transition flex items-center justify-between group">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition">
+                                <i class="fa-solid fa-comments text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200" data-i18n="flow.digest.title">Digest da Conversa</div>
+                                <div class="text-[10px] text-slate-400" data-i18n="flow.digest.note">Extração do chat ➜ Memória</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-play text-[10px] text-slate-500 group-hover:text-indigo-400"></i>
+                    </button>
+                    <!-- Flow 4 -->
+                    <button type="button" onclick="activateFlow('context-retrieval')" id="btn-flow-context-retrieval" class="flow-btn w-full text-left px-3 py-2.5 rounded-lg border border-slate-800 bg-slate-950/40 hover:bg-slate-800/60 hover:border-slate-700 transition flex items-center justify-between group">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-105 transition">
+                                <i class="fa-solid fa-magnifying-glass-nodes text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200" data-i18n="flow.context.title">Recuperação de Contexto</div>
+                                <div class="text-[10px] text-slate-400" data-i18n="flow.context.note">AGENTS.md ➜ Pendências ➜ Busca</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-play text-[10px] text-slate-500 group-hover:text-indigo-400"></i>
+                    </button>
+                </div>
+                
+                <button type="button" onclick="clearFlows()" id="btn-clear-flow" class="hidden mt-3 w-full text-center py-1.5 text-xs font-medium text-slate-400 bg-slate-800/50 hover:bg-slate-800 rounded hover:text-white transition">
+                    <i class="fa-solid fa-arrow-rotate-left mr-1"></i> <span data-i18n="flow.reset">Resetar visualização</span>
+                </button>
+            </div>
+
+            <!-- CLI Control Center -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl flex-1 flex flex-col min-h-[300px]">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-terminal text-amber-400"></i>
+                    <h2 class="font-semibold text-slate-200" data-i18n="cli.title">Sandbox CLI das ferramentas locais</h2>
+                </div>
+                <p class="text-xs text-slate-400 mb-4" data-i18n="cli.desc">Pré-visualize comandos documentados do Agent Brain e saídas simuladas sem alterar arquivos locais.</p>
+                
+                <div class="mb-4">
+                    <label class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5" data-i18n="cli.select">Selecione o comando shell</label>
+                    <div class="relative">
+                        <select id="cli-cmd-selector" onchange="updateCliCommand()" class="w-full bg-slate-950 text-slate-200 text-xs rounded-lg border border-slate-800 px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer">
+                            <option value="learn" data-i18n="cli.option.learn">learn.py (gradua imediatamente)</option>
+                            <option value="stage" data-i18n="cli.option.stage">stage.py (estagia lição pendente)</option>
+                            <option value="recall" data-i18n="cli.option.recall">recall.py (busca similaridade Jaccard)</option>
+                            <option value="graduate" data-i18n="cli.option.graduate">graduate.py (revisa e aceita staged)</option>
+                            <option value="show" data-i18n="cli.option.show">show.py (imprime dashboard do brain)</option>
+                            <option value="list" data-i18n="cli.option.list">list_candidates.py (lista fila staged)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400" data-i18n="cli.command.label">Comando shell do terminal</span>
+                        <button type="button" onclick="copyCliCommand()" class="text-[10px] text-indigo-400 hover:text-indigo-300 transition">
+                            <i class="fa-regular fa-copy mr-1"></i><span data-i18n="cli.copy">Copiar</span>
+                        </button>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-xs text-slate-300 break-all select-all flex items-start gap-1">
+                        <span class="text-indigo-400 select-none">$</span>
+                        <span id="cli-cmd-display">python3 .agent/tools/brain/learn.py "Always serialize timestamps in UTC" --rationale "past cross-region bugs"</span>
+                    </div>
+                </div>
+
+                <div class="flex-1 flex flex-col">
+                    <button type="button" onclick="executeCliCommand()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-lg shadow-md hover:shadow-indigo-500/20 active:scale-[0.98] transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-play text-[10px]"></i> <span data-i18n="cli.simulate">Simular saída do comando</span>
+                    </button>
+                    
+                    <div class="mt-3 flex-1 flex flex-col bg-slate-950 rounded-lg border border-slate-800 p-3 relative overflow-hidden">
+                        <div class="absolute top-1.5 right-2 flex gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500/40"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500/40"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/40"></span>
+                        </div>
+                        <span class="text-[9px] uppercase font-bold tracking-wider text-slate-500 mb-1 select-none" data-i18n="cli.output.label">Saída simulada</span>
+                        <pre id="cli-output" aria-live="polite" class="code-font text-[11px] text-emerald-400 overflow-y-auto max-h-[160px] whitespace-pre-wrap leading-relaxed flex-1" data-i18n="cli.output.initial">Inicializando shell do agente...&#10;Selecione ou execute um comando para ver a saída do brain.</pre>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Center Section: Connected Interactive Map Canvas -->
+        <section class="lg:col-span-6 flex flex-col gap-6 relative">
+            
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl relative overflow-hidden" style="min-height: 700px;">
+                
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-nodes text-indigo-400"></i>
+                        <h2 class="font-semibold text-slate-200" data-i18n="map.title">Mapa Interativo da Arquitetura</h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" data-i18n="map.badge">Conexões SVG interativas</span>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mb-6" data-i18n="map.desc">Clique em qualquer nó abaixo para explorar arquivos, configurações, serviços e scripts no inspetor à direita.</p>
+
+                <!-- Connection Lines SVG Overlay (Behind nodes, relative container allows exact routing) -->
+                <svg id="svg-connections" class="absolute inset-0 pointer-events-none w-full h-full z-0" style="min-height: 700px;">
+                    <!-- Connection Paths will be drawn dynamically via JS and bound here -->
+                </svg>
+
+                <!-- Grid Canvas Nodes (Z-10 to stay on top of SVG) -->
+                <div class="grid grid-cols-3 gap-y-12 gap-x-4 relative z-10 text-center text-xs">
+                    
+                    <!-- ================= COLUMN 1: CLIENTS & EDITORS ================= -->
+                    <div class="flex flex-col gap-8 justify-around h-full pt-10 pb-20">
+                        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500 select-none text-left pl-2 mb-2" data-i18n="map.tier.client">1. Camada Cliente</div>
+                        
+                        <!-- Claude Code Card -->
+                        <div id="client-claude" role="button" tabindex="0" aria-pressed="false" onclick="selectNode('client-claude')" class="node-card cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-indigo-500 transition-all flex flex-col items-center gap-2 max-w-[160px] mx-auto group">
+                            <div class="w-10 h-10 rounded-lg bg-orange-600/10 text-orange-400 flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition">
+                                <i class="fa-solid fa-code"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200">Claude Code</h3>
+                                <p class="text-[9px] text-slate-500" data-i18n="node.client.claude.note">Gateway CLAUDE.md</p>
+                            </div>
+                        </div>
+
+                        <!-- Cursor IDE Card -->
+                        <div id="client-cursor" role="button" tabindex="0" aria-pressed="false" onclick="selectNode('client-cursor')" class="node-card cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-indigo-500 transition-all flex flex-col items-center gap-2 max-w-[160px] mx-auto group">
+                            <div class="w-10 h-10 rounded-lg bg-teal-600/10 text-teal-400 flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200">Cursor IDE</h3>
+                                <p class="text-[9px] text-slate-500" data-i18n="node.client.cursor.note">Regra project.mdc</p>
+                            </div>
+                        </div>
+
+                        <!-- Warp/Terminal Card -->
+                        <div id="client-terminal" role="button" tabindex="0" aria-pressed="false" onclick="selectNode('client-terminal')" class="node-card cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-indigo-500 transition-all flex flex-col items-center gap-2 max-w-[160px] mx-auto group">
+                            <div class="w-10 h-10 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition">
+                                <i class="fa-solid fa-terminal"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200" data-i18n="node.client.terminal.title">Terminal Shell</h3>
+                                <p class="text-[9px] text-slate-500">Warp / Oz Core</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= COLUMN 2: SERVICES & STATE GATEWAYS ================= -->
+                    <div class="flex flex-col gap-6 justify-between h-full pt-10 pb-20">
+                        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500 select-none mb-2" data-i18n="map.tier.operating">2. Camada Operacional</div>
+                        
+                        <!-- Gateway Master Index Node -->
+                        <div id="gateway-agents" role="button" tabindex="0" aria-pressed="false" onclick="selectNode('gateway-agents')" class="node-card cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-indigo-500 transition-all flex flex-col items-center gap-2 max-w-[170px] mx-auto group">
+                            <div class="w-9 h-9 rounded-lg bg-purple-600/10 text-purple-400 flex items-center justify-center text-base shadow-md group-hover:scale-110 transition">
+                                <i class="fa-solid fa-compass"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200">AGENTS.md</h3>
+                                <p class="text-[9px] text-slate-400" data-i18n="node.agents.note">Índice mestre de rotas</p>
+                                <p class="text-[8px] text-slate-500 mt-1" data-i18n="node.agents.tokens">~500 tokens</p>
+                            </div>
+                        </div>
+
+                        <!-- qmd MCP Search Engine -->
+                        <div id="service-qmd" role="button" tabindex="0" aria-pressed="false" onclick="selectNode('service-qmd')" class="node-card cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-indigo-500 transition-all flex flex-col items-center gap-2 max-w-[170px] mx-auto group">
+                            <div class="w-9 h-9 rounded-lg bg-blue-600/10 text-blue-400 flex items-center justify-center text-base shadow-md group-hover:scale-110 transition">
+                                <i class="fa-solid fa-database animate-pulse"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200" data-i18n="node.qmd.title">Busca qmd MCP</h3>
+                                <p class="text-[9px] text-slate-400">embeddinggemma-300M</p>
+                                <p class="text-[8px] text-slate-500 mt-1" data-i18n="node.qmd.port">Portas 8181/8182</p>
+                            </div>
+                        </div>
+
+                        <!-- Local LLM Inference Node -->
+                        <div id="service-ollama" role="button" tabindex="0" aria-pressed="false" onclick="selectNode('service-ollama')" class="node-card cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-indigo-500 transition-all flex flex-col items-center gap-2 max-w-[170px] mx-auto group">
+                            <div class="w-9 h-9 rounded-lg bg-indigo-600/10 text-indigo-400 flex items-center justify-center text-base shadow-md group-hover:scale-110 transition">
+                                <i class="fa-solid fa-server"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200">Ollama API</h3>
+                                <p class="text-[9px] text-slate-400" data-i18n="node.ollama.note">phi4-mini (~3GB pico)</p>
+                                <p class="text-[8px] text-slate-500 mt-1">keep_alive: 0</p>
+                            </div>
+                        </div>
+
+                        <!-- State & Pending Context -->
+                        <div id="gateway-state" role="button" tabindex="0" aria-pressed="false" onclick="selectNode('gateway-state')" class="node-card cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-indigo-500 transition-all flex flex-col items-center gap-2 max-w-[170px] mx-auto group">
+                            <div class="w-9 h-9 rounded-lg bg-rose-600/10 text-rose-400 flex items-center justify-center text-base shadow-md group-hover:scale-110 transition">
+                                <i class="fa-solid fa-clipboard-list"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200">STATE.md</h3>
+                                <p class="text-[9px] text-slate-400" data-i18n="node.state.note">Commits pendentes</p>
+                                <p class="text-[8px] text-slate-500 mt-1">state/pending-analysis</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= COLUMN 3: DURABLE KNOWLEDGE & PIPES ================= -->
+                    <div class="flex flex-col gap-8 justify-around h-full pt-10 pb-20">
+                        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500 select-none text-right pr-2 mb-2" data-i18n="map.tier.storage">3. Camada de Memória e Loops</div>
+                        
+                        <!-- Skills & Agents Orchestrator -->
+                        <div id="storage-skills" role="button" tabindex="0" aria-pressed="false" onclick="selectNode('storage-skills')" class="node-card cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-indigo-500 transition-all flex flex-col items-center gap-2 max-w-[160px] mx-auto group">
+                            <div class="w-10 h-10 rounded-lg bg-pink-600/10 text-pink-400 flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200" data-i18n="node.skills.title">Skills & Agents</h3>
+                                <p class="text-[9px] text-slate-500" data-i18n="node.skills.note">Memória procedural</p>
+                            </div>
+                        </div>
+
+                        <!-- CLI Tools Box -->
+                        <div id="storage-tools" role="button" tabindex="0" aria-pressed="false" onclick="selectNode('storage-tools')" class="node-card cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-indigo-500 transition-all flex flex-col items-center gap-2 max-w-[160px] mx-auto group">
+                            <div class="w-10 h-10 rounded-lg bg-yellow-600/10 text-yellow-400 flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition">
+                                <i class="fa-solid fa-screwdriver-wrench"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200" data-i18n="node.tools.title">Ferramentas CLI</h3>
+                                <p class="text-[9px] text-slate-500">learn.py / stage.py</p>
+                            </div>
+                        </div>
+
+                        <!-- Durable Memory & Lessons Files -->
+                        <div id="storage-memory" role="button" tabindex="0" aria-pressed="false" onclick="selectNode('storage-memory')" class="node-card cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-indigo-500 transition-all flex flex-col items-center gap-2 max-w-[160px] mx-auto group">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-600/10 text-emerald-400 flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition">
+                                <i class="fa-solid fa-box-archive"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200" data-i18n="node.memory.title">Memória do Agente</h3>
+                                <p class="text-[9px] text-slate-500">lessons.jsonl / .md</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer Status Bar inside the diagram container -->
+                <div class="absolute bottom-4 left-4 right-4 bg-slate-950/80 backdrop-blur-sm border border-slate-800/80 p-3 rounded-lg flex items-center justify-between text-slate-400 text-[10px]">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                        <span data-i18n="map.status.base">Operações cliente ligadas ao armazenamento agnóstico a ferramentas</span>
+                    </div>
+                    <div id="flow-status-text" aria-live="polite" class="text-right text-indigo-400 font-semibold select-none">
+                        SELECIONE UM PROTOCOLO PARA INICIAR A SIMULAÇÃO
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Toast notification container for clipboard or simulation -->
+            <div id="toast" role="status" aria-live="polite" class="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2 rounded-lg text-xs font-semibold shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 transform translate-y-2">
+                <i class="fa-solid fa-circle-check text-emerald-400" id="toast-icon"></i>
+                <span id="toast-message">Comando copiado para a área de transferência</span>
+            </div>
+
+        </section>
+
+        <!-- Right Section: Details Inspector Panel & Blueprint Sandbox -->
+        <section class="lg:col-span-3 flex flex-col gap-6">
+            
+            <!-- Details Inspector Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl min-h-[350px] flex flex-col">
+                <div class="flex items-center gap-2 mb-3 border-b border-slate-800 pb-2">
+                    <i id="inspector-icon" class="fa-solid fa-brain text-indigo-400 text-base"></i>
+                    <div>
+                        <h2 id="inspector-title" class="font-bold text-slate-200" data-i18n="inspector.title">Inspetor do Sistema</h2>
+                        <span id="inspector-badge" class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-950 text-slate-400" data-i18n="inspector.badge">Selecione um nó</span>
+                    </div>
+                </div>
+
+                <div id="inspector-empty" class="flex-1 flex flex-col items-center justify-center text-center p-4">
+                    <i class="fa-solid fa-arrow-pointer text-slate-600 text-2xl mb-2 animate-bounce"></i>
+                    <p class="text-xs text-slate-400" data-i18n="inspector.empty">Clique em qualquer elemento do mapa de arquitetura para inspecionar arquivos, ações, portas e funções internas.</p>
+                </div>
+
+                <div id="inspector-content" class="hidden flex-1 flex flex-col justify-between">
+                    <div class="space-y-4 text-xs">
+                        <div>
+                            <span class="text-[9px] uppercase font-bold tracking-wider text-slate-500" data-i18n="inspector.overview">Visão geral / objetivo</span>
+                            <p id="inspector-desc" class="text-slate-300 mt-1 leading-relaxed">Detalhes do sistema operacional do agente aparecem aqui.</p>
+                        </div>
+                        
+                        <div>
+                            <span class="text-[9px] uppercase font-bold tracking-wider text-slate-500" data-i18n="inspector.files">Arquivos / comandos alvo</span>
+                            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-[11px] code-font text-indigo-300 break-all select-all mt-1">
+                                <code id="inspector-files">.agent/AGENTS.md</code>
+                            </div>
+                        </div>
+
+                        <div id="inspector-extra-box">
+                            <span id="inspector-extra-title" class="text-[9px] uppercase font-bold tracking-wider text-slate-500">Detalhes de configuração</span>
+                            <p id="inspector-extra" class="text-slate-400 mt-1 leading-relaxed">Detalhes de metadados</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+                        <span class="text-[9px] text-slate-500" data-i18n="inspector.domain">Domínio agnóstico a ferramentas</span>
+                        <button type="button" onclick="copyInspectorData()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-[11px] font-medium transition flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i> <span data-i18n="inspector.copy">Copiar path</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Folder Tree Map Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-folder-tree text-purple-400"></i>
+                    <h2 class="font-semibold text-slate-200" data-i18n="tree.title">Explorador da árvore de pastas</h2>
+                </div>
+                <p class="text-xs text-slate-400 mb-3" data-i18n="tree.desc">Navegue pela estrutura local do diretório operacional `.agent`.</p>
+                
+                <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 text-xs font-mono select-none overflow-y-auto max-h-[280px]">
+                    
+                    <!-- Root Folder -->
+                    <div class="flex items-center gap-1.5 py-0.5 text-slate-200">
+                        <i class="fa-solid fa-folder-open text-amber-500"></i>
+                        <span>.agent/</span>
+                    </div>
+
+                    <!-- Level 1 Items -->
+                    <div class="pl-4 border-l border-slate-800/80 ml-2 space-y-1">
+                        <!-- File 1 -->
+                        <div class="flex items-center gap-1.5 py-0.5 hover:text-indigo-400 cursor-pointer" onclick="selectNode('gateway-agents')">
+                            <i class="fa-regular fa-file-lines text-purple-400"></i>
+                            <span>AGENTS.md</span>
+                        </div>
+                        
+                        <!-- Folder: memory -->
+                        <div>
+                            <div class="flex items-center gap-1.5 py-0.5 text-indigo-300">
+                                <i class="fa-solid fa-folder text-amber-500"></i>
+                                <span>memory/</span>
+                            </div>
+                            <div class="pl-4 border-l border-slate-800/80 ml-2 space-y-1">
+                                <div class="flex items-center gap-1.5 py-0.5" onclick="selectNode('storage-memory')">
+                                    <i class="fa-solid fa-folder text-amber-500"></i>
+                                    <span>lessons/</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 py-0.5" onclick="selectNode('gateway-state')">
+                                    <i class="fa-solid fa-folder text-amber-500"></i>
+                                    <span>reflections/</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 py-0.5" onclick="selectNode('storage-memory')">
+                                    <i class="fa-solid fa-folder text-amber-500"></i>
+                                    <span>brain/</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Folder: skills -->
+                        <div>
+                            <div class="flex items-center gap-1.5 py-0.5 text-indigo-300">
+                                <i class="fa-solid fa-folder text-amber-500"></i>
+                                <span>skills/</span>
+                            </div>
+                            <div class="pl-4 border-l border-slate-800/80 ml-2 space-y-0.5 text-slate-400 text-[11px]">
+                                <div>├─ reflect/</div>
+                                <div>├─ memory-write/</div>
+                                <div>└─ conversation-digest/</div>
+                            </div>
+                        </div>
+
+                        <!-- Folder: agents -->
+                        <div>
+                            <div class="flex items-center gap-1.5 py-0.5 text-indigo-300">
+                                <i class="fa-solid fa-folder text-amber-500"></i>
+                                <span>agents/</span>
+                            </div>
+                            <div class="pl-4 border-l border-slate-800/80 ml-2 text-slate-400 text-[11px]">
+                                <span>├─ memory-steward.md</span>
+                            </div>
+                        </div>
+
+                        <!-- Folder: state -->
+                        <div>
+                            <div class="flex items-center gap-1.5 py-0.5 text-indigo-300" onclick="selectNode('gateway-state')">
+                                <i class="fa-solid fa-folder text-amber-500"></i>
+                                <span>state/</span>
+                            </div>
+                        </div>
+
+                        <!-- Folder: tools -->
+                        <div>
+                            <div class="flex items-center gap-1.5 py-0.5 text-indigo-300" onclick="selectNode('storage-tools')">
+                                <i class="fa-solid fa-folder text-amber-500"></i>
+                                <span>tools/</span>
+                            </div>
+                        </div>
+
+                        <!-- Folder: engine -->
+                        <div>
+                            <div class="flex items-center gap-1.5 py-0.5 text-indigo-300" onclick="selectNode('service-qmd')">
+                                <i class="fa-solid fa-folder text-amber-500"></i>
+                                <span>engine/</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Governance Code Rules Section -->
+    <section class="max-w-[1600px] w-full mx-auto px-4 pb-8">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 text-indigo-400 font-semibold text-sm">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    <h3 data-i18n="gov.memory.title">Soberania da Memória</h3>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed" data-i18n-html="gov.memory.desc">
+                    Sempre consulte qmd <code class="text-indigo-300 code-font">agent-memory</code> antes de escrever novo conhecimento. Reutilize e atualize arquivos existentes antes de gerar duplicados.
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 text-amber-400 font-semibold text-sm">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <h3 data-i18n="gov.lesson.title">Gate de Curadoria das Lições</h3>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed" data-i18n-html="gov.lesson.desc">
+                    Lições exigem evidência lógica e objetiva de validação. Rubber-stamping é estruturalmente impossível: <code class="text-amber-300 code-font">graduate.py</code> exige a flag <code class="text-amber-300 code-font">--rationale</code>.
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
+                    <i class="fa-solid fa-rocket"></i>
+                    <h3 data-i18n="gov.daemon.title">Stack de Daemons Launchd</h3>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed" data-i18n="gov.daemon.desc">
+                    Quatro jobs launchd mais o Ollama local gerenciam busca, watchers, dashboards, auto-learning e inferência phi4-mini localmente.
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 text-rose-400 font-semibold text-sm">
+                    <i class="fa-solid fa-arrows-spin"></i>
+                    <h3 data-i18n="gov.auto.title">Aprendizado Autônomo</h3>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed" data-i18n="gov.auto.desc">
+                    O auto-learn roda silenciosamente em background a cada 30 minutos, mantendo o estado cognitivo atualizado sem adicionar latência ou interrupção ao desenvolvimento.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-950 text-slate-500 py-6 text-xs mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-base">🎓</span>
+                <span data-i18n-html="footer.lesson">Engineering Hour · Bônus interativo da <a href="part11.html" class="text-indigo-400 hover:text-indigo-300 transition">Parte 11 · Memória Viva</a></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="part11.html" class="hover:text-slate-300 transition" data-i18n="footer.back">← Voltar para a aula</a>
+                <a href="index.html" class="hover:text-slate-300 transition" data-i18n="footer.index">Índice da série</a>
+                <a href="https://github.com/griiettner/ai-engineering-hour" target="_blank" rel="noopener" class="hover:text-slate-300 transition">
+                    <i class="fa-brands fa-github mr-1"></i>GitHub
+                </a>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 mt-3 text-[10px] text-slate-600 text-center sm:text-left" data-i18n="footer.note">
+            © 2026 Paulo Griiettner · Single-file interactive blueprint do sistema Agent Brain · Dispare os flows à esquerda para ver os pacotes atravessarem.
+        </div>
+    </footer>
+
+    <!-- JavaScript logic for flows, connection paths, sandbox runner, and inspector -->
+    <script>
+        // System Data Structure mapping exact node configurations and definitions from uploaded files
+        const systemNodes = {
+            'client-claude': {
+                title: 'Agente Claude Code',
+                badge: 'Cliente externo',
+                icon: 'fa-code text-orange-400',
+                desc: 'Claude Code é uma ferramenta externa de agente de IA integrada ao workspace. Para evitar lock-in de contexto, todas as configurações apontam para a pasta centralizada e agnóstica `.agent/` por meio de redirects.',
+                files: 'CLAUDE.md (arquivo de redirect na raiz do projeto)',
+                extraTitle: 'Estratégia de centralização',
+                extra: 'Mantém os arquivos de startup limpos e evita lock-in de fornecedor. Claude Code carrega .agent/AGENTS.md e state/STATE.md para iniciar o contexto.'
+            },
+            'client-cursor': {
+                title: 'Agente Cursor IDE',
+                badge: 'IDE Plugin',
+                icon: 'fa-wand-magic-sparkles text-teal-400',
+                desc: 'Usa regras customizadas MDC do Cursor. Configurado para aplicar globalmente a todas as tarefas, roteando a leitura de contexto para a arquitetura centralizada .agent/.',
+                files: '.cursor/rules/project.mdc',
+                extraTitle: 'Configuração de aplicação',
+                extra: 'alwaysApply: true fica ativo para que o Cursor consulte continuamente a estrutura do Agent Brain sem depender de prompting humano.'
+            },
+            'client-terminal': {
+                title: 'Terminal / Warp / Oz',
+                badge: 'Terminal do sistema',
+                icon: 'fa-terminal text-slate-300',
+                desc: 'Dispara tarefas CLI locais e consultas diretas de busca MCP. Liga o framework operacional aos workflows de sistema por aliases customizados.',
+                files: '~/.agents/skills/ ➜ .agent/engine/skill/',
+                extraTitle: 'Ligação MCP',
+                extra: 'Um symlink acopla capacidades do terminal diretamente ao motor qmd embutido para acessar conhecimento de qualquer contexto de terminal.'
+            },
+            'gateway-agents': {
+                title: 'Índice de navegação AGENTS.md',
+                badge: 'Arquivo gateway mestre',
+                icon: 'fa-compass text-purple-400',
+                desc: 'Ponto de entrada centralizado para todas as sessões de IA em todos os clientes. Orquestra skills, agentes, regras e estados ativos com mínimo custo de tokens.',
+                files: '.agent/AGENTS.md',
+                extraTitle: 'Perfil de custo',
+                extra: 'Design agressivo de restrição: mantém o startup raiz em ~500 tokens. Conteúdo detalhado só é carregado sob demanda por consultas de busca.'
+            },
+            'service-qmd': {
+                title: 'Busca vetorial qmd MCP',
+                badge: 'Serviço local de busca',
+                icon: 'fa-database text-blue-400',
+                desc: 'Motor local de busca vetorial que gerencia embeddings estruturais. Indexa arquivos-fonte e memória curada. Conecta diretamente com IDEs via Model Context Protocol (MCP).',
+                files: '.agent/engine/ (Embedding Model: embeddinggemma-300M)',
+                extraTitle: 'Portas registradas',
+                extra: 'Roda nas portas 8181 (endpoint MCP) e 8182 (dashboard). Hooks de git e WatchPaths disparam reindexação incremental.'
+            },
+            'service-ollama': {
+                title: 'API Ollama local',
+                badge: 'Núcleo generativo',
+                icon: 'fa-server text-indigo-400',
+                desc: 'Plataforma local de inferência para IA. Executa tarefas sem enviar código proprietário ou decisões de design para fora do disco local.',
+                files: 'phi4-mini model loaded locally (http://localhost:11434)',
+                extraTitle: 'Guardrails de memória',
+                extra: 'Configurado com keep_alive: 0 nas chamadas de API. O phi4-mini descarrega da CPU/RAM imediatamente após responder, consumindo 0GB em idle.'
+            },
+            'gateway-state': {
+                title: 'STATE.md e hooks de commit',
+                badge: 'Rastreador de estado',
+                icon: 'fa-clipboard-list text-rose-400',
+                desc: 'Rastreador durável de sessão que registra o estado ativo do desenvolvimento. Trabalha com hook post-commit para produzir contexto pendente de análise.',
+                files: '.agent/state/STATE.md \n.agent/state/pending-analysis.md',
+                extraTitle: 'Protocolo post-commit',
+                extra: 'Escreve pending-analysis.md com detalhes das mudanças. O agente processa e remove esse arquivo no início do próximo workflow.'
+            },
+            'storage-skills': {
+                title: 'Skills procedurais e papéis de agentes',
+                badge: 'Playbooks sob demanda',
+                icon: 'fa-brain text-pink-400',
+                desc: 'Define procedimentos e papéis modulares sob demanda, incluindo memory-steward, conversation-digest e reflect. Prompts não são pré-carregados, mantendo sessões enxutas.',
+                files: '.agent/skills/ \n.agent/agents/',
+                extraTitle: 'Protocolo de ativação',
+                extra: 'Só ativa quando palavras-chave explícitas, como "aprenda com isso" ou "digest da sessão", são detectadas.'
+            },
+            'storage-tools': {
+                title: 'Ferramentas CLI de lifecycle',
+                badge: 'Biblioteca de scripts Python',
+                icon: 'fa-screwdriver-wrench text-yellow-400',
+                desc: 'Coleção de scripts Python que operam diretamente sobre os arquivos do banco de lições. Estruturada para processamento robusto sem dependências externas.',
+                files: '.agent/tools/brain/ (learn.py, stage.py, recall.py, graduate.py)',
+                extraTitle: 'Filosofia dos scripts',
+                extra: 'Usa apenas a biblioteca padrão do Python. Zero dependências pip para garantir estabilidade de execução entre ambientes.'
+            },
+            'storage-memory': {
+                title: 'Memória durável curada',
+                badge: 'Armazenamento durável',
+                icon: 'fa-box-archive text-emerald-400',
+                desc: 'Guarda arquivos de lições de longo prazo, padrões e convenções de framework. Mantém pools de candidatos e rejeitados para preservar rationale de decisão.',
+                files: '.agent/memory/lessons/lessons.jsonl \n.agent/memory/lessons/LESSONS.md',
+                extraTitle: 'Separação de responsabilidades',
+                extra: 'Salva lógica de domínio do projeto em memory/ e arquitetura de IA em memory/brain/, evitando poluição entre bases de conhecimento.'
+            }
+        };
+
+        // Command definitions for Sandbox Console
+        const cliCommands = {
+            'learn': {
+                cmd: 'python3 .agent/tools/brain/learn.py "Always serialize timestamps in UTC" --rationale "past cross-region bugs"',
+                output: '[LEARN] Regra graduada com sucesso!\nID: lesson-9f3a\nClaim: "Always serialize timestamps in UTC"\nRationale: "past cross-region bugs"\nStatus: Adicionada a .agent/memory/lessons/lessons.jsonl\nAção: Disparando qmd-reindex.sh...\n[qmd] Atualização de embeddings concluída. 42 arquivos reindexados.'
+            },
+            'stage': {
+                cmd: 'python3 .agent/tools/brain/stage.py "Avoid global state in Drupal hooks" --source "code-review"',
+                output: '[STAGE] Lição enviada para revisão.\nID: candidate-d4b2\nClaim: "Avoid global state in Drupal hooks"\nSource: "code-review"\nStatus: Stage em .agent/memory/lessons/candidates/\nAção: Aguardando verificação com rationale via graduate.py.'
+            },
+            'recall': {
+                cmd: 'python3 .agent/tools/brain/recall.py "deploy FastAPI service" --top 3',
+                output: '[RECALL] Buscando match lexical Jaccard em 38 lições graduadas...\n\nMatch 1 [Score: 0.86]:\n"Always use connection pooling for FastAPI DB"\nRationale: Observed connection exhaustion under load.\n\nMatch 2 [Score: 0.61]:\n"Never inline SQL in FastAPI routes"\nRationale: Keep DB layer separated to preserve clean routing architectural pattern.'
+            },
+            'graduate': {
+                cmd: 'python3 .agent/tools/brain/graduate.py candidate-d4b2 --rationale "proven across three decoupled hooks"',
+                output: '[GRADUATE] Candidato candidate-d4b2 verificado com sucesso!\nID promovido: lesson-7e11\nClaim: "Avoid global state in Drupal hooks"\nRationale: "proven across three decoupled hooks"\nStatus: Movido de candidates/ para lessons.jsonl'
+            },
+            'show': {
+                cmd: 'python3 .agent/tools/brain/show.py',
+                output: '========================================\n        STATUS DO AGENT BRAIN SYSTEM    \n========================================\nLições graduadas  : 38\nCandidatos pend.  : 3\nHistórico rejeit. : 14\n\nÚltima graduada   : Regra de timestamp UTC (lesson-9f3a)\nConexão qmd       : Ativa na porta 8181\nOllama phi4-mini  : Rodando (keep_alive: 0)\n========================================'
+            },
+            'list': {
+                cmd: 'python3 .agent/tools/brain/list_candidates.py',
+                output: '[LIST CANDIDATES] Fila atual ordenada por prioridade:\n\n1. [ID: candidate-d4b2] Avoid global state in Drupal hooks (Prioridade: Alta)\n2. [ID: candidate-8c3e] Always configure CORS explicitly (Prioridade: Média)\n\nRode graduate.py <id> --rationale para aceitar um padrão.'
+            }
+        };
+
+        // Active Flow Coordinates for Simulating lines
+        // Elements to map:
+        // client-claude, client-cursor, client-terminal, gateway-agents, service-qmd, service-ollama, gateway-state, storage-skills, storage-tools, storage-memory
+        const flows = {
+            'auto-learn': {
+                color: '#f59e0b', // Amber
+                nodes: ['gateway-state', 'service-ollama', 'storage-tools', 'storage-memory'],
+                connections: [
+                    { from: 'gateway-state', to: 'service-ollama' },
+                    { from: 'service-ollama', to: 'storage-tools' },
+                    { from: 'storage-tools', to: 'storage-memory' }
+                ],
+                text: 'DAEMON: escaneia atividade git ➜ envia ao Ollama local ➜ despacha para stage.py/learn.py'
+            },
+            'reflect': {
+                color: '#10b981', // Emerald
+                nodes: ['gateway-state', 'storage-skills', 'storage-tools', 'storage-memory', 'service-qmd'],
+                connections: [
+                    { from: 'gateway-state', to: 'storage-skills' },
+                    { from: 'storage-skills', to: 'storage-tools' },
+                    { from: 'storage-tools', to: 'storage-memory' },
+                    { from: 'storage-memory', to: 'service-qmd' }
+                ],
+                text: 'FIM DE SESSÃO: skill reflect lê STATE.md ➜ escreve reflection datada ➜ reindexa qmd'
+            },
+            'conversation-digest': {
+                color: '#06b6d4', // Cyan
+                nodes: ['client-claude', 'storage-skills', 'service-qmd', 'storage-tools', 'storage-memory'],
+                connections: [
+                    { from: 'client-claude', to: 'storage-skills' },
+                    { from: 'storage-skills', to: 'service-qmd' }, // check existing memory to avoid duplicates
+                    { from: 'storage-skills', to: 'storage-tools' },
+                    { from: 'storage-tools', to: 'storage-memory' }
+                ],
+                text: 'DIGEST: reúne contexto ➜ filtra duplicados com qmd ➜ salva na camada de memória'
+            },
+            'context-retrieval': {
+                color: '#6366f1', // Indigo
+                nodes: ['client-cursor', 'gateway-agents', 'gateway-state', 'service-qmd'],
+                connections: [
+                    { from: 'client-cursor', to: 'gateway-agents' },
+                    { from: 'gateway-agents', to: 'gateway-state' }, // reads STATE + pending-analysis
+                    { from: 'gateway-state', to: 'service-qmd' } // searches vector database for task memory
+                ],
+                text: 'RECOVERY: lê índice ➜ captura pendências ➜ consulta qmd para memória da tarefa'
+            }
+        };
+
+        const brainI18nMaps = {
+            nodes: {
+                'client-claude': 'dyn.node.clientClaude',
+                'client-cursor': 'dyn.node.clientCursor',
+                'client-terminal': 'dyn.node.clientTerminal',
+                'gateway-agents': 'dyn.node.gatewayAgents',
+                'service-qmd': 'dyn.node.serviceQmd',
+                'service-ollama': 'dyn.node.serviceOllama',
+                'gateway-state': 'dyn.node.gatewayState',
+                'storage-skills': 'dyn.node.storageSkills',
+                'storage-tools': 'dyn.node.storageTools',
+                'storage-memory': 'dyn.node.storageMemory'
+            },
+            cli: {
+                learn: 'dyn.cli.learn.output',
+                stage: 'dyn.cli.stage.output',
+                recall: 'dyn.cli.recall.output',
+                graduate: 'dyn.cli.graduate.output',
+                show: 'dyn.cli.show.output',
+                list: 'dyn.cli.list.output'
+            },
+            flows: {
+                'auto-learn': 'dyn.flow.auto.text',
+                reflect: 'dyn.flow.reflect.text',
+                'conversation-digest': 'dyn.flow.digest.text',
+                'context-retrieval': 'dyn.flow.context.text'
+            }
+        };
+
+        function applyBrainRuntimeTranslations(event) {
+            if (!event || !event.detail || !event.detail.t) return;
+            const t = event.detail.t;
+
+            document.title = t('meta.title') || document.title;
+
+            Object.entries(brainI18nMaps.nodes).forEach(([id, prefix]) => {
+                const node = systemNodes[id];
+                if (!node) return;
+                ['title', 'badge', 'desc', 'files', 'extraTitle', 'extra'].forEach(field => {
+                    const value = t(`${prefix}.${field}`);
+                    if (value) node[field] = value;
+                });
+            });
+
+            Object.entries(brainI18nMaps.cli).forEach(([id, key]) => {
+                const value = t(key);
+                if (value && cliCommands[id]) cliCommands[id].output = value;
+            });
+
+            Object.entries(brainI18nMaps.flows).forEach(([id, key]) => {
+                const value = t(key);
+                if (value && flows[id]) flows[id].text = value;
+            });
+
+            const defaultStatus = t('dyn.flow.defaultStatus');
+            const statusBox = document.getElementById('flow-status-text');
+            if (defaultStatus && statusBox && !document.querySelector('.flow-btn.border-indigo-500')) {
+                statusBox.innerText = defaultStatus;
+            }
+
+            updateCliCommand();
+            if (activeNodeId) selectNode(activeNodeId);
+        }
+
+        window.addEventListener('i18n:applied', applyBrainRuntimeTranslations);
+
+        function runtimeT(key, fallback) {
+            if (window.EHi18n && window.EHi18n.currentLang !== 'pt') {
+                return window.EHi18n.t(key) || fallback;
+            }
+            return fallback;
+        }
+
+        // Initialize Blueprint and connections on Load
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.node-card[role="button"]').forEach(card => {
+                card.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        selectNode(card.id);
+                    }
+                });
+            });
+            selectNode('gateway-agents');
+            setTimeout(drawConnections, 300); // Give layout a brief moment to settle
+        });
+
+        // Ensure responsive connection paths adapt to viewport resize
+        window.addEventListener('resize', drawConnections);
+
+        // Track selected node state
+        let activeNodeId = '';
+
+        function selectNode(id) {
+            // Remove selection state from all nodes
+            document.querySelectorAll('.node-card').forEach(card => {
+                card.classList.remove('border-indigo-500', 'bg-slate-900', 'node-active');
+                card.classList.add('border-slate-800', 'bg-slate-950');
+                card.setAttribute('aria-pressed', 'false');
+            });
+
+            // Set current active card
+            const activeCard = document.getElementById(id);
+            if (activeCard) {
+                activeCard.classList.remove('border-slate-800', 'bg-slate-950');
+                activeCard.classList.add('border-indigo-500', 'bg-slate-900', 'node-active');
+                activeCard.setAttribute('aria-pressed', 'true');
+            }
+
+            // Update Inspector Panel
+            const nodeData = systemNodes[id];
+            if (nodeData) {
+                activeNodeId = id;
+                document.getElementById('inspector-empty').classList.add('hidden');
+                document.getElementById('inspector-content').classList.remove('hidden');
+
+                document.getElementById('inspector-icon').className = `fa-solid ${nodeData.icon} text-lg`;
+                document.getElementById('inspector-title').innerText = nodeData.title;
+                document.getElementById('inspector-badge').innerText = nodeData.badge;
+                document.getElementById('inspector-desc').innerText = nodeData.desc;
+                document.getElementById('inspector-files').innerText = nodeData.files;
+                
+                if (nodeData.extra) {
+                    document.getElementById('inspector-extra-box').classList.remove('hidden');
+                    document.getElementById('inspector-extra-title').innerText = nodeData.extraTitle;
+                    document.getElementById('inspector-extra').innerText = nodeData.extra;
+                } else {
+                    document.getElementById('inspector-extra-box').classList.add('hidden');
+                }
+            }
+        }
+
+        // Draw connecting SVG lines dynamically between center nodes
+        function drawConnections() {
+            const svg = document.getElementById('svg-connections');
+            svg.innerHTML = ''; // clear existing connections
+
+            // Determine if viewport is too narrow (mobile stack) - skip lines on tiny devices
+            if (window.innerWidth < 768) return;
+
+            // Gather elements coordinates relative to the parent canvas container
+            const canvasRect = svg.getBoundingClientRect();
+
+            // Default structural lines mapping standard system interaction paths
+            const baseLinks = [
+                { from: 'client-claude', to: 'gateway-agents', color: '#475569', dash: false },
+                { from: 'client-cursor', to: 'gateway-agents', color: '#475569', dash: false },
+                { from: 'client-terminal', to: 'gateway-agents', color: '#475569', dash: false },
+                { from: 'gateway-agents', to: 'service-qmd', color: '#334155', dash: false },
+                { from: 'gateway-agents', to: 'gateway-state', color: '#334155', dash: false },
+                { from: 'gateway-state', to: 'storage-skills', color: '#334155', dash: false },
+                { from: 'gateway-state', to: 'storage-tools', color: '#334155', dash: false },
+                { from: 'storage-tools', to: 'storage-memory', color: '#334155', dash: false },
+                { from: 'service-qmd', to: 'storage-memory', color: '#334155', dash: false },
+                { from: 'storage-tools', to: 'service-ollama', color: '#334155', dash: false }
+            ];
+
+            baseLinks.forEach(link => {
+                createLine(svg, canvasRect, link.from, link.to, link.color, link.dash);
+            });
+        }
+
+        // Create individual SVG Connection line helper
+        function createLine(svg, canvasRect, fromId, toId, color, animated = false, weight = 1.5, opacity = 0.4) {
+            const fromEl = document.getElementById(fromId);
+            const toEl = document.getElementById(toId);
+            if (!fromEl || !toEl) return;
+
+            const r1 = fromEl.getBoundingClientRect();
+            const r2 = toEl.getBoundingClientRect();
+
+            // Calculate center anchors relative to the SVG canvas overlay
+            const x1 = r1.left + r1.width / 2 - canvasRect.left;
+            const y1 = r1.top + r1.height / 2 - canvasRect.top;
+            const x2 = r2.left + r2.width / 2 - canvasRect.left;
+            const y2 = r2.top + r2.height / 2 - canvasRect.top;
+
+            // Create curved cubic bezier lines for a dynamic flowing visual appearance
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const controlPointOffset = Math.abs(x2 - x1) * 0.5;
+            const d = `M ${x1} ${y1} C ${x1 + controlPointOffset} ${y1}, ${x2 - controlPointOffset} ${y2}, ${x2} ${y2}`;
+            
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', color);
+            path.setAttribute('stroke-width', weight);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('opacity', opacity);
+            path.setAttribute('class', 'connection-line');
+
+            if (animated) {
+                path.setAttribute('class', 'connection-line animate-dash');
+                path.setAttribute('stroke-width', weight + 1);
+                path.setAttribute('opacity', 0.95);
+            }
+
+            svg.appendChild(path);
+        }
+
+        // Active Flow Orchestrator (Toggles animated highlights and simulated data paths)
+        function activateFlow(flowName) {
+            const flow = flows[flowName];
+            if (!flow) return;
+
+            // Reset UI States
+            document.querySelectorAll('.flow-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'bg-indigo-950/20');
+            });
+            document.querySelectorAll('.node-card').forEach(card => {
+                card.classList.remove('ring-2', 'ring-indigo-500/50', 'scale-[1.02]');
+            });
+
+            // Active button highlight
+            document.getElementById(`btn-flow-${flowName}`).classList.add('border-indigo-500', 'bg-indigo-950/20');
+            document.getElementById('btn-clear-flow').classList.remove('hidden');
+
+            // Draw system-specific flow path in SVG Canvas
+            const svg = document.getElementById('svg-connections');
+            svg.innerHTML = ''; // wipe standard connections
+            const canvasRect = svg.getBoundingClientRect();
+
+            // Loop and draw all flow specific highlighting paths
+            flow.connections.forEach(conn => {
+                createLine(svg, canvasRect, conn.from, conn.to, flow.color, true, 3, 1.0);
+                
+                // Highlight nodes taking part in current protocol
+                const fEl = document.getElementById(conn.from);
+                const tEl = document.getElementById(conn.to);
+                if (fEl) fEl.classList.add('ring-2', 'ring-indigo-500/50', 'scale-[1.02]');
+                if (tEl) tEl.classList.add('ring-2', 'ring-indigo-500/50', 'scale-[1.02]');
+            });
+
+            // Update bottom log helper text
+            const statusBox = document.getElementById('flow-status-text');
+            statusBox.style.color = flow.color;
+            statusBox.innerHTML = `<i class="fa-solid fa-circle-nodes animate-spin mr-1"></i> ${runtimeT('dyn.flow.activePrefix', 'ATIVO:')} ${flow.text}`;
+
+            showToast(`${runtimeT('dyn.toast.flow', 'Simulando fluxo do sistema:')} ${flowName.toUpperCase()}`, 'fa-route', flow.color);
+        }
+
+        // Restore default canvas state
+        function clearFlows() {
+            document.querySelectorAll('.flow-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'bg-indigo-950/20');
+            });
+            document.querySelectorAll('.node-card').forEach(card => {
+                card.classList.remove('ring-2', 'ring-indigo-500/50', 'scale-[1.02]');
+            });
+            document.getElementById('btn-clear-flow').classList.add('hidden');
+            
+            const statusBox = document.getElementById('flow-status-text');
+            statusBox.style.color = '#6366f1';
+            statusBox.innerHTML = runtimeT('dyn.flow.defaultStatus', 'SELECIONE UM PROTOCOLO PARA INICIAR A SIMULAÇÃO');
+
+            drawConnections();
+            showToast(runtimeT('dyn.toast.reset', 'Visualização resetada para o mapa base.'), 'fa-arrow-rotate-left', '#6366f1');
+        }
+
+        // Sandbox CLI updates
+        function updateCliCommand() {
+            const selector = document.getElementById('cli-cmd-selector');
+            const target = selector.value;
+            const command = cliCommands[target];
+            if (command) {
+                document.getElementById('cli-cmd-display').innerText = command.cmd;
+            }
+        }
+
+        function executeCliCommand() {
+            const selector = document.getElementById('cli-cmd-selector');
+            const target = selector.value;
+            const command = cliCommands[target];
+            const outputTerminal = document.getElementById('cli-output');
+
+            if (command) {
+                outputTerminal.innerText = runtimeT('dyn.cli.running', 'Rodando operação do brain...\n');
+                outputTerminal.className = 'code-font text-[11px] text-slate-400 overflow-y-auto max-h-[160px] whitespace-pre-wrap leading-relaxed flex-1 animate-pulse';
+                
+                // Simulate process runtime lag
+                setTimeout(() => {
+                    outputTerminal.innerText = command.output;
+                    outputTerminal.className = 'code-font text-[11px] text-emerald-400 overflow-y-auto max-h-[160px] whitespace-pre-wrap leading-relaxed flex-1';
+                    
+                    // Connect CLI executions to node highlights in interface
+                    if (target === 'learn' || target === 'stage') {
+                        activateFlow('auto-learn');
+                        selectNode('storage-memory');
+                    } else if (target === 'recall') {
+                        activateFlow('context-retrieval');
+                        selectNode('service-qmd');
+                    }
+                }, 750);
+            }
+        }
+
+        // Copy utilities adhering to iframe safe clipboard standard
+        async function copyTextToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                return;
+            }
+            const dummy = document.createElement('textarea');
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+        }
+
+        async function copyCliCommand() {
+            const text = document.getElementById('cli-cmd-display').innerText;
+            await copyTextToClipboard(text);
+            showToast(runtimeT('dyn.toast.cliCopied', 'Comando CLI copiado para a área de transferência.'));
+        }
+
+        async function copyInspectorData() {
+            const text = document.getElementById('inspector-files').innerText;
+            await copyTextToClipboard(text);
+            showToast(runtimeT('dyn.toast.pathCopied', 'Path central copiado para a área de transferência.'));
+        }
+
+        // UI Toast Notifications
+        function showToast(message, iconClass = 'fa-circle-check', colorHex = '#10b981') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msgSpan = document.getElementById('toast-message');
+
+            icon.className = `fa-solid ${iconClass}`;
+            icon.style.color = colorHex;
+            msgSpan.innerText = message;
+
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

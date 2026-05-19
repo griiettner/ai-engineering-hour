@@ -29,7 +29,7 @@ A única coisa que pode estar em `~/.claude/projects/.../` são os `.jsonl` de s
 ---
 
 ## Arquivos
-Status verificado em 2026-05-12 (16 parts total após shift +1 que abriu o slot 10):
+Status verificado em 2026-05-19 (16 parts total após shift +1 que abriu o slot 10):
 
 | Part | Status | Tema |
 |------|--------|------|
@@ -43,7 +43,7 @@ Status verificado em 2026-05-12 (16 parts total após shift +1 que abriu o slot 
 | `part8.html` | ✅ | Agentes, Sub-Agentes & Agent Teams |
 | `part9.html` | ✅ | O Sistema Integrado |
 | `part10.html` | ✅ | TDD com IA · Testes Como Contrato |
-| `part11.html` | 📝 draft | Memória Avançada & Busca Local (era P10) |
+| `part11.html` | ✅ | Memória Viva · RAG Local + Reflect |
 | `part12.html` | 📝 draft | n8n & OpenClaw |
 | `part13.html` | 📝 draft | O Dev Sênior do Futuro |
 | `part14.html` | 📝 draft | Governança e Segurança |
@@ -72,6 +72,7 @@ Detalhes de cada sessão em `.claude/memory/project_sessions.md`.
 | P8 | Fuchsia | `#c026d3` |
 | P9 | Amber | `#d97706` |
 | P10 | Lime | `#65a30d` |
+| P11 | Blue | `#2563eb` |
 
 Fundo body sempre `stone-50` (`#fafaf9`). Texto principal `stone-800` (`#292524`). Novas parts escolhem cor distinta e documentam aqui + em `.claude/memory/project_conventions.md`.
 

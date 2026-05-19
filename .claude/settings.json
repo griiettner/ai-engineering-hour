@@ -51,7 +51,8 @@
       "Bash(sed -i '' 's/\"Ubivis\" — this/\"Ubivis\", this/' .claude/commands/review-part.md)",
       "Bash(sed -i '' 's/`navigator.clipboard.writeText\\(\\)` — never/`navigator.clipboard.writeText\\(\\)`, never/' .claude/commands/review-part.md)",
       "Bash(sed -i '' 's/real data — no/real data, no/' .claude/commands/review-part.md)",
-      "Bash(sed -i '' 's/in HTML — no/in HTML, no/' .claude/commands/review-part.md)"
+      "Bash(sed -i '' 's/in HTML — no/in HTML, no/' .claude/commands/review-part.md)",
+      "Bash(awk '{print $NF, $5}')"
     ],
     "additionalDirectories": [
       "/Users/griiettner/Projects/ubivis/ai-engineering-hour/demo/.claude",

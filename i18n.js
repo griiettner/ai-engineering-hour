@@ -51,13 +51,11 @@
 
   function apply () {
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
-      if (el.closest('pre')) return
       var val = t(el.getAttribute('data-i18n'))
       if (val) el.textContent = val
     })
 
     document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
-      if (el.closest('pre')) return
       var val = t(el.getAttribute('data-i18n-html'))
       if (val) el.innerHTML = val
     })

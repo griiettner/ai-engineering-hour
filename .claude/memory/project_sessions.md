@@ -74,8 +74,17 @@ metadata:
 - Charts: paradoxoChart (dual-axis line, cobertura sobe / bugs constantes), metricasChart (horizontal bar, sem TDD vs TDD-first)
 - Em 2026-05-12: arquivos partN.html de 10-15 shiftados para 11-16 para abrir o slot 10
 
+## P11 · Memória Viva · RAG Local + Reflect | Blue `#2563eb`
+- Concluído em 2026-05-19 (Phase 1)
+- Mantra: "A IA não precisa lembrar tudo. Precisa lembrar o que importa, e você precisa decidir o que importa."
+- 9 seções: Problema (load all vs query), RAG em 90s (embed/index/search + hybrid BM25 ∪ vector ∪ rerank), QMD (embeddinggemma-300M + qwen3-reranker-0.6b + SQLite FTS5 + sqlite-vec, MCP server), Memória Estática (`.agent/memory/` tool-agnostic, frontmatter YAML, dense bullets), Limite da Estática (virada da aula, conhecimento órfão), Reflect (skill end-of-session, 5 passos, reflection file dense), Lifecycle (high/medium/low routing, learn/stage/recall/graduate/reject, --rationale obrigatório, auto-learn launchd 30min, post-commit hook, memory-steward), Anti-patterns (5 pares), Próximos Passos (4 comandos)
+- Charts: `efficiencyChart` (line dual, tokens carregados por sessão · estática vs RAG), `capturaChart` (horizontal bar dual, captura por tipo de lição · manual vs reflect)
+- Complementa P2 (4 tipos de memória) sem repetir: foco em retrieval + auto-captura, não em curadoria estática
+- Ganchos cruzados: P5 (MCP), P6 (`.agent/` vs `.claude/`), P7 (skills), P8 (memory-steward agent), P4 (post-commit hook)
+- TBDs resolvidos com fallback: reflection file fictício (jwt-rotation-bug), apontar pro repo tobi/qmd, mostrar `qmd embed` + `qmd-reindex.sh`
+- Stack referenciada: phi4-mini via Ollama localhost:11434, launchd labels `dev.qmd.mcp` / `dev.qmd.reindex` / `dev.brain.auto-learn`
+
 ## Drafts shiftados em 2026-05-12 (eram P10-P15, agora P11-P16)
-- P11 `Memória Avançada & Busca Local (RAG/qmd)` · candidato a reformulação (sobrepõe com P2)
 - P12 `n8n & OpenClaw`
 - P13 `O Dev Sênior do Futuro`
 - P14 `Governança e Segurança`
