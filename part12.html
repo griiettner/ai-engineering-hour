@@ -3,26 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Hour P12: n8n & OpenClaw</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Engineering Hour P12: Arquitetura Operacional para Agentes</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f3a5f'/%3E%3Cpath d='M8 11h16M8 16h11M8 21h14' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="nav.js" defer></script>
+    <script src="i18n.js" defer></script>
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        slate: {
-                            950: '#020617',
+                        stone: {
+                            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+                            300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
                         },
-                        cyber: {
-                            purple: '#a855f7', // neon purple for agents
-                            cyan: '#06b6d4',   // electric cyan for workflows
-                            pink: '#ec4899',
+                        ops: {
+                            navy: '#1f3a5f',
+                            light: '#eff6ff',
+                            border: '#93c5fd',
+                            deep: '#0f2742',
+                            mint: '#ecfccb',
+                            rose: '#ffe4e6',
+                            amber: '#fef3c7'
                         }
                     },
                     fontFamily: {
@@ -34,311 +38,501 @@
         }
     </script>
 
+    <link rel="stylesheet" href="shared.css">
     <style>
-        body { background-color: #020617; color: #e2e8f0; }
-        .nav-item.active {
-            background-color: #1e293b;
-            border-left: 4px solid #a855f7;
-            color: #f8fafc;
-            font-weight: 600;
+        :root { --accent: #1f3a5f; }
+        .ops-callout {
+            background:
+                linear-gradient(135deg, rgba(239,246,255,0.98), rgba(255,255,255,0.94)),
+                radial-gradient(circle at top right, rgba(29,78,216,0.08), transparent 45%);
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin: auto;
-            height: 300px;
-            max-height: 400px;
+        .doc-card {
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
         }
-        .cyber-card { 
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(168, 85, 247, 0.2);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+        .doc-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 28px -18px rgba(31, 58, 95, 0.35);
         }
-        .cyber-card:hover { 
-            border-color: rgba(168, 85, 247, 0.6);
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+        .tree-panel {
+            background-image:
+                linear-gradient(rgba(231,229,228,0.35) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(231,229,228,0.35) 1px, transparent 1px);
+            background-size: 28px 28px;
         }
-        .node-pulse { animation: cyber-pulse 2s infinite; }
-        @keyframes cyber-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(6, 182, 212, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+        .bridge-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-radius: 9999px;
+            padding: 0.35rem 0.7rem;
+            font-size: 0.72rem;
+            font-weight: 700;
         }
-        pre {
-            background-color: #000;
-            color: #a855f7;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.825rem;
-            overflow-x: auto;
-            border: 1px solid #1e293b;
+        .inline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.75rem;
         }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
 
-    <!-- Chosen Palette: Cyber Automation (Slate 950, Neon Purple, Electric Cyan) -->
-    
-    <!-- Application Structure Plan: The SPA is designed as a "Hyper-Automation Control Center". It focuses on the synergy between n8n (visual workflows) and OpenClaw (agent execution). The structure follows: 1. The Productivity Leap (Bar chart showing the exponential gain from agents), 2. The Orchestrator (n8n node logic), 3. The Executor (OpenClaw agent capabilities), and 4. Agentic Ecosystem (How they respond to Slack/GitHub events). This design justifies why this is the "peak" of the series. -->
-
-    <!-- Visualization & Content Choices: 
-         1. Productivity Leap -> Compare -> Bar Chart -> Justification: Contrasts manual work, basic AI, and fully agentic automation. Method: Chart.js.
-         2. n8n Role -> Organize -> Interactive Workflow Nodes -> Justification: Visualizes n8n as the "logic board" for events. Method: Tailwind Grid.
-         3. OpenClaw Role -> Inform -> Capability List -> Justification: Details what an autonomous agent can do (code, chat, trigger). Method: Tailwind Cards.
-         4. Live Ecosystem -> Process -> Interactive Workflow Path -> Justification: Simulates an event (e.g., Bug Report) traveling through n8n to an OpenClaw Agent. Method: JS State.
-         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-
-    <!-- Header -->
-    <header class="bg-slate-900/80 border-b border-slate-800 sticky top-0 z-20 backdrop-blur-md">
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="text-2xl">🤖</span>
-                <h1 class="text-xl font-bold text-white tracking-tight">Engineering Hour <span class="text-cyber-purple">P12</span></h1>
+                <span class="text-2xl">🗂️</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">
+                    Engineering Hour <span style="color:#1f3a5f">P12</span>
+                </h1>
             </div>
-            <div class="text-sm font-medium text-slate-400 hidden sm:block">
-                Módulo 12: Hiper-automação com n8n & OpenClaw
+            <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
+                Módulo 12: Arquitetura Operacional para Agentes
             </div>
         </div>
     </header>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
-        
-        <!-- Sidebar Navigation -->
-        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-2 bg-slate-900/50 p-4 rounded-xl border border-slate-800 h-fit sticky top-24">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilar de Agentes</p>
-            <button onclick="navigate('leap')" id="nav-leap" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 flex items-center gap-3">
-                <span>🚀</span> Salto de Escala
+
+        <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
+            <p class="nav-group-label" data-i18n="nav.group.concept">O Conceito</p>
+            <button onclick="navigate('porque')" id="nav-porque" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🏗️</span> <span data-i18n="nav.porque">Por que arquitetura operacional</span>
             </button>
-            <button onclick="navigate('n8n')" id="nav-n8n" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 flex items-center gap-3">
-                <span>🧩</span> Orquestração n8n
+            <button onclick="navigate('canonico')" id="nav-canonico" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🧭</span> <span data-i18n="nav.canonico">Canônico + adapters</span>
             </button>
-            <button onclick="navigate('openclaw')" id="nav-openclaw" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 flex items-center gap-3">
-                <span>🦅</span> Execução OpenClaw
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.structure">A Estrutura</p>
+            <button onclick="navigate('layout')" id="nav-layout" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🌲</span> <span data-i18n="nav.layout">Layout do repositório</span>
             </button>
-            <button onclick="navigate('ecosystem')" id="nav-ecosystem" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 flex items-center gap-3">
-                <span>⚡</span> Fluxo de Agentes
+            <button onclick="navigate('memory-skills')" id="nav-memory-skills" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🧠</span> <span data-i18n="nav.memory-skills">Memory, skills e tasks</span>
+            </button>
+            <button onclick="navigate('bridges')" id="nav-bridges" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔌</span> <span data-i18n="nav.bridges">Bridges por ferramenta</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.ops">Operação</p>
+            <button onclick="navigate('indexes')" id="nav-indexes" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🗃️</span> <span data-i18n="nav.indexes">Índices e sync</span>
+            </button>
+            <button onclick="navigate('anti-patterns')" id="nav-anti-patterns" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚠️</span> <span data-i18n="nav.anti-patterns">Anti-patterns</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.action">Ação</p>
+            <button onclick="navigate('bootstrap')" id="nav-bootstrap" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> <span data-i18n="nav.bootstrap">Bootstrap recomendado</span>
             </button>
         </nav>
 
-        <!-- Main Content -->
-        <main class="flex-1 bg-slate-900/30 rounded-xl border border-slate-800 p-6 md:p-8">
-            
-            <!-- SECTION 1: The Productivity Leap -->
-            <section id="sec-leap" class="block animate-fade-in">
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+
+            <section id="sec-porque" class="block">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">🚀 O Salto para a Hiper-automação</h2>
-                    <p class="text-slate-400">
-                        Até aqui, usamos a IA como assistente. Agora, ela se torna um **colaborador autônomo**. Ao combinar n8n e OpenClaw, removemos a necessidade de intervenção humana em processos repetitivos de DevOps e Codificação.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🏗️</span> <span data-i18n="sec.porque.h2">Sem arquitetura operacional, agente bom vira improviso caro</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.porque.intro">
+                        O problema não é conseguir uma boa resposta uma vez. O problema é conseguir a mesma qualidade na próxima task, em outra ferramenta, com menos contexto, menos drift e menos retrabalho. É isso que uma arquitetura operacional resolve.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-slate-900/50 p-6 rounded-2xl border border-slate-800">
-                    <div class="chart-container">
-                        <canvas id="leapChart"></canvas>
+                <div class="ops-callout rounded-2xl border border-blue-200 p-5 mb-8">
+                    <p class="text-sm font-semibold text-blue-900 mb-2" data-i18n="sec.porque.callout.label">Tese da sessão</p>
+                    <p class="text-lg font-bold text-blue-950 leading-snug" data-i18n="sec.porque.callout.body">Um sistema de agentes escalável começa por roteadores curtos, memória organizada, skills modulares, tasks explícitas e metadados regeneráveis.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+                    <div class="doc-card rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                        <p class="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3" data-i18n="sec.porque.good.label">Quando está bem montado</p>
+                        <ul class="space-y-2 text-sm text-emerald-900">
+                            <li data-i18n="sec.porque.good.li1">`AGENT.md` só roteia contexto, não tenta carregar o projeto inteiro</li>
+                            <li data-i18n="sec.porque.good.li2">A mesma base serve Claude, Codex e Cursor sem duplicar a verdade</li>
+                            <li data-i18n="sec.porque.good.li3">Cada task preserva sua história operacional dentro da própria pasta</li>
+                            <li data-i18n="sec.porque.good.li4">Índices e stubs podem ser regenerados sem medo</li>
+                        </ul>
                     </div>
-                    <div class="space-y-4">
-                        <div class="bg-slate-800/50 p-4 rounded-lg border-l-4 border-cyber-cyan">
-                            <h4 class="font-bold text-sm text-cyber-cyan uppercase">Processos Reativos</h4>
-                            <p class="text-xs text-slate-400">Um bug no Slack aciona o n8n -> n8n chama o OpenClaw -> OpenClaw analisa o código e propõe o fix.</p>
-                        </div>
-                        <div class="bg-slate-800/50 p-4 rounded-lg border-l-4 border-cyber-purple">
-                            <h4 class="font-bold text-sm text-cyber-purple uppercase">Agentes Pró-ativos</h4>
-                            <p class="text-xs text-slate-400 font-bold">IAs que monitoram logs e criam PRs de refatoração sozinhas durante a madrugada.</p>
-                        </div>
+                    <div class="doc-card rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <p class="text-xs font-bold uppercase tracking-widest text-rose-700 mb-3" data-i18n="sec.porque.bad.label">Quando está mal montado</p>
+                        <ul class="space-y-2 text-sm text-rose-900">
+                            <li data-i18n="sec.porque.bad.li1">Prompt gigante tenta substituir memória, regras, tasks e tooling</li>
+                            <li data-i18n="sec.porque.bad.li2">Cada ferramenta recebe uma cópia diferente dos mesmos fluxos</li>
+                            <li data-i18n="sec.porque.bad.li3">Histórico de execução se mistura com conhecimento durável do projeto</li>
+                            <li data-i18n="sec.porque.bad.li4">Os arquivos de descoberta envelhecem mais rápido que o código</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                    <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                        <h3 class="font-bold text-stone-800" data-i18n="sec.porque.code.title">Bootstrap mínimo de entrada</h3>
+                        <p class="text-sm text-stone-500 mt-1" data-i18n="sec.porque.code.desc">O papel do arquivo inicial é mandar o agente para a rota certa com o menor custo possível.</p>
+                    </div>
+                    <pre id="code-bootstrap"># Contexto do Agente
+
+Este arquivo é o contexto inicial leve para agentes.
+Use-o como mapa de rotas, não como memória completa do projeto.
+
+- Trabalho de task ou ticket: leia `.agents/tasks/index.yaml` primeiro
+- Regras de workflow de tickets: leia `.agents/skills/tkt-management/SKILL.md`
+- Roteador de memória durável: leia `.agents/memory/MEMORY.md`
+- Contexto de arquitetura: leia `.agents/memory/architecture/index.yaml` primeiro
+- Decisões duráveis: leia `.agents/memory/decisions/index.yaml` primeiro
+
+Carregue apenas os arquivos relevantes para a tarefa atual.</pre>
+                </div>
+            </section>
+
+            <section id="sec-canonico" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🧭</span> <span data-i18n="sec.canonico.h2">Canônico + adapters é a decisão que segura o sistema</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.canonico.intro">
+                        Se a sua fonte de verdade muda por ferramenta, a manutenção explode. O layout canônico vive em `.agents/`. O resto existe para compatibilidade, descoberta ou UX de cada ambiente.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.canonico.card1.label">Fonte de verdade</p>
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.canonico.card1.title">`.agents/`</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.canonico.card1.desc">Memória, skills, tasks e tooling regenerável vivem aqui. É o que você edita de verdade.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.canonico.card2.label">Compatibilidade</p>
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.canonico.card2.title">`.claude/skills/` e afins</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.canonico.card2.desc">Stubs, metadata local e bridges existem para a ferramenta consumir sem duplicar a lógica real.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.canonico.card3.label">Risco principal</p>
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.canonico.card3.title">Drift silencioso</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.canonico.card3.desc">Quando o time edita o adapter e esquece o canônico, o comportamento diverge sem ninguém perceber.</p>
+                    </div>
+                </div>
+
+                <div class="inline-grid mb-6">
+                    <span class="bridge-chip bg-blue-50 text-blue-800 border border-blue-200">Claude Code · bridge explícita</span>
+                    <span class="bridge-chip bg-indigo-50 text-indigo-800 border border-indigo-200">Codex · metadata local opcional</span>
+                    <span class="bridge-chip bg-stone-100 text-stone-700 border border-stone-200">Cursor · convenção e naming</span>
+                </div>
+
+                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+                    <p class="text-sm font-semibold text-amber-900 mb-2" data-i18n="sec.canonico.rule.label">Regra operacional</p>
+                    <p class="text-lg font-bold text-amber-950" data-i18n="sec.canonico.rule.body">Edite o artefato canônico. Regenere o que for derivado. Nunca trate bridge como fonte da verdade.</p>
+                </div>
+            </section>
+
+            <section id="sec-layout" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🌲</span> <span data-i18n="sec.layout.h2">A árvore precisa refletir função, não só organização estética</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.layout.intro">
+                        A estrutura recomendada separa bootstrap, memória, skills, tasks e tooling. Isso reduz custo de descoberta e deixa claro onde cada tipo de informação deve viver.
+                    </p>
+                </div>
+
+                <div class="tree-panel rounded-2xl border border-stone-200 p-5 mb-6">
+                    <pre>.
+├── AGENT.md
+├── CLAUDE.md
+├── README.md
+├── .claude/
+│   ├── commands/
+│   │   └── sync-skills.md
+│   └── skills/              # stubs gerados de compatibilidade para Claude
+└── .agents/
+    ├── agents/
+    ├── memory/
+    │   ├── MEMORY.md
+    │   ├── architecture/
+    │   ├── decisions/
+    │   └── principles/
+    ├── plans/
+    ├── skills/
+    │   ├── tkt-management/
+    │   ├── tkt-plan/
+    │   ├── tkt-exec/
+    │   └── tkt-sync/
+    ├── tasks/
+    │   ├── index.yaml
+    │   ├── indexes/
+    │   └── TKT-001/
+    ├── tools/
+    │   ├── sync_claude_skills.py
+    │   ├── tkt_sync.py
+    │   └── tkt_validate.py
+    ├── settings.json
+    └── settings.local.json</pre>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-3" data-i18n="sec.layout.card1.title">Camadas permanentes</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.layout.card1.desc">`memory`, `skills` e `tasks` formam o núcleo. São eles que preservam contexto, procedimento e execução ao longo do tempo.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-3" data-i18n="sec.layout.card2.title">Camadas derivadas</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.layout.card2.desc">`index.yaml`, shards e stubs ajudam descoberta. Eles só são confiáveis quando podem ser reconstruídos pelo repo.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 2: n8n Orchestration -->
-            <section id="sec-n8n" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-white mb-2">🧩 n8n: O Sistema Nervoso</h2>
-                    <p class="text-slate-400 leading-relaxed">
-                        O n8n é o orquestrador visual. Ele conecta centenas de apps (Slack, GitHub, Jira) e define a <strong>lógica de disparo</strong> para os agentes. Ele é o cérebro organizacional que decide QUANDO um agente deve agir.
+            <section id="sec-memory-skills" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🧠</span> <span data-i18n="sec.memory.h2">Memory, skills e tasks têm ciclos de vida diferentes</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.memory.intro">
+                        Misturar esses três domínios é uma das formas mais rápidas de degradar um sistema de agentes. Cada um existe para uma pergunta diferente.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div class="cyber-card p-4 rounded-xl text-center">
-                        <div class="text-2xl mb-2">📥</div>
-                        <h4 class="font-bold text-sm mb-1">Gatilhos (Triggers)</h4>
-                        <p class="text-[10px] text-slate-500 italic">Webhook, Cron, GitHub PR, Slack Message.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                        <h3 class="font-bold text-blue-900 mb-2" data-i18n="sec.memory.card1.title">Memory</h3>
+                        <p class="text-sm text-blue-900/90" data-i18n="sec.memory.card1.desc">Conhecimento durável: arquitetura, princípios, ADRs, feedbacks e coisas que precisam sobreviver à task atual.</p>
                     </div>
-                    <div class="cyber-card p-4 rounded-xl text-center border-cyber-cyan node-pulse">
-                        <div class="text-2xl mb-2">⚙️</div>
-                        <h4 class="font-bold text-sm mb-1 text-cyber-cyan">Lógica</h4>
-                        <p class="text-[10px] text-slate-500 italic">If/Else, Loops, Data Transformation.</p>
+                    <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+                        <h3 class="font-bold text-indigo-900 mb-2" data-i18n="sec.memory.card2.title">Skills</h3>
+                        <p class="text-sm text-indigo-900/90" data-i18n="sec.memory.card2.desc">Procedimento reutilizável. A skill ensina como operar, não armazena a história da última execução.</p>
                     </div>
-                    <div class="cyber-card p-4 rounded-xl text-center">
-                        <div class="text-2xl mb-2">📤</div>
-                        <h4 class="font-bold text-sm mb-1">Ações</h4>
-                        <p class="text-[10px] text-slate-500 italic">Chamar OpenClaw, Enviar Email, Jira Update.</p>
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                        <h3 class="font-bold text-emerald-900 mb-2" data-i18n="sec.memory.card3.title">Tasks</h3>
+                        <p class="text-sm text-emerald-900/90" data-i18n="sec.memory.card3.desc">História operacional por work item: objetivo, plano, updates, evidência e relatório de conclusão.</p>
                     </div>
                 </div>
 
-                <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                    <h4 class="text-xs font-bold text-cyber-cyan uppercase mb-4 tracking-widest">Exemplo de Workflow:</h4>
-                    <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
-                        <div class="p-2 border border-slate-700 rounded bg-slate-900">GitHub (New PR)</div>
-                        <div class="text-cyber-cyan">─────▶</div>
-                        <div class="p-2 border border-cyber-cyan rounded bg-slate-900">n8n: Filtra Arquivos</div>
-                        <div class="text-cyber-cyan">─────▶</div>
-                        <div class="p-2 border border-cyber-purple rounded bg-slate-900">OpenClaw: Code Review</div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+                    <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                        <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                            <h3 class="font-bold text-stone-800" data-i18n="sec.memory.code1.title">Exemplo de frontmatter de memória</h3>
+                        </div>
+                        <pre>---
+id: architecture-overview
+title: Visão geral da arquitetura
+type: architecture
+status: ativo
+created: 2026-05-25
+updated: 2026-05-25
+tags:
+  - arquitetura
+  - roteamento
+read_when:
+  - alterando a estrutura de pastas
+---</pre>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                        <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                            <h3 class="font-bold text-stone-800" data-i18n="sec.memory.code2.title">Exemplo de task mínima</h3>
+                        </div>
+                        <pre>---
+id: TKT-001
+title: Estabelecer scaffolding de agentes
+artifact: tarefa
+status: concluida
+owner: repo-agent
+created: 2026-05-25
+updated: 2026-05-25
+skills:
+  - tkt-management
+---
+
+# TKT-001
+
+- objetivo
+- contexto
+- evidência
+- saída produzida</pre>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                    <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                        <h3 class="font-bold text-stone-800" data-i18n="sec.memory.code3.title">Skill pequena, específica e canônica</h3>
+                    </div>
+                    <pre>.agents/skills/tkt-plan/
+├─ SKILL.md
+└─ agents/
+   └─ openai.yaml
+
+# SKILL.md
+Crie ou atualize `plan.md` apenas quando a task tiver decisões de implementação em aberto.
+
+- Use o contexto do ticket em `.agents/tasks/TKT-XXX/`
+- Evite planejar quando `task.md` já for diretamente executável
+- Preserve apenas o plano mínimo útil</pre>
+                </div>
+            </section>
+
+            <section id="sec-bridges" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔌</span> <span data-i18n="sec.bridges.h2">Cada ferramenta descobre contexto de um jeito diferente</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.bridges.intro">
+                        O erro comum é fingir simetria. Claude, Codex e Cursor têm capacidades diferentes de descoberta, invocation e metadata. A arquitetura boa lida com isso explicitamente.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.bridges.card1.label">Claude Code</p>
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.bridges.card1.title">Bridge explícita</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.bridges.card1.desc">Use `.claude/skills/` como stub gerado e mantenha `CLAUDE.md` curto, apontando de volta para a estrutura canônica do repo.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.bridges.card2.label">Codex</p>
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.bridges.card2.title">Metadata local opcional</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.bridges.card2.desc">Quando fizer sentido, mantenha `agents/openai.yaml` ao lado da skill canônica para display metadata e política de invocation.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.bridges.card3.label">Cursor</p>
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.bridges.card3.title">Convenção primeiro</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.bridges.card3.desc">Sem adapter nativo forte, padronize naming, argumentos e contratos de uso. O objetivo é preservar o workflow, não simular features inexistentes.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 3: OpenClaw Execution -->
-            <section id="sec-openclaw" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-white mb-2">🦅 OpenClaw: O Braço Executor</h2>
-                    <p class="text-slate-400">
-                        O OpenClaw é onde os agentes ganham vida. Ele permite criar entidades que respondem chat, executam scripts, disparam outros sub-agentes e interagem com o sistema de arquivos de forma autônoma.
+            <section id="sec-indexes" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🗃️</span> <span data-i18n="sec.indexes.h2">Índices só funcionam se forem baratos de ler e baratos de reconstruir</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.indexes.intro">
+                        O papel de `index.yaml` não é virar banco de dados paralelo. É reduzir custo de descoberta. Se ele não acompanha a árvore real, vira ruído e engana o agente.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="cyber-card p-6 rounded-2xl">
-                        <h3 class="font-bold text-cyber-purple mb-3 flex items-center gap-2"><span>👤</span> Agentes Especialistas</h3>
-                        <p class="text-sm text-slate-400 mb-4">Crie personas como "DB Admin Agent" ou "Refactor Expert" que mantêm sua própria memória e ferramentas.</p>
-                        <pre class="m-0 text-[10px]">
-claw.createAgent({
-  name: "DocUpdater",
-  tools: ["fs", "web_search"],
-  goal: "Sincronizar MD com código"
-});</pre>
-                    </div>
-                    <div class="cyber-card p-6 rounded-2xl">
-                        <h3 class="font-bold text-cyber-pink mb-3 flex items-center gap-2"><span>💬</span> Interatividade Total</h3>
-                        <p class="text-sm text-slate-400 mb-4">Agentes que respondem em threads de chat, mantendo o histórico da conversa e agindo sobre o código em tempo real.</p>
-                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 text-[11px] text-slate-400 italic">
-                            "Agente, vi que o teste X falhou no CI. Tente corrigir usando o estilo do nosso TECH_STACK.md."
+                <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5 mb-6">
+                    <p class="text-sm font-semibold text-blue-900 mb-2" data-i18n="sec.indexes.rule.label">Regra operacional</p>
+                    <p class="text-lg font-bold text-blue-950" data-i18n="sec.indexes.rule.body">Se um índice é importante para o agente, ele precisa ser gerado e validado pelo próprio repositório.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+                    <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                        <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                            <h3 class="font-bold text-stone-800" data-i18n="sec.indexes.code1.title">Índice temático de memória</h3>
                         </div>
+                        <pre>entries:
+  - id: principles-constitution
+    file: .agents/memory/principles/constitution.md
+    status: ativo
+  - id: architecture-overview
+    file: .agents/memory/architecture/overview.md
+    status: ativo</pre>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                        <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                            <h3 class="font-bold text-stone-800" data-i18n="sec.indexes.code2.title">Shard de tasks por intervalo</h3>
+                        </div>
+                        <pre>- range: TKT-001-025
+  file: .agents/tasks/indexes/TKT-001-025.yaml
+  count: 2
+  updated: 2026-05-25
+  statuses:
+    - concluido: 1
+    - em_andamento: 1</pre>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.indexes.card1.title">Esquema estável</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.indexes.card1.desc">Campos previsíveis em YAML evitam parse ambíguo e facilitam automação simples.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.indexes.card2.title">Sync e validação</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.indexes.card2.desc">Scripts como `tkt_sync.py`, `tkt_validate.py` e `sync_claude_skills.py` mantêm tasks, índices e bridges alinhados.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.indexes.card3.title">Descoberta barata</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.indexes.card3.desc">Leia o menor arquivo útil primeiro. O índice existe para evitar varrer a árvore inteira.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 4: Agentic Ecosystem -->
-            <section id="sec-ecosystem" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-white mb-2">⚡ Fluxo de Agentes em Ação</h2>
-                    <p class="text-slate-400">
-                        Simule um fluxo real: Um desenvolvedor reporta um bug no Slack, e as máquinas cuidam do triagem inicial.
+            <section id="sec-anti-patterns" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.anti.h2">Os erros mais caros não são técnicos, são estruturais</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.anti.intro">
+                        Quando a arquitetura operacional quebra, o efeito aparece como contexto inchado, task sem rastreabilidade e comportamento inconsistente entre ferramentas.
                     </p>
                 </div>
 
-                <div class="bg-slate-950 rounded-2xl p-6 shadow-2xl border border-slate-800">
-                    <!-- Workflow Visual -->
-                    <div class="flex flex-col gap-6">
-                        <!-- Step 1: Input -->
-                        <div id="flow-1" class="flex items-center gap-4 transition-all duration-500">
-                            <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-xl">💬</div>
-                            <div class="flex-1 p-3 bg-slate-900 rounded-xl border border-slate-700 text-sm">
-                                <span class="text-cyber-cyan font-bold">Slack:</span> "Erro 404 no endpoint de busca de usuários."
-                            </div>
-                        </div>
-
-                        <!-- Connector -->
-                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-6"></div>
-
-                        <!-- Step 2: n8n -->
-                        <div id="flow-2" class="flex items-center gap-4 opacity-30 transition-all duration-500">
-                            <div class="w-10 h-10 rounded-full bg-cyber-cyan flex items-center justify-center text-xl text-slate-950 font-bold">🧩</div>
-                            <div class="flex-1 p-3 bg-slate-900 rounded-xl border border-cyber-cyan text-sm">
-                                <span class="text-cyber-cyan font-bold">n8n:</span> Identifica contexto e dispara agente OpenClaw de SRE.
-                            </div>
-                        </div>
-
-                        <!-- Connector -->
-                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-6"></div>
-
-                        <!-- Step 3: OpenClaw -->
-                        <div id="flow-3" class="flex items-center gap-4 opacity-30 transition-all duration-500">
-                            <div class="w-10 h-10 rounded-full bg-cyber-purple flex items-center justify-center text-xl text-slate-950 font-bold">🦅</div>
-                            <div class="flex-1 p-3 bg-slate-900 rounded-xl border border-cyber-purple text-sm">
-                                <span class="text-cyber-purple font-bold">OpenClaw Agent:</span> Analisa logs, encontra o erro no <code>routes.ts</code> e gera o fix.
-                            </div>
-                        </div>
+                <div class="space-y-4">
+                    <div class="antipattern-wrong rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.item1.title">Transformar `AGENT.md` em dump file</h3>
+                        <p class="text-sm text-rose-900/80" data-i18n="sec.anti.item1.desc">Se o bootstrap tenta ensinar tudo de uma vez, ele deixa de ser roteador e vira custo fixo de contexto.</p>
                     </div>
-
-                    <div class="mt-8 flex justify-center">
-                        <button id="run-flow-btn" onclick="runAgentFlow()" class="bg-cyber-purple hover:bg-purple-600 text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg shadow-purple-900/50">
-                            Simular Automação Ponta-a-Ponta ➔
-                        </button>
+                    <div class="antipattern-wrong rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.item2.title">Editar a cópia exposta em vez da skill canônica</h3>
+                        <p class="text-sm text-rose-900/80" data-i18n="sec.anti.item2.desc">Isso cria drift entre `.agents/skills/` e o adapter da ferramenta, e ninguém sabe mais qual versão vale.</p>
                     </div>
-                </div>
-
-                <div class="mt-8 p-6 bg-slate-900 text-slate-300 rounded-2xl border-l-8 border-cyber-pink shadow-xl italic font-serif">
-                    <h4 class="not-italic font-bold text-white mb-2 uppercase text-xs tracking-widest text-cyber-pink">Veredito da Parte 11:</h4>
-                    "A automação de workflows (n8n) e a autonomia de agentes (OpenClaw) são as chaves para desentupir o gargalo humano. O dev agora gerencia fluxos, não mais apenas arquivos."
+                    <div class="antipattern-wrong rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.item3.title">Misturar memória durável com histórico de task</h3>
+                        <p class="text-sm text-rose-900/80" data-i18n="sec.anti.item3.desc">Conhecimento de projeto e narrativa operacional têm ciclos de vida diferentes e precisam de casas diferentes.</p>
+                    </div>
+                    <div class="antipattern-wrong rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.item4.title">Assumir descoberta igual em todas as ferramentas</h3>
+                        <p class="text-sm text-rose-900/80" data-i18n="sec.anti.item4.desc">Claude, Codex e Cursor não têm o mesmo modelo de invocation, então a integração não pode ser tratada como se fosse idêntica.</p>
+                    </div>
+                    <div class="antipattern-right rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                        <h3 class="font-bold text-emerald-900 mb-2" data-i18n="sec.anti.item5.title">Manter tudo regenerável</h3>
+                        <p class="text-sm text-emerald-900/80" data-i18n="sec.anti.item5.desc">O que for derivado deve ser recriado por script. O que for canônico deve ser pequeno, explícito e fácil de editar.</p>
+                    </div>
                 </div>
             </section>
 
+            <section id="sec-bootstrap" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.bootstrap.h2">O caminho curto é começar do scaffold certo</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.bootstrap.intro">
+                        Em vez de inventar a árvore inteira no improviso, o fluxo recomendado é clonar `griiettner/agents-scaffolding`, trocar placeholders e adaptar o conteúdo canônico ao seu projeto.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5 mb-6">
+                    <p class="text-sm font-semibold text-blue-900 mb-2" data-i18n="sec.bootstrap.code.label">Clone direto</p>
+                    <pre>git clone https://github.com/griiettner/agents-scaffolding
+cd agents-scaffolding</pre>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">1</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.bootstrap.step1.title">Clone o scaffold</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.bootstrap.step1.desc">Use a árvore pronta como base para evitar discutir naming, indexação e bridges a cada repo novo.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">2</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.bootstrap.step2.title">Troque placeholders por regras reais</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.bootstrap.step2.desc">Atualize `AGENT.md`, `CLAUDE.md`, arquitetura, princípios, decisões e exemplos de task para refletir o projeto verdadeiro.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">3</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.bootstrap.step3.title">Defina skills canônicas</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.bootstrap.step3.desc">Cada workflow recorrente deve ganhar sua própria skill em `.agents/skills/`, e não um bloco perdido em um prompt gigante.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">4</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.bootstrap.step4.title">Regenere adapters e índices</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.bootstrap.step4.desc">Sempre que a estrutura mudar, rode sync e validação para manter bridges e metadata coerentes.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">5</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.bootstrap.step5.title">Abra a ferramenta na raiz do repo</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.bootstrap.step5.desc">É isso que permite descoberta local de memória, skills e tasks sem depender de contexto manual em toda sessão.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="session-complete" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 hidden">
+                    <p class="text-sm font-semibold text-slate-700 mb-2" data-i18n="sec.bootstrap.final.label">Resumo final</p>
+                    <p class="text-lg font-bold text-slate-900" data-i18n="sec.bootstrap.final.body">Trate `.agents/` como sistema de registro, exponha compatibilidade por ferramenta só onde necessário e mantenha tudo que for derivado sempre regenerável.</p>
+                </div>
+            </section>
         </main>
     </div>
-
-    <!-- JavaScript Logic -->
-    <script>
-        let currentState = { activeSection: 'leap', chart: null };
-
-        function navigate(sectionId) {
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`nav-${sectionId}`).classList.add('active');
-            
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
-
-            if (sectionId === 'leap' && !currentState.chart) initChart();
-            currentState.activeSection = sectionId;
-        }
-
-        function initChart() {
-            const ctx = document.getElementById('leapChart').getContext('2d');
-            currentState.chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Manual', 'IA Assistida', 'Agentes (n8n+Claw)'],
-                    datasets: [{
-                        label: 'Tasks por Dia',
-                        data: [5, 15, 65],
-                        backgroundColor: [
-                            'rgba(71, 85, 105, 0.4)',
-                            'rgba(6, 182, 212, 0.6)',
-                            '#a855f7'
-                        ],
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        }
-
-        let flowStep = 1;
-        function runAgentFlow() {
-            if(flowStep < 3) {
-                flowStep++;
-                document.getElementById(`flow-${flowStep}`).classList.remove('opacity-30');
-            } else {
-                document.getElementById('run-flow-btn').innerText = "Processo Finalizado!";
-                document.getElementById('run-flow-btn').classList.add('opacity-50', 'pointer-events-none');
-            }
-        }
-
-        window.onload = () => {
-            initChart();
-        };
-    </script>
 </body>
 </html>

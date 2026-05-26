@@ -29,7 +29,7 @@ A única coisa que pode estar em `~/.claude/projects/.../` são os `.jsonl` de s
 ---
 
 ## Arquivos
-Status verificado em 2026-05-19 (16 parts total após shift +1 que abriu o slot 10):
+Status verificado em 2026-05-25 (17 parts total após inserir a nova P12 e renumerar os drafts finais):
 
 | Part | Status | Tema |
 |------|--------|------|
@@ -44,11 +44,12 @@ Status verificado em 2026-05-19 (16 parts total após shift +1 que abriu o slot 
 | `part9.html` | ✅ | O Sistema Integrado |
 | `part10.html` | ✅ | TDD com IA · Testes Como Contrato |
 | `part11.html` | ✅ | Memória Viva · RAG Local + Reflect |
-| `part12.html` | 📝 draft | n8n & OpenClaw |
-| `part13.html` | 📝 draft | O Dev Sênior do Futuro |
-| `part14.html` | 📝 draft | Governança e Segurança |
-| `part15.html` | 📝 draft | Métricas e ROI |
-| `part16.html` | 📝 draft | A Próxima Fronteira |
+| `part12.html` | ✅ | Arquitetura Operacional para Agentes |
+| `part13.html` | 📝 draft | n8n & OpenClaw |
+| `part14.html` | 📝 draft | O Dev Sênior do Futuro |
+| `part15.html` | 📝 draft | Governança e Segurança |
+| `part16.html` | 📝 draft | Métricas e ROI |
+| `part17.html` | 📝 draft | A Próxima Fronteira |
 | `agents-structure.html` | ✅ | Docs standalone · Estrutura `.agents/` + `AGENT.md` |
 
 Detalhes de cada sessão em `.claude/memory/project_sessions.md`.
@@ -74,6 +75,7 @@ Detalhes de cada sessão em `.claude/memory/project_sessions.md`.
 | P9 | Amber | `#d97706` |
 | P10 | Lime | `#65a30d` |
 | P11 | Blue | `#2563eb` |
+| P12 | Ink Blue | `#1f3a5f` |
 
 Fundo body sempre `stone-50` (`#fafaf9`). Texto principal `stone-800` (`#292524`). Novas parts escolhem cor distinta e documentam aqui + em `.claude/memory/project_conventions.md`.
 

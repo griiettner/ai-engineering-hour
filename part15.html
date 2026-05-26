@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Hour P15: Métricas e ROI</title>
+    <title>Engineering Hour P15: Governança e Segurança</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,10 +25,11 @@
                             800: '#292524',
                             900: '#1c1917',
                         },
-                        success: {
-                            emerald: '#059669', // emerald for growth/ROI
-                            slate: '#1e293b',   // slate for metrics
-                            gold: '#ca8a04',
+                        security: {
+                            red: '#991b1b', // ruby red for risk
+                            amber: '#d97706', // amber for warning
+                            slate: '#0f172a', // dark slate for governance
+                            cyan: '#0891b2', // cyan for sandbox
                         }
                     },
                     fontFamily: {
@@ -44,8 +45,8 @@
         body { background-color: #fafaf9; color: #1e293b; }
         .nav-item.active {
             background-color: #f1f5f9;
-            border-left: 4px solid #059669;
-            color: #059669;
+            border-left: 4px solid #991b1b;
+            color: #991b1b;
             font-weight: 600;
         }
         .chart-container {
@@ -56,12 +57,28 @@
             height: 300px;
             max-height: 400px;
         }
-        .metric-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .risk-badge { 
+            animation: pulse-red 2s infinite; 
         }
-        .metric-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        @keyframes pulse-red {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(153, 27, 27, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(153, 27, 27, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(153, 27, 27, 0); }
+        }
+        .security-step {
+            border-left: 2px solid #e2e8f0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        .security-step::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #991b1b;
         }
         pre {
             background-color: #1c1917;
@@ -71,41 +88,28 @@
             font-size: 0.825rem;
             overflow-x: auto;
         }
-        .progress-bar {
-            height: 8px;
-            background-color: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background-color: #059669;
-            transition: width 1s ease-in-out;
+        .sandbox-box {
+            background: repeating-linear-gradient(
+              45deg,
+              #f8fafc,
+              #f8fafc 10px,
+              #f1f5f9 10px,
+              #f1f5f9 20px
+            );
         }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
 
-    <!-- Chosen Palette: Growth Emerald & Analytical Slate over Warm Stone Neutrals -->
-    
-    <!-- Application Structure Plan: The SPA is designed as an "Executive Impact Dashboard". It translates technical efforts into business value. The structure follows: 1. DORA Metrics (Bar chart showing Pre vs Post AI benchmarks), 2. ROI Calculator (Interactive tool to estimate hours saved), 3. Quality Index (Radar chart on defect reduction), and 4. The Value Prop (Final summary for stakeholders). This structure ensures the developer can prove their value beyond just writing code faster. -->
-
-    <!-- Visualization & Content Choices: 
-         1. DORA Metrics -> Compare -> Grouped Bar Chart -> Justification: Standard industry metrics to prove DevOps efficiency. Method: Chart.js.
-         2. ROI Analysis -> Change -> Interactive Calculator -> Justification: Allows the team to input their own data to see the scale of impact. Method: Vanilla JS logic.
-         3. Quality vs Velocity -> Compare -> Radar Chart -> Justification: Shows that speed didn't kill quality. Method: Chart.js.
-         4. Success Checklist -> Organize -> Interactive list -> Justification: High-level summary for the end of the series. Method: HTML/CSS.
-         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-
     <!-- Header -->
     <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="text-2xl">📊</span>
-                <h1 class="text-xl font-bold text-stone-800 tracking-tight">Engineering Hour <span class="text-success-emerald">P15</span></h1>
+                <span class="text-2xl">🛡️</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">Engineering Hour <span class="text-security-red">P15</span></h1>
             </div>
             <div class="text-sm font-medium text-stone-500 hidden sm:block">
-                Módulo 15: Métricas de Sucesso, ROI e DORA
+                Módulo 15: Governança de Dados & Segurança de Prompt
             </div>
         </div>
     </header>
@@ -114,157 +118,198 @@
         
         <!-- Sidebar Navigation -->
         <nav class="md:w-64 flex-shrink-0 flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
-            <p class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Medição de Valor</p>
-            <button onclick="navigate('dora')" id="nav-dora" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚡</span> DORA Metrics
+            <p class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Segurança em Primeiro Lugar</p>
+            <button onclick="navigate('risks')" id="nav-risks" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚫</span> Riscos e Vazamentos
             </button>
-            <button onclick="navigate('roi')" id="nav-roi" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>💰</span> Calculadora de ROI
+            <button onclick="navigate('sanitization')" id="nav-sanitization" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🧼</span> Sanitização
             </button>
-            <button onclick="navigate('quality')" id="nav-quality" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>💎</span> Índice de Qualidade
+            <button onclick="navigate('proxy')" id="nav-proxy" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🏢</span> AI Proxies
             </button>
-            <button onclick="navigate('roadmap')" id="nav-roadmap" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🏁</span> Conclusão da Jornada
+            <button onclick="navigate('sandbox')" id="nav-sandbox" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📦</span> Ambiente Sandbox
+            </button>
+            <button onclick="navigate('checklist')" id="nav-checklist" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>✅</span> Checklist Zero Trust
             </button>
         </nav>
 
         <!-- Main Content Area -->
         <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8 min-h-[600px]">
             
-            <!-- SECTION 1: DORA Metrics -->
-            <section id="sec-dora" class="block animate-fade-in">
+            <!-- SECTION 1: Risks -->
+            <section id="sec-risks" class="block animate-fade-in">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                        <span>⚡</span> DORA Metrics: O Impacto na Entrega
-                    </h2>
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🚫 O que não pode sair</h2>
                     <p class="text-stone-600 leading-relaxed">
-                        As métricas DORA são o padrão da indústria para medir a eficácia das equipas de engenharia. O gráfico abaixo compara a performance da equipa antes e depois da adopção da orquestração com IA.
+                        Identificar o risco é o primeiro passo. A maioria dos vazamentos ocorre por descuido no envio de segredos ou dados de clientes que a IA "memoriza" para o seu treino ou logs do provedor.
                     </p>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-2xl border border-stone-200">
                     <div class="chart-container">
-                        <canvas id="doraChart"></canvas>
+                        <canvas id="riskChart"></canvas>
                     </div>
                     <div class="space-y-4">
-                        <div class="p-4 bg-white rounded-xl border-l-4 border-stone-400 shadow-sm">
-                            <h4 class="font-bold text-sm text-stone-500 uppercase">Deployment Frequency</h4>
-                            <p class="text-xs text-stone-600">Com automação e Hooks, o número de implementações semanais aumenta sem sacrificar a estabilidade.</p>
+                        <div class="p-4 bg-white rounded-xl border-l-4 border-security-red shadow-sm">
+                            <h4 class="font-bold text-sm text-security-red uppercase tracking-wider">Vazamento de Segredos</h4>
+                            <p class="text-xs text-stone-600">Hardcoded keys são 45% dos incidentes.</p>
                         </div>
-                        <div class="p-4 bg-white rounded-xl border-l-4 border-success-emerald shadow-sm">
-                            <h4 class="font-bold text-sm text-success-emerald uppercase">Lead Time for Changes</h4>
-                            <p class="text-xs text-stone-600 font-bold">O tempo entre o primeiro commit e o código em produção é reduzido drasticamente através do AI-to-AI Review.</p>
+                        <div class="p-4 bg-white rounded-xl border-l-4 border-security-amber shadow-sm">
+                            <h4 class="font-bold text-sm text-security-amber uppercase tracking-wider">Dados Sensíveis (PII)</h4>
+                            <p class="text-xs text-stone-600 font-bold">Nomes e CPFs reais em prompts de teste.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 2: ROI Calculator -->
-            <section id="sec-roi" class="hidden animate-fade-in">
+            <!-- SECTION 2: Sanitization -->
+            <section id="sec-sanitization" class="hidden animate-fade-in">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                        <span>💰</span> Calculadora de Impacto (ROI)
-                    </h2>
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🧼 Sanitização de Prompts</h2>
                     <p class="text-stone-600 leading-relaxed">
-                        Introduza os dados da sua equipa para estimar o retorno sobre o investimento em tempo e produtividade.
-                    </p>
-                </div>
-
-                <div class="bg-stone-50 p-6 rounded-2xl border border-stone-200">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Tamanho da Equipa</label>
-                                <input type="number" id="team-size" value="10" class="w-full p-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-success-emerald">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Horas de Coding / Semana</label>
-                                <input type="number" id="coding-hours" value="30" class="w-full p-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-success-emerald">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">% Ganho de Eficiência Estimado</label>
-                                <select id="efficiency-gain" class="w-full p-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-success-emerald">
-                                    <option value="0.2">20% (Fase 1-3)</option>
-                                    <option value="0.4">40% (Fase 4-6)</option>
-                                    <option value="0.7" selected>70% (Fase 8-12)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="bg-success-slate text-white p-6 rounded-2xl flex flex-col justify-center items-center text-center shadow-xl">
-                            <h4 class="text-xs font-bold text-stone-400 uppercase mb-2">Horas Poupadas / Mês</h4>
-                            <p id="hours-saved" class="text-5xl font-extrabold text-success-emerald mb-2">840</p>
-                            <p class="text-xs opacity-75">Equivalente a <span id="dev-equiv" class="font-bold">5.2</span> desenvolvedores extra na equipa.</p>
-                            <button onclick="calculateROI()" class="mt-6 bg-success-emerald hover:bg-emerald-600 px-6 py-2 rounded-full font-bold transition-all text-sm">Recalcular Valor</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECTION 3: Quality Index -->
-            <section id="sec-quality" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">💎 Índice de Qualidade</h2>
-                    <p class="text-stone-600">
-                        A velocidade sem qualidade é apenas dívida técnica futura. A orquestração com IA permite manter o rigor técnico enquanto se acelera a entrega.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-stone-50 p-6 rounded-2xl border border-stone-200">
-                    <div class="chart-container">
-                        <canvas id="qualityChart"></canvas>
-                    </div>
-                    <div class="space-y-6">
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-xs font-bold"><span>Cobertura de Testes</span><span>+35%</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 85%"></div></div>
-                        </div>
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-xs font-bold"><span>Tratamento de Erros</span><span>+50%</span></div>
-                            <div class="progress-bar"><div class="progress-fill" style="width: 92%"></div></div>
-                        </div>
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-xs font-bold"><span>Defect Leakage</span><span>-28%</span></div>
-                            <div class="progress-bar"><div class="progress-fill bg-success-gold" style="width: 15%"></div></div>
-                        </div>
-                        <p class="text-[10px] text-stone-500 italic">Dados baseados em estudos de caso de implementação de Multi-Agentes e Hooks de auto-correção.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECTION 4: Roadmap Conclusão -->
-            <section id="sec-roadmap" class="hidden animate-fade-in">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🏁 Conclusão da Jornada: O Próximo Nível</h2>
-                    <p class="text-stone-600">
-                        Chegamos ao fim da nossa série. Transformámos o fluxo de trabalho de um modelo manual para um ecossistema orquestrado por IA.
+                        Substitua dados "quentes" por placeholders. Isso mantém a lógica para a IA, mas remove o valor de mercado do dado caso ele seja interceptado.
                     </p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="p-6 bg-white border border-stone-200 rounded-2xl shadow-sm">
-                        <h4 class="font-bold text-stone-800 mb-4 flex items-center gap-2"><span>✅</span> O que conquistámos</h4>
-                        <ul class="text-sm space-y-3 text-stone-600">
-                            <li>• <strong>Contexto Infinito:</strong> Uso de qmd e RAG local.</li>
-                            <li>• <strong>Zero Chute:</strong> Conectividade via MCP.</li>
-                            <li>• <strong>Auto-Correção:</strong> Ciclos de Hooks no terminal.</li>
-                            <li>• <strong>Segurança:</strong> Governança de prompt e Sandbox.</li>
-                        </ul>
+                    <div class="border border-red-200 p-5 rounded-2xl bg-red-50 relative">
+                        <span class="absolute top-4 right-4 text-red-600 font-bold text-xs uppercase">ORIGINAL</span>
+                        <pre class="text-xs opacity-75">
+const api_key = "sk-live-55a8f...";
+const customer = {
+  name: "João Silva",
+  email: "joao@gmail.com"
+};</pre>
                     </div>
-                    <div class="p-6 bg-success-emerald text-white rounded-2xl shadow-xl">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><span>🚀</span> O Próximo Passo</h4>
-                        <p class="text-sm mb-6">A tecnologia continuará a evoluir. O seu papel como <strong>Maestro de Intenções</strong> é manter-se actualizado sobre novos agentes e modelos de raciocínio.</p>
-                        <div class="bg-white/20 p-3 rounded-lg text-xs font-mono">
-                            Próxima Meta: Integração Total com Agentes Autónomos de Deploy.
+
+                    <div class="border border-emerald-200 p-5 rounded-2xl bg-emerald-50 relative shadow-md">
+                        <span class="absolute top-4 right-4 text-emerald-600 font-bold text-xs uppercase">SANITIZADO</span>
+                        <pre class="text-xs border-2 border-emerald-300">
+const api_key = process.env.API_KEY;
+const customer = {
+  name: "MOCK_USER_NAME",
+  email: "user@example.com"
+};</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Proxy -->
+            <section id="sec-proxy" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">🏢 Enterprise AI Proxy</h2>
+                    <p class="text-stone-600">
+                        O Proxy atua como uma barreira automática que roda algoritmos de <strong>DLP (Data Loss Prevention)</strong> antes de permitir que o prompt saia da rede da empresa.
+                    </p>
+                </div>
+
+                <div class="space-y-6 max-w-2xl mx-auto">
+                    <div class="flex items-center gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center text-2xl">💻</div>
+                        <div class="flex-1 p-4 bg-white border border-stone-200 rounded-xl">
+                            <h4 class="font-bold text-sm">Dev</h4>
+                        </div>
+                    </div>
+                    <div class="ml-8 border-l-2 border-dashed border-stone-300 h-8"></div>
+                    <div class="flex items-center gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-security-slate text-white flex items-center justify-center text-2xl risk-badge">🛡️</div>
+                        <div class="flex-1 p-4 bg-slate-50 border-2 border-security-slate rounded-xl">
+                            <h4 class="font-bold text-sm text-security-slate">AI Proxy (Filtro DLP)</h4>
+                            <p class="text-[10px] text-stone-600 uppercase">Detecta e bloqueia PII/Secrets automaticamente.</p>
+                        </div>
+                    </div>
+                    <div class="ml-8 border-l-2 border-dashed border-stone-300 h-8"></div>
+                    <div class="flex items-center gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center text-2xl opacity-60">☁️</div>
+                        <div class="flex-1 p-4 bg-white border border-stone-200 rounded-xl opacity-60">
+                            <h4 class="font-bold text-sm text-stone-400">LLM Provider</h4>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <div class="mt-12 text-center p-10 bg-stone-900 text-white rounded-3xl border-t-8 border-success-emerald shadow-2xl">
-                    <h3 class="text-3xl font-serif italic mb-4">"A engenharia não mudou. A escala sim."</h3>
-                    <p class="text-stone-400 font-light max-w-xl mx-auto">
-                        Obrigado por participar nestas 12 sessões. Agora, você é o arquiteto da produtividade da sua equipa.
+            <!-- SECTION 4: Sandbox (Corrigido) -->
+            <section id="sec-sandbox" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                        <span>📦</span> Ambiente Sandbox: A "Clean Room" da IA
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed">
+                        O Sandbox garante que os agentes operem em um ambiente isolado. Se a IA gerar um código malicioso ou tentar exfiltrar dados, ela está presa em uma "caixa" sem rede externa.
                     </p>
+                </div>
+
+                <!-- Box Container com Padding Seguro -->
+                <div class="sandbox-box border-2 border-dashed border-stone-300 p-6 md:p-10 rounded-3xl relative">
+                    <!-- Badge posicionado com mais recuo -->
+                    <div class="absolute -top-3 right-6 z-20">
+                        <span class="bg-security-cyan text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-md">Isolamento Ativo</span>
+                    </div>
+
+                    <!-- Grid Flexível e Responsivo -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10 w-full">
+                        <!-- Feature 1 -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 flex flex-col items-center text-center">
+                            <div class="text-3xl mb-3">🌐</div>
+                            <h4 class="font-bold text-sm text-stone-800 mb-2">Rede Bloqueada</h4>
+                            <p class="text-xs text-stone-500 leading-relaxed">Sem acesso à internet externa. O dado não pode ser exfiltrado para servidores terceiros.</p>
+                        </div>
+                        <!-- Feature 2 -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 flex flex-col items-center text-center">
+                            <div class="text-3xl mb-3">⌛</div>
+                            <h4 class="font-bold text-sm text-stone-800 mb-2">Estado Efêmero</h4>
+                            <p class="text-xs text-stone-500 leading-relaxed">Tudo é deletado após a execução. Zero persistência de dados sensíveis em disco.</p>
+                        </div>
+                        <!-- Feature 3 -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 flex flex-col items-center text-center">
+                            <div class="text-3xl mb-3">🔭</div>
+                            <h4 class="font-bold text-sm text-stone-800 mb-2">Audit Log</h4>
+                            <p class="text-xs text-stone-500 leading-relaxed">Cada comando da IA é logado internamente para auditoria de segurança e rastreabilidade total.</p>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Code Block -->
+                    <div class="mt-10 bg-stone-900 text-stone-300 p-5 rounded-xl font-mono text-xs shadow-inner">
+                        <span class="text-security-cyan">$</span> docker run --rm --net=none ai-sandbox-agent
+                        <br>
+                        <span class="text-stone-500 italic mt-1 block"># Executando agente em ambiente sem rede e com limpeza automática de arquivos</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-cyan-50 border border-cyan-100 rounded-xl text-sm text-cyan-800 flex gap-3 items-start">
+                    <span class="text-lg">💡</span>
+                    <p>Agentes locais (como o Claude Code) podem rodar ferramentas. O Sandbox garante que essas ferramentas não acessem seus <code>.ssh</code> ou variáveis de ambiente da sua máquina física.</p>
+                </div>
+            </section>
+
+            <!-- SECTION 5: Checklist -->
+            <section id="sec-checklist" class="hidden animate-fade-in">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2">✅ Checklist Zero Trust</h2>
+                    <p class="text-stone-600">Perguntas fundamentais antes de cada interação.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="security-step"><h4 class="font-bold text-sm">Segredos?</h4><p class="text-xs text-stone-500">Removi API Keys?</p></div>
+                    <div class="security-step"><h4 class="font-bold text-sm">Dados Reais?</h4><p class="text-xs text-stone-500">Os dados são fictícios?</p></div>
+                    <div class="security-step"><h4 class="font-bold text-sm">Ambiente?</h4><p class="text-xs text-stone-500">Estou em um Sandbox se for rodar código?</p></div>
+                    <div class="security-step"><h4 class="font-bold text-sm">Visibilidade?</h4><p class="text-xs text-stone-500">Este prompt pode ser público?</p></div>
+                </div>
+
+                <div class="mt-12 bg-security-red text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h4 class="text-2xl font-bold mb-4">Conclusão da Parte 13</h4>
+                        <p class="text-lg font-light leading-relaxed mb-6 italic">
+                            "A segurança é uma skill de engenharia. Um dev sênior sabe que a IA é uma aliada, mas nunca deve ser uma confidente de segredos."
+                        </p>
+                        <div class="flex gap-4">
+                            <span class="bg-white/20 px-3 py-1 rounded text-xs font-mono">#SafeAI</span>
+                            <span class="bg-white/20 px-3 py-1 rounded text-xs font-mono">#ZeroTrust</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -273,7 +318,7 @@
 
     <!-- JavaScript Logic -->
     <script>
-        let currentState = { activeSection: 'dora', chartDora: null, chartQuality: null };
+        let currentState = { activeSection: 'risks', chart: null };
 
         function navigate(sectionId) {
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
@@ -282,90 +327,33 @@
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
             document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
 
-            if (sectionId === 'dora' && !currentState.chartDora) initDoraChart();
-            if (sectionId === 'quality' && !currentState.chartQuality) initQualityChart();
+            if (sectionId === 'risks' && !currentState.chart) initChart();
             currentState.activeSection = sectionId;
         }
 
-        function calculateROI() {
-            const size = parseFloat(document.getElementById('team-size').value) || 0;
-            const hours = parseFloat(document.getElementById('coding-hours').value) || 0;
-            const gain = parseFloat(document.getElementById('efficiency-gain').value) || 0;
-
-            const saved = Math.round(size * hours * 4 * gain); // hours per month
-            const equiv = (saved / (40 * 4)).toFixed(1); // 40h week, 4 weeks
-
-            document.getElementById('hours-saved').innerText = saved;
-            document.getElementById('dev-equiv').innerText = equiv;
-        }
-
-        function initDoraChart() {
-            const ctx = document.getElementById('doraChart').getContext('2d');
-            currentState.chartDora = new Chart(ctx, {
-                type: 'bar',
+        function initChart() {
+            const ctx = document.getElementById('riskChart').getContext('2d');
+            currentState.chart = new Chart(ctx, {
+                type: 'doughnut',
                 data: {
-                    labels: ['Deploy Freq.', 'Lead Time', 'MTTR (Recovery)', 'Change Fail Rate'],
-                    datasets: [
-                        {
-                            label: 'Antes (Manual)',
-                            data: [30, 80, 60, 25],
-                            backgroundColor: 'rgba(71, 85, 105, 0.4)',
-                        },
-                        {
-                            label: 'Depois (AI-Orchestrated)',
-                            data: [95, 20, 15, 8],
-                            backgroundColor: '#059669',
-                        }
-                    ]
+                    labels: ['Segredos/API Keys', 'Dados PII', 'IP Sensível', 'Outros'],
+                    datasets: [{
+                        data: [45, 30, 20, 5],
+                        backgroundColor: ['#991b1b', '#d97706', '#44403c', '#d6d3d1'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
                 },
                 options: {
                     maintainAspectRatio: false,
                     responsive: true,
-                    scales: {
-                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Pontuação de Eficiência (%)', font: { size: 10 } } }
-                    },
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
-                    }
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
+                    cutout: '70%'
                 }
             });
         }
 
-        function initQualityChart() {
-            const ctx = document.getElementById('qualityChart').getContext('2d');
-            currentState.chartQuality = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Consistência', 'Segurança', 'Manutenibilidade', 'Estabilidade', 'Performance'],
-                    datasets: [
-                        {
-                            label: 'Fluxo Manual',
-                            data: [60, 50, 40, 70, 65],
-                            backgroundColor: 'rgba(71, 85, 105, 0.2)',
-                            borderColor: '#475569',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Fluxo AI-Agentic',
-                            data: [95, 90, 92, 85, 95],
-                            backgroundColor: 'rgba(5, 150, 105, 0.2)',
-                            borderColor: '#059669',
-                            borderWidth: 2
-                        }
-                    ]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    scales: { r: { beginAtZero: true, max: 100, ticks: { display: false } } },
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-        }
-
-        window.onload = () => {
-            initDoraChart();
-            calculateROI();
-        };
+        window.onload = () => initChart();
     </script>
 </body>
 </html>

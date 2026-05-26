@@ -5,8 +5,8 @@
   "hero.series": "Open-Source Series",
   "hero.h2": "Use AI like<br class=\"hidden md:block\"> a senior engineer",
   "hero.desc": "15 hands-on sessions on integrating AI tools into your development workflow, from basic setup to agents and advanced automations.",
-  "hero.available": "11 sessions available",
-  "hero.upcoming": "4 coming soon",
+  "hero.available": "12 sessions available",
+  "hero.upcoming": "5 coming soon",
 
   "card.p1.badge": "Module 1",
   "card.p1.status": "Available",
@@ -77,9 +77,14 @@
   "card.p11.desc": "Local hybrid search with QMD, indexable static memory, and automatic lesson capture with reflect. From manual curation to memory that updates itself.",
   "card.p11.cta": "Open session",
 
-  "card.p12_15.badge": "Modules 12 to 15",
-  "card.p12_15.status": "Coming soon",
-  "card.p12_15.desc": "4 final sessions in the series. Content to be defined.",
+  "card.p12.badge": "Module 12",
+  "card.p12.status": "Available",
+  "card.p12.title": "Operational Architecture for Agents",
+  "card.p12.desc": "`.agents/` as canonical source, separation between memory, skills and tasks, per-tool bridges, regenerable indexes and scaffold-based bootstrap.",
+  "card.p12.cta": "Open session",
+  "card.p13_17.badge": "Modules 13 to 17",
+  "card.p13_17.status": "Coming soon",
+  "card.p13_17.desc": "5 final sessions in the series. Content to be defined.",
 
   "footer.brand": "Engineering Hour · By <a href=\"https://github.com/griiettner/ai-engineering-hour\" target=\"_blank\" class=\"underline hover:text-stone-600\">Paulo Griiettner</a>",
   "footer.stack": "HTML · Tailwind CSS · Chart.js",

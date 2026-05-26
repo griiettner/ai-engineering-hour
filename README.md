@@ -28,12 +28,13 @@ Ou arraste qualquer `partN.html` para o browser. Não há servidor necessário.
 | 8 | `part8.html` | *(planejado)* | — | 🔜 |
 | 9 | `part9.html` | *(planejado)* | — | 🔜 |
 | 10 | `part10.html` | **TDD com IA: Testes Como Contrato** | Lime `#65a30d` | ✅ Concluído |
-| 11 | `part11.html` | *(planejado)* | - | 🔜 |
-| 12 | `part12.html` | *(planejado)* | - | 🔜 |
-| 13 | `part13.html` | *(planejado)* | - | 🔜 |
-| 14 | `part14.html` | *(planejado)* | - | 🔜 |
-| 15 | `part15.html` | *(planejado)* | - | 🔜 |
-| 16 | `part16.html` | *(planejado)* | - | 🔜 |
+| 11 | `part11.html` | **Memória Viva · RAG Local + Reflect** | Blue `#2563eb` | ✅ Concluído |
+| 12 | `part12.html` | **Arquitetura Operacional para Agentes** — `.agents/` canônico, memory, skills, tasks, bridges e bootstrap com scaffold | Ink Blue `#1f3a5f` | ✅ Concluído |
+| 13 | `part13.html` | **n8n & OpenClaw** | — | 📝 draft |
+| 14 | `part14.html` | **O Dev Sênior do Futuro** | — | 📝 draft |
+| 15 | `part15.html` | **Governança e Segurança** | — | 📝 draft |
+| 16 | `part16.html` | **Métricas e ROI** | — | 📝 draft |
+| 17 | `part17.html` | **A Próxima Fronteira** | — | 📝 draft |
 
 ---
 
@@ -60,7 +61,16 @@ ai-engineering-hour/
 ├── part5.html          # Sessão 5 — Workspace Seguro
 ├── part6.html          # Sessão 6 — Skills
 ├── part7.html          # Sessão 7 — Agentes
-├── part8-14.html       # Sessões futuras (stubs)
+├── part8.html          # Sessão 8 — Agentes
+├── part9.html          # Sessão 9 — Sistema Integrado
+├── part10.html         # Sessão 10 — TDD com IA
+├── part11.html         # Sessão 11 — Memória Viva
+├── part12.html         # Sessão 12 — Arquitetura Operacional para Agentes
+├── part13.html         # Sessão 13 — n8n & OpenClaw
+├── part14.html         # Sessão 14 — O Dev Sênior do Futuro
+├── part15.html         # Sessão 15 — Governança e Segurança
+├── part16.html         # Sessão 16 — Métricas e ROI
+├── part17.html         # Sessão 17 — A Próxima Fronteira
 │
 ├── demo/               # Arquivos de demonstração ao vivo
 │   ├── CLAUDE.md
@@ -150,6 +160,8 @@ Cada `partN.html` segue estas regras:
 | Part 5 | Orange | `#ea580c` |
 | Part 6 | Indigo | `#4f46e5` |
 | Part 7 | Fuchsia | `#c026d3` |
+| Part 11 | Blue | `#2563eb` |
+| Part 12 | Ink Blue | `#1f3a5f` |
 | Base | Warm Stone | `stone-*` |
 
 Novas partes devem escolher uma cor distinta ainda não utilizada e documentá-la aqui.
