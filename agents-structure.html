@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Hour Docs | agents-scaffolding</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f3a5f'/%3E%3Cpath d='M8 11h16M8 16h11M8 21h14' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="nav.js" defer></script>
+    <script src="i18n.js" defer></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
+                            300: '#d6d3d1', 400: '#a8a29e', 500: '#78716c',
+                            700: '#44403c', 800: '#292524', 900: '#1c1917',
+                        },
+                        docs: {
+                            ink: '#1f3a5f',
+                            sky: '#dbeafe',
+                            line: '#bfdbfe',
+                            moss: '#ecfccb',
+                            rose: '#ffe4e6',
+                            amber: '#fef3c7',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        :root { --accent: #1f3a5f; }
+
+        .branch-nav {
+            position: relative;
+        }
+
+        .branch-item {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1.5rem 1fr;
+            align-items: start;
+            gap: 0.9rem;
+            min-height: 3.25rem;
+            padding: 0.85rem 1rem 0.85rem 0.2rem;
+        }
+
+        .branch-rail {
+            position: relative;
+            min-height: 100%;
+        }
+
+        .branch-rail::before {
+            content: '';
+            position: absolute;
+            top: -0.85rem;
+            bottom: -0.85rem;
+            left: 0.72rem;
+            width: 1px;
+            background: linear-gradient(to bottom, #dbe4f0, #cbd5e1);
+        }
+
+        .branch-item:first-child .branch-rail::before {
+            top: 0.9rem;
+        }
+
+        .branch-item:last-child .branch-rail::before {
+            bottom: 1.1rem;
+        }
+
+        .branch-rail::after {
+            content: '';
+            position: absolute;
+            top: 1rem;
+            left: 0.72rem;
+            width: 0.9rem;
+            height: 1px;
+            background: #cbd5e1;
+        }
+
+        .branch-bullet {
+            position: absolute;
+            top: 0.72rem;
+            left: 0.47rem;
+            width: 0.55rem;
+            height: 0.55rem;
+            border-radius: 9999px;
+            border: 2px solid #60a5fa;
+            background: white;
+            box-shadow: 0 0 0 4px white;
+        }
+
+        .branch-item.active .branch-bullet {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .branch-label {
+            display: block;
+            line-height: 1.35;
+            padding-top: 0.05rem;
+        }
+
+        .rule-callout {
+            background:
+                linear-gradient(135deg, rgba(219,234,254,0.95), rgba(255,255,255,0.92)),
+                radial-gradient(circle at top right, rgba(31,58,95,0.08), transparent 45%);
+        }
+
+        .doc-card {
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 30px -18px rgba(31, 58, 95, 0.35);
+        }
+
+        .tree-panel {
+            background-image:
+                linear-gradient(rgba(231,229,228,0.35) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(231,229,228,0.35) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
+        .mini-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans bg-stone-50 text-stone-800">
+
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🗂️</span>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-stone-800">Engineering Hour Docs</h1>
+                    <p class="text-sm text-stone-500">Setup cross-tool com `.agents/` canônico</p>
+                </div>
+            </div>
+            <a href="index.html" class="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-stone-500 hover:text-stone-800">
+                <span>←</span>
+                <span>Voltar ao índice</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
+
+        <nav class="md:w-72 flex-shrink-0 bg-white p-4 rounded-2xl shadow-sm border border-stone-200 h-fit sticky top-24">
+            <div class="pb-4 border-b border-stone-200">
+                <p class="mini-label text-slate-500 mb-2">Mapa da documentação</p>
+                <p class="text-sm text-stone-600 leading-relaxed">O foco aqui passou a ser o scaffold de referência e como ele mantém compatibilidade entre ferramentas.</p>
+            </div>
+
+            <div class="branch-nav mt-4 flex flex-col gap-1">
+                <button onclick="navigate('overview')" id="nav-overview" class="branch-item nav-item active text-left px-4 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors">
+                    <span class="branch-rail" aria-hidden="true"><span class="branch-bullet"></span></span>
+                    <span class="branch-label">Scaffold: visão geral</span>
+                </button>
+                <button onclick="navigate('layout')" id="nav-layout" class="branch-item nav-item text-left px-4 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors">
+                    <span class="branch-rail" aria-hidden="true"><span class="branch-bullet"></span></span>
+                    <span class="branch-label">Layout cross-tool</span>
+                </button>
+                <button onclick="navigate('skills')" id="nav-skills" class="branch-item nav-item text-left px-4 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors">
+                    <span class="branch-rail" aria-hidden="true"><span class="branch-bullet"></span></span>
+                    <span class="branch-label">Skills e compatibilidade</span>
+                </button>
+                <button onclick="navigate('memory')" id="nav-memory" class="branch-item nav-item text-left px-4 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors">
+                    <span class="branch-rail" aria-hidden="true"><span class="branch-bullet"></span></span>
+                    <span class="branch-label">Memory e roteamento</span>
+                </button>
+                <button onclick="navigate('tasks')" id="nav-tasks" class="branch-item nav-item text-left px-4 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors">
+                    <span class="branch-rail" aria-hidden="true"><span class="branch-bullet"></span></span>
+                    <span class="branch-label">Tasks e lifecycle</span>
+                </button>
+                <button onclick="navigate('indexes')" id="nav-indexes" class="branch-item nav-item text-left px-4 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors">
+                    <span class="branch-rail" aria-hidden="true"><span class="branch-bullet"></span></span>
+                    <span class="branch-label">Índices e automação</span>
+                </button>
+                <button onclick="navigate('anti-patterns')" id="nav-anti-patterns" class="branch-item nav-item text-left px-4 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors">
+                    <span class="branch-rail" aria-hidden="true"><span class="branch-bullet"></span></span>
+                    <span class="branch-label">Falhas comuns</span>
+                </button>
+                <button onclick="navigate('adaptacao')" id="nav-adaptacao" class="branch-item nav-item text-left px-4 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors">
+                    <span class="branch-rail" aria-hidden="true"><span class="branch-bullet"></span></span>
+                    <span class="branch-label">Adaptação por ferramenta</span>
+                </button>
+                <button onclick="navigate('starter-kit')" id="nav-starter-kit" class="branch-item nav-item text-left px-4 py-3 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors">
+                    <span class="branch-rail" aria-hidden="true"><span class="branch-bullet"></span></span>
+                    <span class="branch-label">Clone e bootstrap</span>
+                </button>
+            </div>
+        </nav>
+
+        <main class="flex-1 bg-white rounded-2xl shadow-sm border border-stone-200 p-6 md:p-8">
+
+            <section id="sec-overview" class="block">
+                <div class="mb-8">
+                    <p class="mini-label text-slate-500 mb-3">Repo de referência</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-stone-800 mb-3">`agents-scaffolding` organiza um setup canônico e compatível entre ferramentas</h2>
+                    <p class="text-stone-600 leading-relaxed max-w-3xl">O ponto de partida recomendado agora é o repositório <a href="https://github.com/griiettner/agents-scaffolding" class="text-blue-700 underline decoration-blue-300 underline-offset-2">griiettner/agents-scaffolding</a>. Ele separa bootstrap, memória, skills, tasks e tooling de sync, mantendo <code class="font-mono bg-stone-100 px-1 rounded text-xs">.agents/</code> como estrutura canônica e adicionando compatibilidade explícita para Claude Code e Codex.</p>
+                </div>
+
+                <div class="rule-callout rounded-2xl border border-blue-200 p-5 mb-8">
+                    <p class="text-sm font-semibold text-slate-800 mb-2">Princípio do scaffold</p>
+                    <p class="text-lg font-bold text-slate-900 leading-snug">A estrutura de verdade vive em `.agents/`. Integrações específicas de ferramenta são camadas de compatibilidade, não a fonte canônica.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
+                    <div class="doc-card rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                        <p class="mini-label text-emerald-700 mb-3">O que o scaffold acerta</p>
+                        <ul class="space-y-2 text-sm text-emerald-900">
+                            <li>Mantém `AGENT.md` curto e orientado a roteamento</li>
+                            <li>Separa `.agents/memory/`, `.agents/skills/` e `.agents/tasks/`</li>
+                            <li>Expõe skills canônicas para Claude via `.claude/skills/` gerado</li>
+                            <li>Usa frontmatter e `index.yaml` para descoberta barata</li>
+                        </ul>
+                    </div>
+                    <div class="doc-card rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <p class="mini-label text-rose-700 mb-3">O que ele evita</p>
+                        <ul class="space-y-2 text-sm text-rose-900">
+                            <li>Prompt gigante como memória total do projeto</li>
+                            <li>Mistura de workflow, decisão durável e histórico de task</li>
+                            <li>Acoplamento do layout a uma única ferramenta</li>
+                            <li>Índices manuais que envelhecem rápido</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                    <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                        <h3 class="font-bold text-stone-800">Exemplo real de bootstrap leve</h3>
+                        <p class="text-sm text-stone-500 mt-1">Trecho alinhado ao `AGENT.md` do scaffold, com rotas por contexto e leitura mínima.</p>
+                    </div>
+                    <pre class="text-xs"># Contexto do Agente
+
+Este arquivo é o contexto inicial leve para agentes.
+Use-o como mapa de rotas, não como memória completa do projeto.
+
+- Trabalho de task ou ticket: leia `.agents/tasks/index.yaml` primeiro
+- Regras de workflow de tickets: leia `.agents/skills/tkt-management/SKILL.md`
+- Roteador de memória durável: leia `.agents/memory/MEMORY.md`
+- Contexto de arquitetura: leia `.agents/memory/architecture/index.yaml` primeiro
+- Decisões duráveis: leia `.agents/memory/decisions/index.yaml` primeiro
+
+Carregue apenas os arquivos relevantes para a tarefa atual.</pre>
+                </div>
+            </section>
+
+            <section id="sec-layout" class="hidden">
+                <div class="mb-6">
+                    <p class="mini-label text-slate-500 mb-3">Estrutura do repositório</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-stone-800 mb-3">O layout recomendado já inclui camadas canônicas e bridges de compatibilidade</h2>
+                    <p class="text-stone-600 leading-relaxed">A árvore abaixo segue o scaffold de referência. Ela assume `.agents/` como sistema de registro, adiciona `.claude/skills/` gerado para Claude Code e deixa metadata opcional para descoberta de skills no Codex.</p>
+                </div>
+
+                <div class="tree-panel rounded-2xl border border-stone-200 p-5 mb-6">
+                    <pre class="text-xs">.
+├── AGENT.md
+├── CLAUDE.md
+├── README.md
+├── .claude/
+│   ├── commands/
+│   │   └── sync-skills.md
+│   └── skills/              # stubs gerados de compatibilidade para Claude
+└── .agents/
+    ├── agents/
+    ├── memory/
+    │   ├── MEMORY.md
+    │   ├── architecture/
+    │   ├── decisions/
+    │   └── principles/
+    ├── plans/
+    ├── skills/
+    │   ├── commit/
+    │   ├── commitpush/
+    │   ├── plan-exec/
+    │   ├── tkt-exec/
+    │   ├── tkt-management/
+    │   ├── tkt-new/
+    │   ├── tkt-plan/
+    │   ├── tkt-report/
+    │   ├── tkt-sync/
+    │   ├── tkt-task/
+    │   └── tkt-update/
+    ├── tasks/
+    │   ├── README.md
+    │   ├── index.yaml
+    │   ├── indexes/
+    │   ├── TKT-001/
+    │   └── TKT-002/
+    ├── tools/
+    │   ├── sync_claude_skills.py
+    │   ├── tkt_sync.py
+    │   └── tkt_validate.py
+    ├── settings.json
+    └── settings.local.json</pre>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-3">Canônico + adapters</h3>
+                        <p class="text-sm text-stone-600 leading-relaxed"><code class="font-mono bg-white px-1 rounded text-xs">AGENT.md</code> e <code class="font-mono bg-white px-1 rounded text-xs">.agents/</code> são a base. <code class="font-mono bg-white px-1 rounded text-xs">CLAUDE.md</code> e <code class="font-mono bg-white px-1 rounded text-xs">.claude/skills/</code> existem para compatibilidade, não para duplicar a fonte de verdade.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-3">Pilares reais</h3>
+                        <p class="text-sm text-stone-600 leading-relaxed"><strong>Memory</strong> guarda conhecimento durável. <strong>Skills</strong> guardam procedimento reutilizável. <strong>Tasks</strong> guardam a história operacional. <strong>Tools</strong> regeneram índices e bridges.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-skills" class="hidden">
+                <div class="mb-6">
+                    <p class="mini-label text-slate-500 mb-3">Compatibilidade</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-stone-800 mb-3">Skills continuam canônicas em `.agents/skills/`, com exposição por ferramenta</h2>
+                    <p class="text-stone-600 leading-relaxed">O scaffold fixa a regra importante: a skill vive em `.agents/skills/&lt;name&gt;/SKILL.md`. Claude recebe stubs gerados em `.claude/skills/`. Codex pode usar `agents/openai.yaml` ao lado da skill. Cursor fica no nível de convenção de naming e invocation.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+                        <h3 class="font-bold text-indigo-900 mb-2">`tkt-management/`</h3>
+                        <p class="text-sm text-indigo-900/80">Define o lifecycle canônico de tasks, modos slim/full e completion gates.</p>
+                    </div>
+                    <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+                        <h3 class="font-bold text-indigo-900 mb-2">`tkt-plan/` + `tkt-exec/`</h3>
+                        <p class="text-sm text-indigo-900/80">Separam planejamento de execução e preservam contexto útil em `report.md` ou `updates/`.</p>
+                    </div>
+                    <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+                        <h3 class="font-bold text-indigo-900 mb-2">`tkt-sync/` + `skill-new/`</h3>
+                        <p class="text-sm text-indigo-900/80">Atualizam metadados gerados e criam novas skills mantendo a estrutura consistente.</p>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 mb-6">
+                    <p class="text-sm font-semibold text-amber-900 mb-2">Ponto estrutural</p>
+                    <p class="text-lg font-bold text-amber-950">Não edite a cópia exposta para a ferramenta. Edite a skill canônica em `.agents/skills/` e regenere os adapters.</p>
+                </div>
+
+                <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                    <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                        <h3 class="font-bold text-stone-800">Estrutura pequena, canônica e compatível</h3>
+                    </div>
+                    <pre class="text-xs">.agents/skills/tkt-plan/
+├─ SKILL.md
+└─ agents/
+   └─ openai.yaml
+
+.claude/skills/tkt-plan/
+└─ SKILL.md   # stub gerado apontando para a skill canônica
+
+# SKILL.md
+Crie ou atualize `plan.md` apenas quando a task tiver decisões de implementação em aberto.
+
+- Use o contexto do ticket em `.agents/tasks/TKT-XXX/`
+- Evite planejar quando `task.md` já for diretamente executável
+- Preserve apenas o plano mínimo útil</pre>
+                </div>
+            </section>
+
+            <section id="sec-memory" class="hidden">
+                <div class="mb-6">
+                    <p class="mini-label text-slate-500 mb-3">Memória durável</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-stone-800 mb-3">Memory segue o mesmo princípio: índice primeiro, arquivo mínimo depois</h2>
+                    <p class="text-stone-600 leading-relaxed"><code class="font-mono bg-stone-100 px-1 rounded text-xs">AGENT.md</code> roteia para <code class="font-mono bg-stone-100 px-1 rounded text-xs">.agents/memory/MEMORY.md</code>, que por sua vez roteia para categorias como arquitetura, decisões e princípios. O scaffold recomenda frontmatter pequeno, índices temáticos e leitura estritamente seletiva.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-3">Regras de memória</h3>
+                        <ul class="space-y-2 text-sm text-stone-600">
+                            <li>Arquivos duráveis começam com YAML frontmatter.</li>
+                            <li>O subset suportado deve permanecer simples e previsível.</li>
+                            <li>Leia `index.yaml` antes do Markdown detalhado.</li>
+                            <li>O arquivo canônico continua sendo o `.md`, não o índice.</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                        <h3 class="font-bold text-blue-900 mb-3">Fluxo de leitura</h3>
+                        <p class="text-sm text-blue-900/90 leading-relaxed">`AGENT.md` → `MEMORY.md` → `index.yaml` temático → arquivo certo. O objetivo não é documentar tudo; é permitir que a ferramenta ache só o contexto que precisa.</p>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-stone-200 overflow-hidden mb-6">
+                    <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                        <h3 class="font-bold text-stone-800">Exemplo de frontmatter de memória</h3>
+                    </div>
+                    <pre class="text-xs">---
+id: architecture-overview
+title: Visão geral da arquitetura
+type: architecture
+status: ativo
+created: 2026-05-25
+updated: 2026-05-25
+tags:
+  - arquitetura
+  - roteamento
+read_when:
+  - alterando a estrutura de pastas
+---</pre>
+                </div>
+
+                <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                    <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                        <h3 class="font-bold text-stone-800">Exemplo de índice temático</h3>
+                    </div>
+                    <pre class="text-xs">entries:
+  - id: architecture-overview
+    title: Visão geral da arquitetura
+    file: .agents/memory/architecture/overview.md
+    tags:
+      - arquitetura
+      - roteamento
+    read_when:
+      - alterando a estrutura de pastas
+
+  - id: ADR-001
+    title: Ciclo de vida de tickets para agentes
+    file: .agents/memory/decisions/ADR-001-agent-ticket-lifecycle.md
+    tags:
+      - adr
+      - tasks</pre>
+                </div>
+            </section>
+
+            <section id="sec-tasks" class="hidden">
+                <div class="mb-6">
+                    <p class="mini-label text-slate-500 mb-3">Work history</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-stone-800 mb-3">Tasks no scaffold são a loja canônica de work-unit history</h2>
+                    <p class="text-stone-600 leading-relaxed">O repo de referência usa uma pasta por ticket ou work item. Há modo slim para chores simples e modo full para trabalho com conceito, plano, execução e relatório. O importante é manter a história operacional dentro da própria task.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-3">Fonte da verdade</h3>
+                        <p class="text-sm text-stone-600 leading-relaxed">A pasta `TKT-XXX/` é a história real do trabalho. O scaffold demonstra `task.md` como mínimo e usa `concept.md`, `plan.md`, `report.md` e `updates/` só quando o tipo de tarefa justificar.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-3">Papel do índice</h3>
+                        <p class="text-sm text-stone-600 leading-relaxed">`tasks/index.yaml` e os shards em `tasks/indexes/` ajudam a escolher o ticket certo antes de abrir a pasta. Eles continuam sendo metadado derivado.</p>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                    <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                        <h3 class="font-bold text-stone-800">Exemplo de frontmatter de task</h3>
+                    </div>
+                    <pre class="text-xs">---
+id: TKT-001
+title: Estabelecer scaffolding de agentes
+artifact: tarefa
+status: concluida
+owner: repo-agent
+created: 2026-05-25
+updated: 2026-05-25
+dependencies: []
+areas:
+  - AGENT.md
+  - .agents/memory
+skills:
+  - tkt-management
+---
+
+# TKT-001 Tarefa</pre>
+                </div>
+            </section>
+
+            <section id="sec-indexes" class="hidden">
+                <div class="mb-6">
+                    <p class="mini-label text-slate-500 mb-3">Automação</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-stone-800 mb-3">Índices só funcionam bem quando são regeneráveis e validados</h2>
+                    <p class="text-stone-600 leading-relaxed">O scaffold assume `index.yaml` como atalho de descoberta, mas também assume scripts de sync e validação para evitar drift. É isso que mantém a árvore barata de ler sem virar documentação quebrada.</p>
+                </div>
+
+                <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5 mb-6">
+                    <p class="text-sm font-semibold text-blue-900 mb-2">Regra operacional</p>
+                    <p class="text-lg font-bold text-blue-950">Se o índice é importante para a ferramenta, ele precisa ser gerado por tooling do repositório.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+                    <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                        <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                            <h3 class="font-bold text-stone-800">Índice de memória por categoria</h3>
+                        </div>
+                        <pre class="text-xs">entries:
+  - id: principles-constitution
+    file: .agents/memory/principles/constitution.md
+    status: ativo
+  - id: architecture-overview
+    file: .agents/memory/architecture/overview.md
+    status: ativo</pre>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 overflow-hidden">
+                        <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
+                            <h3 class="font-bold text-stone-800">Shard de tasks por intervalo</h3>
+                        </div>
+                        <pre class="text-xs">- range: TKT-001-025
+  file: .agents/tasks/indexes/TKT-001-025.yaml
+  count: 2
+  updated: 2026-05-25
+  statuses:
+    - concluido: 1
+    - em_andamento: 1</pre>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-2">Esquema estável</h3>
+                        <p class="text-sm text-stone-600">Defina campos YAML consistentes para memory, tasks e índices.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-2">Sync e validação</h3>
+                        <p class="text-sm text-stone-600">Use `tkt_sync.py`, `tkt_validate.py` e `sync_claude_skills.py` para manter tasks, índices e compatibilidade alinhados.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <h3 class="font-bold text-stone-800 mb-2">Descoberta barata</h3>
+                        <p class="text-sm text-stone-600">Leia o menor arquivo útil primeiro. O índice continua existindo só para reduzir custo de contexto.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-anti-patterns" class="hidden">
+                <div class="mb-6">
+                    <p class="mini-label text-slate-500 mb-3">Erros comuns</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-stone-800 mb-3">A maior parte das falhas vem de duplicação e acoplamento por ferramenta</h2>
+                    <p class="text-stone-600 leading-relaxed">O scaffold existe justamente para separar canônico de compatibilidade. Quando isso quebra, a manutenção sobe e a descoberta piora rápido.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <h3 class="font-bold text-rose-900 mb-2">Transformar `AGENT.md` em dump file</h3>
+                        <p class="text-sm text-rose-900/80">Se o bootstrap deixa de rotear e tenta ensinar tudo, o custo de entrada explode.</p>
+                    </div>
+                    <div class="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <h3 class="font-bold text-rose-900 mb-2">Editar stubs gerados em vez da skill canônica</h3>
+                        <p class="text-sm text-rose-900/80">Isso cria drift entre `.agents/skills/` e `.claude/skills/` e destrói a regra de fonte única.</p>
+                    </div>
+                    <div class="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <h3 class="font-bold text-rose-900 mb-2">Misturar memória durável com histórico de task</h3>
+                        <p class="text-sm text-rose-900/80">Conhecimento de projeto e narrativa operacional têm ciclos de vida diferentes e precisam de lugares diferentes.</p>
+                    </div>
+                    <div class="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <h3 class="font-bold text-rose-900 mb-2">Assumir auto-discovery igual em todas as ferramentas</h3>
+                        <p class="text-sm text-rose-900/80">Claude, Codex e Cursor têm capacidades diferentes. O scaffold lida com isso explicitamente em vez de fingir simetria.</p>
+                    </div>
+                    <div class="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <h3 class="font-bold text-rose-900 mb-2">Manter índices e bridges sem sync</h3>
+                        <p class="text-sm text-rose-900/80">Se `index.yaml` e stubs não acompanham a árvore, eles viram ruído e não roteadores.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-adaptacao" class="hidden">
+                <div class="mb-6">
+                    <p class="mini-label text-slate-500 mb-3">Ferramentas</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-stone-800 mb-3">O mesmo scaffold suporta ferramentas diferentes, com integrações diferentes</h2>
+                    <p class="text-stone-600 leading-relaxed">A parte estável é a organização do repositório. O que muda por ferramenta é descoberta de skills, sintaxe de invocação e nível de automação nativa.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <p class="mini-label text-stone-500 mb-2">Claude Code</p>
+                        <h3 class="font-bold text-stone-800 mb-2">Bridge explícita</h3>
+                        <p class="text-sm text-stone-600">Use `.claude/skills/` como stub gerado e mantenha `CLAUDE.md` alinhado para redirecionar à estrutura canônica.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <p class="mini-label text-stone-500 mb-2">Codex</p>
+                        <h3 class="font-bold text-stone-800 mb-2">Metadata local</h3>
+                        <p class="text-sm text-stone-600">Mantenha `agents/openai.yaml` pequeno e ao lado da skill canônica quando quiser display metadata e invocation policy.</p>
+                    </div>
+                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
+                        <p class="mini-label text-stone-500 mb-2">Cursor</p>
+                        <h3 class="font-bold text-stone-800 mb-2">Convenção, não bridge</h3>
+                        <p class="text-sm text-stone-600">Use os mesmos nomes de skill e argumentos, mas trate a integração como convenção até existir suporte nativo ou adapter seu.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-starter-kit" class="hidden">
+                <div class="mb-6">
+                    <p class="mini-label text-slate-500 mb-3">Bootstrap</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-stone-800 mb-3">O caminho recomendado agora é clonar `griiettner/agents-scaffolding`</h2>
+                    <p class="text-stone-600 leading-relaxed">Em vez de reconstruir essa estrutura manualmente, use o scaffold como base e substitua o conteúdo genérico pelas regras reais do seu projeto.</p>
+                </div>
+
+                <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5 mb-6">
+                    <p class="text-sm font-semibold text-blue-900 mb-2">Clone direto</p>
+                    <pre class="text-xs text-blue-100">git clone https://github.com/griiettner/agents-scaffolding
+cd agents-scaffolding</pre>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">1</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1">Clone o scaffold</h3>
+                            <p class="text-sm text-stone-600">Use <a href="https://github.com/griiettner/agents-scaffolding" class="text-blue-700 underline decoration-blue-300 underline-offset-2">griiettner/agents-scaffolding</a> como base em vez de recriar a árvore do zero.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">2</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1">Troque os placeholders</h3>
+                            <p class="text-sm text-stone-600">Atualize `AGENT.md`, `CLAUDE.md`, arquitetura, princípios, decisões e exemplos de task para refletir o projeto real.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">3</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1">Defina suas skills canônicas</h3>
+                            <p class="text-sm text-stone-600">Mantenha cada workflow em `.agents/skills/`, com `agents/openai.yaml` apenas quando houver necessidade real no Codex.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">4</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1">Regenere adapters e índices</h3>
+                            <p class="text-sm text-stone-600">Rode `sync_claude_skills.py`, `tkt_sync.py` e `tkt_validate.py` sempre que a estrutura relevante mudar.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">5</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1">Mantenha o subset de frontmatter simples</h3>
+                            <p class="text-sm text-stone-600">O scaffold assume YAML pequeno e previsível para evitar parse ambíguo e índices quebrados.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                        <div class="step-number">6</div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 mb-1">Abra uma sessão nova no repo clonado</h3>
+                            <p class="text-sm text-stone-600">Depois do bootstrap, carregue a ferramenta a partir da raiz do repositório para que a descoberta local de contexto e skills funcione corretamente.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="session-complete" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 hidden">
+                    <p class="text-sm font-semibold text-slate-700 mb-2">Resumo final</p>
+                    <p class="text-lg font-bold text-slate-900">Clone o scaffold, trate `.agents/` como sistema de registro, exponha compatibilidade por ferramenta só onde necessário e deixe índices e stubs sempre regeneráveis.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

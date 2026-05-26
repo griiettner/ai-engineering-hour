@@ -49,6 +49,7 @@ Status verificado em 2026-05-19 (16 parts total após shift +1 que abriu o slot 
 | `part14.html` | 📝 draft | Governança e Segurança |
 | `part15.html` | 📝 draft | Métricas e ROI |
 | `part16.html` | 📝 draft | A Próxima Fronteira |
+| `agents-structure.html` | ✅ | Docs standalone · Estrutura `.agents/` + `AGENT.md` |
 
 Detalhes de cada sessão em `.claude/memory/project_sessions.md`.
 
