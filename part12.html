@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Hour P12: Arquitetura Operacional para Agentes</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f3a5f'/%3E%3Cpath d='M8 11h16M8 16h11M8 21h14' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+    <title>Engineering Hour P12: O Dev do Futuro</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23a16207'/%3E%3Cpath d='M8 22h16M10 18h12M12 14h8M16 7l7 5H9l7-5Z' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="nav.js" defer></script>
     <script src="i18n.js" defer></script>
 
@@ -17,16 +18,17 @@
                     colors: {
                         stone: {
                             50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4',
-                            300: '#d6d3d1', 700: '#44403c', 800: '#292524', 900: '#1c1917',
+                            300: '#d6d3d1', 500: '#78716c', 600: '#57534e',
+                            700: '#44403c', 800: '#292524', 900: '#1c1917',
                         },
-                        ops: {
-                            navy: '#1f3a5f',
-                            light: '#eff6ff',
-                            border: '#93c5fd',
-                            deep: '#0f2742',
-                            mint: '#ecfccb',
-                            rose: '#ffe4e6',
-                            amber: '#fef3c7'
+                        future: {
+                            gold: '#a16207',
+                            amber: '#f59e0b',
+                            slate: '#334155',
+                            ink: '#172033',
+                            green: '#059669',
+                            red: '#e11d48',
+                            blue: '#2563eb'
                         }
                     },
                     fontFamily: {
@@ -40,38 +42,57 @@
 
     <link rel="stylesheet" href="shared.css">
     <style>
-        :root { --accent: #1f3a5f; }
-        .ops-callout {
+        :root { --accent: #a16207; }
+
+        .hero-panel {
             background:
-                linear-gradient(135deg, rgba(239,246,255,0.98), rgba(255,255,255,0.94)),
-                radial-gradient(circle at top right, rgba(29,78,216,0.08), transparent 45%);
+                linear-gradient(135deg, rgba(255,255,255,0.98), rgba(254,243,199,0.62)),
+                linear-gradient(90deg, rgba(161,98,7,0.08), rgba(51,65,85,0.05));
         }
-        .doc-card {
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+        .role-card,
+        .skill-card,
+        .shift-card {
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
         }
-        .doc-card:hover {
+
+        .role-card:hover,
+        .skill-card:hover,
+        .shift-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 16px 28px -18px rgba(31, 58, 95, 0.35);
+            box-shadow: 0 18px 30px -22px rgba(28, 25, 23, 0.35);
         }
-        .tree-panel {
-            background-image:
-                linear-gradient(rgba(231,229,228,0.35) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(231,229,228,0.35) 1px, transparent 1px);
-            background-size: 28px 28px;
+
+        .timeline-line {
+            position: absolute;
+            left: 1rem;
+            top: 2rem;
+            bottom: 0;
+            width: 2px;
+            background: repeating-linear-gradient(to bottom, #d6d3d1 0, #d6d3d1 7px, transparent 7px, transparent 14px);
         }
-        .bridge-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            border-radius: 9999px;
-            padding: 0.35rem 0.7rem;
-            font-size: 0.72rem;
-            font-weight: 700;
+
+        .loop-node {
+            min-height: 8.75rem;
         }
-        .inline-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 0.75rem;
+
+        .matrix-table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .matrix-table th,
+        .matrix-table td {
+            border-bottom: 1px solid #e7e5e4;
+        }
+
+        .matrix-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .quote-panel {
+            background: #1c1917;
+            color: #fafaf9;
         }
     </style>
 </head>
@@ -80,13 +101,13 @@
     <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="text-2xl">🗂️</span>
+                <span class="text-2xl">🏛️</span>
                 <h1 class="text-xl font-bold text-stone-800 tracking-tight">
-                    Engineering Hour <span style="color:#1f3a5f">P12</span>
+                    Engineering Hour <span class="text-future-gold">P12</span>
                 </h1>
             </div>
             <div class="text-sm font-medium text-stone-500 hidden sm:block" data-i18n="header.subtitle">
-                Módulo 12: Arquitetura Operacional para Agentes
+                Módulo 12: O Dev do Futuro
             </div>
         </div>
     </header>
@@ -94,445 +115,606 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 py-8 flex flex-col md:flex-row gap-8 w-full">
 
         <nav class="md:w-64 flex-shrink-0 flex flex-col gap-1 bg-white p-4 rounded-xl shadow-sm border border-stone-200 h-fit sticky top-24">
-            <p class="nav-group-label" data-i18n="nav.group.concept">O Conceito</p>
-            <button onclick="navigate('porque')" id="nav-porque" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🏗️</span> <span data-i18n="nav.porque">Por que arquitetura operacional</span>
+            <p class="nav-group-label" data-i18n="nav.group.shift">A Virada</p>
+            <button onclick="navigate('mudanca')" id="nav-mudanca" class="nav-item active text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔄</span> <span data-i18n="nav.mudanca">De executor para arquiteto</span>
             </button>
-            <button onclick="navigate('canonico')" id="nav-canonico" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🧭</span> <span data-i18n="nav.canonico">Canônico + adapters</span>
-            </button>
-
-            <p class="nav-group-label mt-2" data-i18n="nav.group.structure">A Estrutura</p>
-            <button onclick="navigate('layout')" id="nav-layout" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🌲</span> <span data-i18n="nav.layout">Layout do repositório</span>
-            </button>
-            <button onclick="navigate('memory-skills')" id="nav-memory-skills" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🧠</span> <span data-i18n="nav.memory-skills">Memory, skills e tasks</span>
-            </button>
-            <button onclick="navigate('bridges')" id="nav-bridges" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🔌</span> <span data-i18n="nav.bridges">Bridges por ferramenta</span>
+            <button onclick="navigate('agentic')" id="nav-agentic" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🧭</span> <span data-i18n="nav.agentic">Workflow agentic</span>
             </button>
 
-            <p class="nav-group-label mt-2" data-i18n="nav.group.ops">Operação</p>
-            <button onclick="navigate('indexes')" id="nav-indexes" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🗃️</span> <span data-i18n="nav.indexes">Índices e sync</span>
+            <p class="nav-group-label mt-2" data-i18n="nav.group.roles">Novos Papéis</p>
+            <button onclick="navigate('arquetipos')" id="nav-arquetipos" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🏗️</span> <span data-i18n="nav.arquetipos">Quatro arquétipos</span>
             </button>
-            <button onclick="navigate('anti-patterns')" id="nav-anti-patterns" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>⚠️</span> <span data-i18n="nav.anti-patterns">Anti-patterns</span>
+            <button onclick="navigate('competencias')" id="nav-competencias" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>📊</span> <span data-i18n="nav.competencias">Competências centrais</span>
+            </button>
+
+            <p class="nav-group-label mt-2" data-i18n="nav.group.practice">Na Prática</p>
+            <button onclick="navigate('loop')" id="nav-loop" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🔁</span> <span data-i18n="nav.loop">Novo loop de trabalho</span>
+            </button>
+            <button onclick="navigate('valor')" id="nav-valor" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚖️</span> <span data-i18n="nav.valor">O que muda de valor</span>
+            </button>
+            <button onclick="navigate('carreira')" id="nav-carreira" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🪜</span> <span data-i18n="nav.carreira">Carreira e formação</span>
             </button>
 
             <p class="nav-group-label mt-2" data-i18n="nav.group.action">Ação</p>
-            <button onclick="navigate('bootstrap')" id="nav-bootstrap" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
-                <span>🚀</span> <span data-i18n="nav.bootstrap">Bootstrap recomendado</span>
+            <button onclick="navigate('anti-patterns')" id="nav-anti-patterns" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>⚠️</span> <span data-i18n="nav.anti-patterns">Anti-patterns</span>
+            </button>
+            <button onclick="navigate('evoluir')" id="nav-evoluir" class="nav-item text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 flex items-center gap-3">
+                <span>🚀</span> <span data-i18n="nav.evoluir">Como evoluir agora</span>
             </button>
         </nav>
 
         <main class="flex-1 bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
 
-            <section id="sec-porque" class="block">
+            <section id="sec-mudanca" class="block">
+                <div class="hero-panel rounded-2xl border border-amber-200 p-6 md:p-8 mb-8">
+                    <div class="max-w-3xl">
+                        <p class="text-xs font-bold uppercase tracking-widest text-future-gold mb-3" data-i18n="sec.mudanca.eyebrow">Depois da Memória Viva</p>
+                        <h2 class="text-3xl font-bold text-stone-900 mb-4 leading-tight">
+                            <span data-i18n="sec.mudanca.h2">O dev do futuro não compete com agentes. Ele arquiteta o sistema onde agentes trabalham.</span>
+                        </h2>
+                        <p class="text-stone-700 leading-relaxed" data-i18n="sec.mudanca.intro">
+                            A P11 mostrou que agentes podem lembrar, consultar, executar e aprender. A pergunta agora é mais importante: qual é o papel humano quando a implementação deixa de ser o gargalo principal?
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+                    <div class="shift-card rounded-2xl border border-stone-200 bg-stone-50 p-5">
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.mudanca.dev2018.label">Dev 2018</p>
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.mudanca.dev2018.title">Implementador eficiente</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.mudanca.dev2018.desc">Valor medido por transformar ticket em código, conhecer sintaxe e navegar o framework com velocidade.</p>
+                    </div>
+                    <div class="shift-card rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                        <p class="text-xs font-bold uppercase tracking-widest text-blue-700 mb-2" data-i18n="sec.mudanca.dev2023.label">Dev 2023</p>
+                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.mudanca.dev2023.title">Copiloto aumentado</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.mudanca.dev2023.desc">Valor medido por usar autocomplete, chat e snippets para acelerar implementação ainda centrada no humano.</p>
+                    </div>
+                    <div class="shift-card rounded-2xl border-2 border-amber-300 bg-amber-50 p-5">
+                        <p class="text-xs font-bold uppercase tracking-widest text-future-gold mb-2" data-i18n="sec.mudanca.dev2026.label">Dev 2026</p>
+                        <h3 class="font-bold text-stone-900 mb-2" data-i18n="sec.mudanca.dev2026.title">Arquiteto de agentes</h3>
+                        <p class="text-sm text-stone-700" data-i18n="sec.mudanca.dev2026.desc">Valor medido por definir intenção, contexto, boundaries, verificação e responsabilidade pelo resultado.</p>
+                    </div>
+                </div>
+
+                <div class="quote-panel rounded-2xl p-6">
+                    <p class="text-xs font-bold uppercase tracking-widest text-amber-300 mb-2" data-i18n="sec.mudanca.thesis.label">Tese da sessão</p>
+                    <p class="text-xl font-bold leading-snug" data-i18n="sec.mudanca.thesis.body">O problema não é escrever código mais rápido. É decidir qual código deve existir, como ele deve se encaixar no sistema e qual evidência prova que ele está correto.</p>
+                </div>
+            </section>
+
+            <section id="sec-agentic" class="hidden">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🏗️</span> <span data-i18n="sec.porque.h2">Sem arquitetura operacional, agente bom vira improviso caro</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.porque.intro">
-                        O problema não é conseguir uma boa resposta uma vez. O problema é conseguir a mesma qualidade na próxima task, em outra ferramenta, com menos contexto, menos drift e menos retrabalho. É isso que uma arquitetura operacional resolve.
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🧭</span> <span data-i18n="sec.agentic.h2">Agentic development é delegação controlada</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.agentic.intro">
+                        Um fluxo agentic não é mandar um prompt grande e torcer. É um ciclo onde o humano define intenção, o agente propõe e executa, e o sistema de verificação decide o que pode avançar.
                     </p>
                 </div>
 
-                <div class="ops-callout rounded-2xl border border-blue-200 p-5 mb-8">
-                    <p class="text-sm font-semibold text-blue-900 mb-2" data-i18n="sec.porque.callout.label">Tese da sessão</p>
-                    <p class="text-lg font-bold text-blue-950 leading-snug" data-i18n="sec.porque.callout.body">Um sistema de agentes escalável começa por roteadores curtos, memória organizada, skills modulares, tasks explícitas e metadados regeneráveis.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-                    <div class="doc-card rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-                        <p class="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3" data-i18n="sec.porque.good.label">Quando está bem montado</p>
-                        <ul class="space-y-2 text-sm text-emerald-900">
-                            <li data-i18n="sec.porque.good.li1">`AGENT.md` só roteia contexto, não tenta carregar o projeto inteiro</li>
-                            <li data-i18n="sec.porque.good.li2">A mesma base serve Claude, Codex e Cursor sem duplicar a verdade</li>
-                            <li data-i18n="sec.porque.good.li3">Cada task preserva sua história operacional dentro da própria pasta</li>
-                            <li data-i18n="sec.porque.good.li4">Índices e stubs podem ser regenerados sem medo</li>
-                        </ul>
+                <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-8">
+                    <div class="loop-node rounded-2xl border border-stone-200 p-4 bg-white">
+                        <div class="step-number mb-3">1</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-2" data-i18n="sec.agentic.step1.title">Intenção</h3>
+                        <p class="text-xs text-stone-600" data-i18n="sec.agentic.step1.desc">Objetivo, usuário, restrições, não-objetivos e critérios de aceite.</p>
                     </div>
-                    <div class="doc-card rounded-2xl border border-rose-200 bg-rose-50 p-5">
-                        <p class="text-xs font-bold uppercase tracking-widest text-rose-700 mb-3" data-i18n="sec.porque.bad.label">Quando está mal montado</p>
-                        <ul class="space-y-2 text-sm text-rose-900">
-                            <li data-i18n="sec.porque.bad.li1">Prompt gigante tenta substituir memória, regras, tasks e tooling</li>
-                            <li data-i18n="sec.porque.bad.li2">Cada ferramenta recebe uma cópia diferente dos mesmos fluxos</li>
-                            <li data-i18n="sec.porque.bad.li3">Histórico de execução se mistura com conhecimento durável do projeto</li>
-                            <li data-i18n="sec.porque.bad.li4">Os arquivos de descoberta envelhecem mais rápido que o código</li>
-                        </ul>
+                    <div class="loop-node rounded-2xl border border-stone-200 p-4 bg-white">
+                        <div class="step-number mb-3">2</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-2" data-i18n="sec.agentic.step2.title">Plano</h3>
+                        <p class="text-xs text-stone-600" data-i18n="sec.agentic.step2.desc">O agente propõe decomposição, arquivos, riscos e estratégia de validação.</p>
+                    </div>
+                    <div class="loop-node rounded-2xl border border-stone-200 p-4 bg-white">
+                        <div class="step-number mb-3">3</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-2" data-i18n="sec.agentic.step3.title">Calibração</h3>
+                        <p class="text-xs text-stone-600" data-i18n="sec.agentic.step3.desc">Humano ajusta arquitetura, escopo, trade-offs e áreas sensíveis.</p>
+                    </div>
+                    <div class="loop-node rounded-2xl border border-stone-200 p-4 bg-white">
+                        <div class="step-number mb-3">4</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-2" data-i18n="sec.agentic.step4.title">Execução</h3>
+                        <p class="text-xs text-stone-600" data-i18n="sec.agentic.step4.desc">Agente edita código, consulta ferramentas, roda comandos e registra decisões.</p>
+                    </div>
+                    <div class="loop-node rounded-2xl border border-stone-200 p-4 bg-white">
+                        <div class="step-number mb-3">5</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-2" data-i18n="sec.agentic.step5.title">Verificação</h3>
+                        <p class="text-xs text-stone-600" data-i18n="sec.agentic.step5.desc">Testes, hooks, reviewers, logs e observabilidade filtram o que é seguro.</p>
+                    </div>
+                    <div class="loop-node rounded-2xl border border-stone-200 p-4 bg-white">
+                        <div class="step-number mb-3">6</div>
+                        <h3 class="font-bold text-stone-800 text-sm mb-2" data-i18n="sec.agentic.step6.title">Aprendizado</h3>
+                        <p class="text-xs text-stone-600" data-i18n="sec.agentic.step6.desc">Lições úteis viram memória, regras, testes ou ajustes no workflow.</p>
                     </div>
                 </div>
 
                 <div class="rounded-2xl border border-stone-200 overflow-hidden">
                     <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
-                        <h3 class="font-bold text-stone-800" data-i18n="sec.porque.code.title">Bootstrap mínimo de entrada</h3>
-                        <p class="text-sm text-stone-500 mt-1" data-i18n="sec.porque.code.desc">O papel do arquivo inicial é mandar o agente para a rota certa com o menor custo possível.</p>
+                        <h3 class="font-bold text-stone-800" data-i18n="sec.agentic.prompt.title">A diferença entre pedir código e dirigir trabalho</h3>
                     </div>
-                    <pre id="code-bootstrap"># Contexto do Agente
-
-Este arquivo é o contexto inicial leve para agentes.
-Use-o como mapa de rotas, não como memória completa do projeto.
-
-- Trabalho de task ou ticket: leia `.agents/tasks/index.yaml` primeiro
-- Regras de workflow de tickets: leia `.agents/skills/tkt-management/SKILL.md`
-- Roteador de memória durável: leia `.agents/memory/MEMORY.md`
-- Contexto de arquitetura: leia `.agents/memory/architecture/index.yaml` primeiro
-- Decisões duráveis: leia `.agents/memory/decisions/index.yaml` primeiro
-
-Carregue apenas os arquivos relevantes para a tarefa atual.</pre>
+                    <div class="grid grid-cols-1 lg:grid-cols-2">
+                        <div class="p-5 bg-rose-50 border-b lg:border-b-0 lg:border-r border-stone-200">
+                            <p class="text-xs font-bold uppercase tracking-widest text-rose-700 mb-3" data-i18n="sec.agentic.bad.label">Prompt solto</p>
+                            <pre>implemente export CSV no dashboard</pre>
+                            <p class="text-sm text-rose-900 mt-3" data-i18n="sec.agentic.bad.desc">A IA precisa adivinhar escopo, permissão, formato, performance, erro, auditoria e teste.</p>
+                        </div>
+                        <div class="p-5 bg-emerald-50">
+                            <p class="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-3" data-i18n="sec.agentic.good.label">Delegação controlada</p>
+                            <pre>Objetivo: exportar CSV do dashboard financeiro.
+Contrato: respeitar filtros atuais e permissões do usuário.
+Limites: não exportar PII, máximo 50k linhas, streaming obrigatório.
+Validação: teste de permissão, snapshot do cabeçalho, teste de timeout.
+Antes de editar: proponha plano e riscos.</pre>
+                            <p class="text-sm text-emerald-900 mt-3" data-i18n="sec.agentic.good.desc">O humano não escolhe cada linha, mas define o espaço correto de solução.</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <section id="sec-canonico" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🧭</span> <span data-i18n="sec.canonico.h2">Canônico + adapters é a decisão que segura o sistema</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.canonico.intro">
-                        Se a sua fonte de verdade muda por ferramenta, a manutenção explode. O layout canônico vive em `.agents/`. O resto existe para compatibilidade, descoberta ou UX de cada ambiente.
+            <section id="sec-arquetipos" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🏗️</span> <span data-i18n="sec.arquetipos.h2">Os quatro arquétipos da nova senioridade</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.arquetipos.intro">
+                        Eles podem virar cargos em empresas grandes, mas em times menores o mesmo dev alterna entre esses papéis ao longo da task. A senioridade passa a ser composição, não um título único.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.canonico.card1.label">Fonte de verdade</p>
-                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.canonico.card1.title">`.agents/`</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.canonico.card1.desc">Memória, skills, tasks e tooling regenerável vivem aqui. É o que você edita de verdade.</p>
-                    </div>
-                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.canonico.card2.label">Compatibilidade</p>
-                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.canonico.card2.title">`.claude/skills/` e afins</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.canonico.card2.desc">Stubs, metadata local e bridges existem para a ferramenta consumir sem duplicar a lógica real.</p>
-                    </div>
-                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.canonico.card3.label">Risco principal</p>
-                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.canonico.card3.title">Drift silencioso</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.canonico.card3.desc">Quando o time edita o adapter e esquece o canônico, o comportamento diverge sem ninguém perceber.</p>
-                    </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <article class="role-card rounded-2xl border border-stone-200 p-5 bg-white">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="w-11 h-11 rounded-xl bg-amber-100 text-future-gold flex items-center justify-center text-xl font-bold">1</div>
+                            <div>
+                                <h3 class="font-bold text-stone-900" data-i18n="sec.arquetipos.system.title">Systems Architect</h3>
+                                <p class="text-xs uppercase tracking-widest text-stone-500 font-bold" data-i18n="sec.arquetipos.system.focus">Estrutura, boundaries e integração</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4" data-i18n="sec.arquetipos.system.desc">Desenha a forma do sistema, define contratos, escala, infraestrutura, restrições e onde agentes podem atuar sem quebrar a arquitetura.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag-badge bg-amber-100 text-amber-800">system design</span>
+                            <span class="tag-badge bg-stone-100 text-stone-700">infra</span>
+                            <span class="tag-badge bg-stone-100 text-stone-700">trade-offs</span>
+                        </div>
+                    </article>
+
+                    <article class="role-card rounded-2xl border border-stone-200 p-5 bg-white">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="w-11 h-11 rounded-xl bg-blue-100 text-future-blue flex items-center justify-center text-xl font-bold">2</div>
+                            <div>
+                                <h3 class="font-bold text-stone-900" data-i18n="sec.arquetipos.orchestrator.title">AI Orchestrator / Context Engineer</h3>
+                                <p class="text-xs uppercase tracking-widest text-stone-500 font-bold" data-i18n="sec.arquetipos.orchestrator.focus">Contexto, ferramentas e execução agentic</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4" data-i18n="sec.arquetipos.orchestrator.desc">Cria pipelines de contexto, decompõe trabalho, escolhe ferramentas, prepara docs, regras, exemplos, testes e feedback loops.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag-badge bg-blue-100 text-blue-800">context</span>
+                            <span class="tag-badge bg-stone-100 text-stone-700">tools</span>
+                            <span class="tag-badge bg-stone-100 text-stone-700">delegation</span>
+                        </div>
+                    </article>
+
+                    <article class="role-card rounded-2xl border border-stone-200 p-5 bg-white">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="w-11 h-11 rounded-xl bg-emerald-100 text-future-green flex items-center justify-center text-xl font-bold">3</div>
+                            <div>
+                                <h3 class="font-bold text-stone-900" data-i18n="sec.arquetipos.product.title">Product Engineer</h3>
+                                <p class="text-xs uppercase tracking-widest text-stone-500 font-bold" data-i18n="sec.arquetipos.product.focus">Usuário, negócio e comportamento</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4" data-i18n="sec.arquetipos.product.desc">Traduz necessidade real em comportamento testável, valida se o software resolve o caso de uso e corta escopo que não serve ao produto.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag-badge bg-emerald-100 text-emerald-800">domain</span>
+                            <span class="tag-badge bg-stone-100 text-stone-700">UX</span>
+                            <span class="tag-badge bg-stone-100 text-stone-700">outcomes</span>
+                        </div>
+                    </article>
+
+                    <article class="role-card rounded-2xl border border-stone-200 p-5 bg-white">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="w-11 h-11 rounded-xl bg-rose-100 text-future-red flex items-center justify-center text-xl font-bold">4</div>
+                            <div>
+                                <h3 class="font-bold text-stone-900" data-i18n="sec.arquetipos.quality.title">Quality & Reliability Lead</h3>
+                                <p class="text-xs uppercase tracking-widest text-stone-500 font-bold" data-i18n="sec.arquetipos.quality.focus">Evidência, segurança e confiabilidade</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4" data-i18n="sec.arquetipos.quality.desc">Revisa outputs de IA, caça edge cases, desenha testes, observa dívida técnica e garante que velocidade não vire regressão em escala.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag-badge bg-rose-100 text-rose-800">tests</span>
+                            <span class="tag-badge bg-stone-100 text-stone-700">security</span>
+                            <span class="tag-badge bg-stone-100 text-stone-700">reliability</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="sec-competencias" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>📊</span> <span data-i18n="sec.competencias.h2">O mapa de competências mudou</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.competencias.intro">
+                        Sintaxe e boilerplate continuam úteis, mas deixam de ser diferencial. O peso migra para intenção, contexto, desenho de sistemas, verificação e julgamento.
+                    </p>
                 </div>
 
-                <div class="inline-grid mb-6">
-                    <span class="bridge-chip bg-blue-50 text-blue-800 border border-blue-200">Claude Code · bridge explícita</span>
-                    <span class="bridge-chip bg-indigo-50 text-indigo-800 border border-indigo-200">Codex · metadata local opcional</span>
-                    <span class="bridge-chip bg-stone-100 text-stone-700 border border-stone-200">Cursor · convenção e naming</span>
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-center mb-8">
+                    <div class="chart-container">
+                        <canvas id="skillsChart"></canvas>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="skill-card rounded-xl border border-stone-200 p-4">
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.competencias.intent.title">Intent Architecture</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.competencias.intent.desc">Objetivo, critérios de aceite, limites e não-objetivos.</p>
+                        </div>
+                        <div class="skill-card rounded-xl border border-stone-200 p-4">
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.competencias.context.title">Context Engineering</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.competencias.context.desc">Contexto certo, no tamanho certo, na hora certa.</p>
+                        </div>
+                        <div class="skill-card rounded-xl border border-stone-200 p-4">
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.competencias.system.title">System Design for Agents</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.competencias.system.desc">Boundaries, contratos e superfícies seguras para mudança.</p>
+                        </div>
+                        <div class="skill-card rounded-xl border border-stone-200 p-4">
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.competencias.verify.title">Verification Design</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.competencias.verify.desc">Testes, hooks, reviewers, rollback e evidência observável.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                    <p class="text-sm font-semibold text-amber-900 mb-2" data-i18n="sec.canonico.rule.label">Regra operacional</p>
-                    <p class="text-lg font-bold text-amber-950" data-i18n="sec.canonico.rule.body">Edite o artefato canônico. Regenere o que for derivado. Nunca trate bridge como fonte da verdade.</p>
+                    <p class="text-sm font-bold text-future-gold mb-2" data-i18n="sec.competencias.note.title">Atenção ao nome</p>
+                    <p class="text-stone-700 leading-relaxed" data-i18n="sec.competencias.note.desc">Prompt é interface. A competência real é arquitetar o sistema inteiro ao redor dela: contexto, memória, tools, validação, feedback e responsabilidade.</p>
                 </div>
             </section>
 
-            <section id="sec-layout" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🌲</span> <span data-i18n="sec.layout.h2">A árvore precisa refletir função, não só organização estética</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.layout.intro">
-                        A estrutura recomendada separa bootstrap, memória, skills, tasks e tooling. Isso reduz custo de descoberta e deixa claro onde cada tipo de informação deve viver.
+            <section id="sec-loop" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔁</span> <span data-i18n="sec.loop.h2">A mesma task, outro nível de trabalho</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.loop.intro">
+                        O trabalho sobe um nível de abstração. Isso não significa ficar mais fácil. Significa que o erro humano muda de lugar: menos sintaxe, mais definição ruim de intenção, arquitetura ou evidência.
                     </p>
                 </div>
 
-                <div class="tree-panel rounded-2xl border border-stone-200 p-5 mb-6">
-                    <pre>.
-├── AGENT.md
-├── CLAUDE.md
-├── README.md
-├── .claude/
-│   ├── commands/
-│   │   └── sync-skills.md
-│   └── skills/              # stubs gerados de compatibilidade para Claude
-└── .agents/
-    ├── agents/
-    ├── memory/
-    │   ├── MEMORY.md
-    │   ├── architecture/
-    │   ├── decisions/
-    │   └── principles/
-    ├── plans/
-    ├── skills/
-    │   ├── tkt-management/
-    │   ├── tkt-plan/
-    │   ├── tkt-exec/
-    │   └── tkt-sync/
-    ├── tasks/
-    │   ├── index.yaml
-    │   ├── indexes/
-    │   └── TKT-001/
-    ├── tools/
-    │   ├── sync_claude_skills.py
-    │   ├── tkt_sync.py
-    │   └── tkt_validate.py
-    ├── settings.json
-    └── settings.local.json</pre>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <h3 class="font-bold text-stone-800 mb-3" data-i18n="sec.layout.card1.title">Camadas permanentes</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.layout.card1.desc">`memory`, `skills` e `tasks` formam o núcleo. São eles que preservam contexto, procedimento e execução ao longo do tempo.</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-3" data-i18n="sec.loop.before.label">Loop antigo</p>
+                        <pre>Ler ticket
+-> escrever código
+-> rodar teste
+-> abrir PR</pre>
                     </div>
-                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <h3 class="font-bold text-stone-800 mb-3" data-i18n="sec.layout.card2.title">Camadas derivadas</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.layout.card2.desc">`index.yaml`, shards e stubs ajudam descoberta. Eles só são confiáveis quando podem ser reconstruídos pelo repo.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section id="sec-memory-skills" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🧠</span> <span data-i18n="sec.memory.h2">Memory, skills e tasks têm ciclos de vida diferentes</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.memory.intro">
-                        Misturar esses três domínios é uma das formas mais rápidas de degradar um sistema de agentes. Cada um existe para uma pergunta diferente.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5">
-                        <h3 class="font-bold text-blue-900 mb-2" data-i18n="sec.memory.card1.title">Memory</h3>
-                        <p class="text-sm text-blue-900/90" data-i18n="sec.memory.card1.desc">Conhecimento durável: arquitetura, princípios, ADRs, feedbacks e coisas que precisam sobreviver à task atual.</p>
-                    </div>
-                    <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
-                        <h3 class="font-bold text-indigo-900 mb-2" data-i18n="sec.memory.card2.title">Skills</h3>
-                        <p class="text-sm text-indigo-900/90" data-i18n="sec.memory.card2.desc">Procedimento reutilizável. A skill ensina como operar, não armazena a história da última execução.</p>
-                    </div>
-                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-                        <h3 class="font-bold text-emerald-900 mb-2" data-i18n="sec.memory.card3.title">Tasks</h3>
-                        <p class="text-sm text-emerald-900/90" data-i18n="sec.memory.card3.desc">História operacional por work item: objetivo, plano, updates, evidência e relatório de conclusão.</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
-                    <div class="rounded-2xl border border-stone-200 overflow-hidden">
-                        <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
-                            <h3 class="font-bold text-stone-800" data-i18n="sec.memory.code1.title">Exemplo de frontmatter de memória</h3>
-                        </div>
-                        <pre>---
-id: architecture-overview
-title: Visão geral da arquitetura
-type: architecture
-status: ativo
-created: 2026-05-25
-updated: 2026-05-25
-tags:
-  - arquitetura
-  - roteamento
-read_when:
-  - alterando a estrutura de pastas
----</pre>
-                    </div>
-                    <div class="rounded-2xl border border-stone-200 overflow-hidden">
-                        <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
-                            <h3 class="font-bold text-stone-800" data-i18n="sec.memory.code2.title">Exemplo de task mínima</h3>
-                        </div>
-                        <pre>---
-id: TKT-001
-title: Estabelecer scaffolding de agentes
-artifact: tarefa
-status: concluida
-owner: repo-agent
-created: 2026-05-25
-updated: 2026-05-25
-skills:
-  - tkt-management
----
-
-# TKT-001
-
-- objetivo
-- contexto
-- evidência
-- saída produzida</pre>
+                    <div class="rounded-2xl border-2 border-amber-300 p-5 bg-amber-50">
+                        <p class="text-xs font-bold uppercase tracking-widest text-future-gold mb-3" data-i18n="sec.loop.after.label">Loop agentic</p>
+                        <pre>Ler objetivo
+-> definir contrato
+-> preparar contexto
+-> delegar plano
+-> revisar estratégia
+-> deixar agente executar
+-> validar evidência
+-> capturar aprendizado</pre>
                     </div>
                 </div>
 
                 <div class="rounded-2xl border border-stone-200 overflow-hidden">
                     <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
-                        <h3 class="font-bold text-stone-800" data-i18n="sec.memory.code3.title">Skill pequena, específica e canônica</h3>
+                        <h3 class="font-bold text-stone-800" data-i18n="sec.loop.example.title">Exemplo: export CSV no dashboard financeiro</h3>
                     </div>
-                    <pre>.agents/skills/tkt-plan/
-├─ SKILL.md
-└─ agents/
-   └─ openai.yaml
-
-# SKILL.md
-Crie ou atualize `plan.md` apenas quando a task tiver decisões de implementação em aberto.
-
-- Use o contexto do ticket em `.agents/tasks/TKT-XXX/`
-- Evite planejar quando `task.md` já for diretamente executável
-- Preserve apenas o plano mínimo útil</pre>
-                </div>
-            </section>
-
-            <section id="sec-bridges" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🔌</span> <span data-i18n="sec.bridges.h2">Cada ferramenta descobre contexto de um jeito diferente</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.bridges.intro">
-                        O erro comum é fingir simetria. Claude, Codex e Cursor têm capacidades diferentes de descoberta, invocation e metadata. A arquitetura boa lida com isso explicitamente.
-                    </p>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.bridges.card1.label">Claude Code</p>
-                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.bridges.card1.title">Bridge explícita</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.bridges.card1.desc">Use `.claude/skills/` como stub gerado e mantenha `CLAUDE.md` curto, apontando de volta para a estrutura canônica do repo.</p>
-                    </div>
-                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.bridges.card2.label">Codex</p>
-                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.bridges.card2.title">Metadata local opcional</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.bridges.card2.desc">Quando fizer sentido, mantenha `agents/openai.yaml` ao lado da skill canônica para display metadata e política de invocation.</p>
-                    </div>
-                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2" data-i18n="sec.bridges.card3.label">Cursor</p>
-                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.bridges.card3.title">Convenção primeiro</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.bridges.card3.desc">Sem adapter nativo forte, padronize naming, argumentos e contratos de uso. O objetivo é preservar o workflow, não simular features inexistentes.</p>
+                    <div class="overflow-x-auto">
+                        <table class="matrix-table w-full text-sm">
+                            <thead>
+                                <tr class="bg-white">
+                                    <th class="text-left p-4 text-stone-500 uppercase text-xs tracking-widest" data-i18n="sec.loop.table.col1">Atividade antiga</th>
+                                    <th class="text-left p-4 text-stone-500 uppercase text-xs tracking-widest" data-i18n="sec.loop.table.col2">Atividade nova</th>
+                                    <th class="text-left p-4 text-stone-500 uppercase text-xs tracking-widest" data-i18n="sec.loop.table.col3">Evidência de qualidade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="p-4 text-stone-600" data-i18n="sec.loop.row1.old">Criar endpoint e botão</td>
+                                    <td class="p-4 text-stone-800 font-medium" data-i18n="sec.loop.row1.new">Definir contrato de dados, filtros e permissões</td>
+                                    <td class="p-4 text-stone-600" data-i18n="sec.loop.row1.evidence">Teste de permissão e fixture de filtros</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 text-stone-600" data-i18n="sec.loop.row2.old">Formatar CSV</td>
+                                    <td class="p-4 text-stone-800 font-medium" data-i18n="sec.loop.row2.new">Definir schema, encoding, timezone e limites de linha</td>
+                                    <td class="p-4 text-stone-600" data-i18n="sec.loop.row2.evidence">Snapshot de cabeçalho e teste de locale</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 text-stone-600" data-i18n="sec.loop.row3.old">Testar caminho feliz</td>
+                                    <td class="p-4 text-stone-800 font-medium" data-i18n="sec.loop.row3.new">Mapear abuso, PII, performance e auditoria</td>
+                                    <td class="p-4 text-stone-600" data-i18n="sec.loop.row3.evidence">Teste negativo, log auditável e timeout</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
 
-            <section id="sec-indexes" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🗃️</span> <span data-i18n="sec.indexes.h2">Índices só funcionam se forem baratos de ler e baratos de reconstruir</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.indexes.intro">
-                        O papel de `index.yaml` não é virar banco de dados paralelo. É reduzir custo de descoberta. Se ele não acompanha a árvore real, vira ruído e engana o agente.
+            <section id="sec-valor" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚖️</span> <span data-i18n="sec.valor.h2">O que ganha valor e o que perde peso relativo</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.valor.intro">
+                        A mudança não torna fundamentos irrelevantes. Ela muda quais fundamentos diferenciam um dev comum de um dev que consegue dirigir sistemas agentic sem criar caos.
                     </p>
                 </div>
 
-                <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5 mb-6">
-                    <p class="text-sm font-semibold text-blue-900 mb-2" data-i18n="sec.indexes.rule.label">Regra operacional</p>
-                    <p class="text-lg font-bold text-blue-950" data-i18n="sec.indexes.rule.body">Se um índice é importante para o agente, ele precisa ser gerado e validado pelo próprio repositório.</p>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
-                    <div class="rounded-2xl border border-stone-200 overflow-hidden">
-                        <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
-                            <h3 class="font-bold text-stone-800" data-i18n="sec.indexes.code1.title">Índice temático de memória</h3>
-                        </div>
-                        <pre>entries:
-  - id: principles-constitution
-    file: .agents/memory/principles/constitution.md
-    status: ativo
-  - id: architecture-overview
-    file: .agents/memory/architecture/overview.md
-    status: ativo</pre>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                        <p class="text-xs font-bold uppercase tracking-widest text-emerald-700 mb-4" data-i18n="sec.valor.up.label">Fica mais valioso</p>
+                        <ul class="space-y-3 text-sm text-emerald-950">
+                            <li data-i18n="sec.valor.up.li1">Modelagem de domínio e tradução negócio-tecnologia</li>
+                            <li data-i18n="sec.valor.up.li2">Arquitetura incremental e desenho de boundaries</li>
+                            <li data-i18n="sec.valor.up.li3">Especificação de contratos e critérios de aceite</li>
+                            <li data-i18n="sec.valor.up.li4">Leitura crítica de diffs grandes gerados por IA</li>
+                            <li data-i18n="sec.valor.up.li5">Testes que representam comportamento real</li>
+                            <li data-i18n="sec.valor.up.li6">Segurança, privacidade, observabilidade e rollback</li>
+                        </ul>
                     </div>
-                    <div class="rounded-2xl border border-stone-200 overflow-hidden">
-                        <div class="px-5 py-4 bg-stone-50 border-b border-stone-200">
-                            <h3 class="font-bold text-stone-800" data-i18n="sec.indexes.code2.title">Shard de tasks por intervalo</h3>
-                        </div>
-                        <pre>- range: TKT-001-025
-  file: .agents/tasks/indexes/TKT-001-025.yaml
-  count: 2
-  updated: 2026-05-25
-  statuses:
-    - concluido: 1
-    - em_andamento: 1</pre>
+                    <div class="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                        <p class="text-xs font-bold uppercase tracking-widest text-rose-700 mb-4" data-i18n="sec.valor.down.label">Perde peso relativo</p>
+                        <ul class="space-y-3 text-sm text-rose-950">
+                            <li data-i18n="sec.valor.down.li1">Digitar boilerplate rápido</li>
+                            <li data-i18n="sec.valor.down.li2">Memorizar sintaxe de framework como diferencial central</li>
+                            <li data-i18n="sec.valor.down.li3">Fazer CRUD repetitivo do zero</li>
+                            <li data-i18n="sec.valor.down.li4">Resolver problemas isolados sem contexto de produto</li>
+                            <li data-i18n="sec.valor.down.li5">Saber o comando certo sem entender o trade-off</li>
+                            <li data-i18n="sec.valor.down.li6">Ser apenas executor de tickets</li>
+                        </ul>
                     </div>
                 </div>
+            </section>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.indexes.card1.title">Esquema estável</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.indexes.card1.desc">Campos previsíveis em YAML evitam parse ambíguo e facilitam automação simples.</p>
+            <section id="sec-carreira" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🪜</span> <span data-i18n="sec.carreira.h2">O pipeline tradicional de carreira foi quebrado</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.carreira.intro">
+                        Por anos, juniors aprenderam fazendo tarefas simples, repetitivas e seguras. Se agentes passam a fazer grande parte desse trabalho, o aprendizado básico precisa ser desenhado de propósito.
+                    </p>
+                </div>
+
+                <div class="relative pl-10 space-y-8 mb-8">
+                    <div class="timeline-line"></div>
+                    <div class="relative">
+                        <div class="absolute -left-10 top-0 w-8 h-8 rounded-full bg-stone-200 border-2 border-stone-400 flex items-center justify-center font-bold text-stone-700">1</div>
+                        <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.carreira.step1.title">A rampa antiga era repetição</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.carreira.step1.desc">CRUD, bug pequeno, teste simples, refactor localizado. O aprendizado vinha por volume e exposição gradual.</p>
                     </div>
-                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.indexes.card2.title">Sync e validação</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.indexes.card2.desc">Scripts como `tkt_sync.py`, `tkt_validate.py` e `sync_claude_skills.py` mantêm tasks, índices e bridges alinhados.</p>
+                    <div class="relative">
+                        <div class="absolute -left-10 top-0 w-8 h-8 rounded-full bg-amber-100 border-2 border-amber-500 flex items-center justify-center font-bold text-future-gold">2</div>
+                        <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.carreira.step2.title">A automação remove parte da prática natural</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.carreira.step2.desc">Se o agente faz a tarefa simples, o junior pode perder o caminho que construía intuição de código e produto.</p>
                     </div>
-                    <div class="rounded-2xl border border-stone-200 p-5 bg-stone-50">
-                        <h3 class="font-bold text-stone-800 mb-2" data-i18n="sec.indexes.card3.title">Descoberta barata</h3>
-                        <p class="text-sm text-stone-600" data-i18n="sec.indexes.card3.desc">Leia o menor arquivo útil primeiro. O índice existe para evitar varrer a árvore inteira.</p>
+                    <div class="relative">
+                        <div class="absolute -left-10 top-0 w-8 h-8 rounded-full bg-emerald-100 border-2 border-emerald-500 flex items-center justify-center font-bold text-emerald-700">3</div>
+                        <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.carreira.step3.title">A formação precisa virar prática deliberada</h3>
+                        <p class="text-sm text-stone-600" data-i18n="sec.carreira.step3.desc">Leitura guiada de PRs, postmortem de prompts, debugging com hipóteses, exercícios de decomposição e review de trade-offs.</p>
                     </div>
+                </div>
+
+                <div class="rounded-2xl border border-stone-200 bg-stone-50 p-5">
+                    <p class="font-bold text-stone-800 mb-2" data-i18n="sec.carreira.rule.title">Regra para líderes técnicos</p>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.carreira.rule.desc">Não basta dar mais automação para o time. É preciso criar espaços onde devs aprendem raciocínio, diagnóstico, modelagem e validação. Caso contrário, o mercado cria juniors sem rampa e seniors sem base.</p>
                 </div>
             </section>
 
             <section id="sec-anti-patterns" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.anti.h2">Os erros mais caros não são técnicos, são estruturais</span></h2>
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>⚠️</span> <span data-i18n="sec.anti.h2">Anti-patterns do dev no mundo agentic</span></h2>
                     <p class="text-stone-600 leading-relaxed" data-i18n="sec.anti.intro">
-                        Quando a arquitetura operacional quebra, o efeito aparece como contexto inchado, task sem rastreabilidade e comportamento inconsistente entre ferramentas.
+                        Agentic development aumenta alavancagem. Isso também amplifica julgamento ruim. Estes são os comportamentos que criam velocidade aparente e dívida real.
                     </p>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="antipattern-wrong rounded-2xl border border-rose-200 bg-rose-50 p-5">
-                        <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.item1.title">Transformar `AGENT.md` em dump file</h3>
-                        <p class="text-sm text-rose-900/80" data-i18n="sec.anti.item1.desc">Se o bootstrap tenta ensinar tudo de uma vez, ele deixa de ser roteador e vira custo fixo de contexto.</p>
+                <div class="space-y-5">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="antipattern-wrong bg-rose-50 p-5 rounded-r-xl">
+                            <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.ap1.bad.title">O digitador ansioso</h3>
+                            <p class="text-sm text-rose-800" data-i18n="sec.anti.ap1.bad.desc">Microgerencia cada linha, corrige sintaxe manualmente e transforma o agente em autocomplete caro.</p>
+                        </div>
+                        <div class="antipattern-right bg-emerald-50 p-5 rounded-r-xl">
+                            <h3 class="font-bold text-emerald-900 mb-2" data-i18n="sec.anti.ap1.good.title">O arquiteto de intenção</h3>
+                            <p class="text-sm text-emerald-800" data-i18n="sec.anti.ap1.good.desc">Define contrato, restrições, evidência esperada e deixa a implementação acontecer dentro desses limites.</p>
+                        </div>
                     </div>
-                    <div class="antipattern-wrong rounded-2xl border border-rose-200 bg-rose-50 p-5">
-                        <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.item2.title">Editar a cópia exposta em vez da skill canônica</h3>
-                        <p class="text-sm text-rose-900/80" data-i18n="sec.anti.item2.desc">Isso cria drift entre `.agents/skills/` e o adapter da ferramenta, e ninguém sabe mais qual versão vale.</p>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="antipattern-wrong bg-rose-50 p-5 rounded-r-xl">
+                            <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.ap2.bad.title">O prompt mágico</h3>
+                            <p class="text-sm text-rose-800" data-i18n="sec.anti.ap2.bad.desc">Acredita que uma frase esperta substitui contexto, testes, exemplos e critério de aceite.</p>
+                        </div>
+                        <div class="antipattern-right bg-emerald-50 p-5 rounded-r-xl">
+                            <h3 class="font-bold text-emerald-900 mb-2" data-i18n="sec.anti.ap2.good.title">O engenheiro de contexto</h3>
+                            <p class="text-sm text-emerald-800" data-i18n="sec.anti.ap2.good.desc">Monta o input correto: docs, memória, restrições, fixtures, testes e plano de validação.</p>
+                        </div>
                     </div>
-                    <div class="antipattern-wrong rounded-2xl border border-rose-200 bg-rose-50 p-5">
-                        <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.item3.title">Misturar memória durável com histórico de task</h3>
-                        <p class="text-sm text-rose-900/80" data-i18n="sec.anti.item3.desc">Conhecimento de projeto e narrativa operacional têm ciclos de vida diferentes e precisam de casas diferentes.</p>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="antipattern-wrong bg-rose-50 p-5 rounded-r-xl">
+                            <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.ap3.bad.title">O aprovador passivo</h3>
+                            <p class="text-sm text-rose-800" data-i18n="sec.anti.ap3.bad.desc">Aceita diff grande porque passou no teste e parece plausível.</p>
+                        </div>
+                        <div class="antipattern-right bg-emerald-50 p-5 rounded-r-xl">
+                            <h3 class="font-bold text-emerald-900 mb-2" data-i18n="sec.anti.ap3.good.title">O reviewer de sistemas</h3>
+                            <p class="text-sm text-emerald-800" data-i18n="sec.anti.ap3.good.desc">Revisa arquitetura, comportamento observável, impacto de produto, segurança e dívida técnica.</p>
+                        </div>
                     </div>
-                    <div class="antipattern-wrong rounded-2xl border border-rose-200 bg-rose-50 p-5">
-                        <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.item4.title">Assumir descoberta igual em todas as ferramentas</h3>
-                        <p class="text-sm text-rose-900/80" data-i18n="sec.anti.item4.desc">Claude, Codex e Cursor não têm o mesmo modelo de invocation, então a integração não pode ser tratada como se fosse idêntica.</p>
-                    </div>
-                    <div class="antipattern-right rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-                        <h3 class="font-bold text-emerald-900 mb-2" data-i18n="sec.anti.item5.title">Manter tudo regenerável</h3>
-                        <p class="text-sm text-emerald-900/80" data-i18n="sec.anti.item5.desc">O que for derivado deve ser recriado por script. O que for canônico deve ser pequeno, explícito e fácil de editar.</p>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="antipattern-wrong bg-rose-50 p-5 rounded-r-xl">
+                            <h3 class="font-bold text-rose-900 mb-2" data-i18n="sec.anti.ap4.bad.title">O arquiteto ausente</h3>
+                            <p class="text-sm text-rose-800" data-i18n="sec.anti.ap4.bad.desc">Deixa agentes criarem estrutura, padrões e boundaries sem direção humana.</p>
+                        </div>
+                        <div class="antipattern-right bg-emerald-50 p-5 rounded-r-xl">
+                            <h3 class="font-bold text-emerald-900 mb-2" data-i18n="sec.anti.ap4.good.title">O designer de boundaries</h3>
+                            <p class="text-sm text-emerald-800" data-i18n="sec.anti.ap4.good.desc">Define módulos, contratos e áreas seguras de mudança antes de escalar a execução.</p>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <section id="sec-bootstrap" class="hidden">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.bootstrap.h2">O caminho curto é começar do scaffold certo</span></h2>
-                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.bootstrap.intro">
-                        Em vez de inventar a árvore inteira no improviso, o fluxo recomendado é clonar `griiettner/agents-scaffolding`, trocar placeholders e adaptar o conteúdo canônico ao seu projeto.
+            <section id="sec-evoluir" class="hidden">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-stone-800 mb-2"><span>🚀</span> <span data-i18n="sec.evoluir.h2">Como evoluir agora</span></h2>
+                    <p class="text-stone-600 leading-relaxed" data-i18n="sec.evoluir.intro">
+                        A transição não acontece por ferramenta. Acontece por mudança de prática. Comece pequeno, mas mude o tipo de responsabilidade que você assume.
                     </p>
                 </div>
 
-                <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5 mb-6">
-                    <p class="text-sm font-semibold text-blue-900 mb-2" data-i18n="sec.bootstrap.code.label">Clone direto</p>
-                    <pre>git clone https://github.com/griiettner/agents-scaffolding
-cd agents-scaffolding</pre>
-                </div>
-
-                <div class="space-y-4 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">1</div>
                         <div>
-                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.bootstrap.step1.title">Clone o scaffold</h3>
-                            <p class="text-sm text-stone-600" data-i18n="sec.bootstrap.step1.desc">Use a árvore pronta como base para evitar discutir naming, indexação e bridges a cada repo novo.</p>
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.evoluir.step1.title">Peça plano antes de código</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.evoluir.step1.desc">Inclua riscos, arquivos, testes e critérios de rollback antes da primeira edição.</p>
                         </div>
                     </div>
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">2</div>
                         <div>
-                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.bootstrap.step2.title">Troque placeholders por regras reais</h3>
-                            <p class="text-sm text-stone-600" data-i18n="sec.bootstrap.step2.desc">Atualize `AGENT.md`, `CLAUDE.md`, arquitetura, princípios, decisões e exemplos de task para refletir o projeto verdadeiro.</p>
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.evoluir.step2.title">Escreva tickets como contratos</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.evoluir.step2.desc">Comportamento, restrições, exemplos, dados sensíveis e sinais de sucesso.</p>
                         </div>
                     </div>
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">3</div>
                         <div>
-                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.bootstrap.step3.title">Defina skills canônicas</h3>
-                            <p class="text-sm text-stone-600" data-i18n="sec.bootstrap.step3.desc">Cada workflow recorrente deve ganhar sua própria skill em `.agents/skills/`, e não um bloco perdido em um prompt gigante.</p>
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.evoluir.step3.title">Fortaleça verificação</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.evoluir.step3.desc">Teste comportamento, segurança, performance, observabilidade e rollback.</p>
                         </div>
                     </div>
                     <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
                         <div class="step-number">4</div>
                         <div>
-                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.bootstrap.step4.title">Regenere adapters e índices</h3>
-                            <p class="text-sm text-stone-600" data-i18n="sec.bootstrap.step4.desc">Sempre que a estrutura mudar, rode sync e validação para manter bridges e metadata coerentes.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-4 p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
-                        <div class="step-number">5</div>
-                        <div>
-                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.bootstrap.step5.title">Abra a ferramenta na raiz do repo</h3>
-                            <p class="text-sm text-stone-600" data-i18n="sec.bootstrap.step5.desc">É isso que permite descoberta local de memória, skills e tasks sem depender de contexto manual em toda sessão.</p>
+                            <h3 class="font-bold text-stone-800 mb-1" data-i18n="sec.evoluir.step4.title">Revise por intenção</h3>
+                            <p class="text-sm text-stone-600" data-i18n="sec.evoluir.step4.desc">Não revise só linhas. Revise objetivo, arquitetura, risco e evidência.</p>
                         </div>
                     </div>
                 </div>
 
-                <div id="session-complete" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 hidden">
-                    <p class="text-sm font-semibold text-slate-700 mb-2" data-i18n="sec.bootstrap.final.label">Resumo final</p>
-                    <p class="text-lg font-bold text-slate-900" data-i18n="sec.bootstrap.final.body">Trate `.agents/` como sistema de registro, exponha compatibilidade por ferramenta só onde necessário e mantenha tudo que for derivado sempre regenerável.</p>
+                <div class="rounded-2xl border border-blue-200 bg-blue-50 p-6 mb-8">
+                    <p class="text-xs font-bold uppercase tracking-widest text-blue-700 mb-2" data-i18n="sec.evoluir.bonus.label">Bônus rápido</p>
+                    <h3 class="text-xl font-bold text-stone-900 mb-3" data-i18n="sec.evoluir.bonus.title">Loop Engineering: o próximo degrau depois do prompt</h3>
+                    <p class="text-stone-700 leading-relaxed mb-4" data-i18n="sec.evoluir.bonus.intro">
+                        Em vez de promptar o agente a cada turno, você desenha um loop que descobre trabalho, delega, verifica, registra estado e decide o próximo passo.
+                    </p>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                        <div class="rounded-xl bg-white border border-blue-100 p-4">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.evoluir.bonus.card1.title">O que muda</h4>
+                            <p class="text-sm text-stone-600" data-i18n="sec.evoluir.bonus.card1.desc">Você deixa de ser o operador do prompt e vira designer do sistema que aciona agentes.</p>
+                        </div>
+                        <div class="rounded-xl bg-white border border-blue-100 p-4">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.evoluir.bonus.card2.title">Peças do loop</h4>
+                            <p class="text-sm text-stone-600" data-i18n="sec.evoluir.bonus.card2.desc">Automação, worktrees, skills, conectores, sub-agentes e uma memória externa que guarda estado.</p>
+                        </div>
+                        <div class="rounded-xl bg-white border border-blue-100 p-4">
+                            <h4 class="font-bold text-stone-800 mb-1" data-i18n="sec.evoluir.bonus.card3.title">O risco</h4>
+                            <p class="text-sm text-stone-600" data-i18n="sec.evoluir.bonus.card3.desc">Um loop ruim automatiza erro, custo e dívida técnica. A verificação continua sendo responsabilidade humana.</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-blue-900 leading-relaxed" data-i18n-html="sec.evoluir.bonus.link">
+                        Leia depois: <a href="https://addyosmani.com/blog/loop-engineering/" target="_blank" class="font-semibold underline hover:text-blue-700">Loop Engineering, por Addy Osmani</a>.
+                    </p>
+                </div>
+
+                <div id="session-complete" class="hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-6 mb-8">
+                    <h3 class="text-lg font-bold text-emerald-900 mb-2" data-i18n="complete.title">Sessão concluída!</h3>
+                    <p class="text-sm text-emerald-800 mb-4" data-i18n="complete.desc">Você completou esta sessão. Continue para a próxima ou volte ao índice.</p>
+                    <a href="index.html" class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-900 hover:text-emerald-700" data-i18n="complete.home">← Voltar ao índice</a>
+                </div>
+
+                <div class="quote-panel rounded-2xl p-6">
+                    <p class="text-xs font-bold uppercase tracking-widest text-amber-300 mb-2" data-i18n="sec.evoluir.mantra.label">Mantra da Parte 12</p>
+                    <p class="text-xl font-bold leading-snug" data-i18n="sec.evoluir.mantra.body">O futuro do dev não é escrever cada linha. É decidir o que deve existir, criar as condições para que agentes construam com segurança e assumir responsabilidade pelo resultado.</p>
                 </div>
             </section>
+
         </main>
     </div>
+
+    <footer class="border-t border-stone-200 mt-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-sm text-stone-400">
+                <span class="text-base">🎓</span>
+                <span data-i18n-html="footer.brand">Engineering Hour · By <a href="https://github.com/griiettner/ai-engineering-hour" target="_blank" class="underline hover:text-stone-600">Paulo Griiettner</a></span>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-stone-400">
+                <span data-i18n="footer.stack">HTML · Tailwind CSS · Chart.js</span>
+                <span>·</span>
+                <span data-i18n="footer.tagline">Sem build. Abra e use.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var skillsChart = null;
+
+            function labels() {
+                var t = window.EHi18n ? window.EHi18n.t : function () { return null; };
+                return {
+                    syntax: t('chart.skills.syntax') || 'Sintaxe',
+                    boilerplate: t('chart.skills.boilerplate') || 'Boilerplate',
+                    intent: t('chart.skills.intent') || 'Intenção',
+                    context: t('chart.skills.context') || 'Contexto',
+                    system: t('chart.skills.system') || 'System design',
+                    verify: t('chart.skills.verify') || 'Verificação',
+                    old: t('chart.skills.old') || 'Senior tradicional',
+                    future: t('chart.skills.future') || 'Dev do futuro'
+                };
+            }
+
+            function initSkillsChart() {
+                var canvas = document.getElementById('skillsChart');
+                if (!canvas) return;
+                if (skillsChart) skillsChart.destroy();
+                var l = labels();
+                skillsChart = new Chart(canvas.getContext('2d'), {
+                    type: 'radar',
+                    data: {
+                        labels: [l.syntax, l.boilerplate, l.intent, l.context, l.system, l.verify],
+                        datasets: [
+                            {
+                                label: l.old,
+                                data: [92, 85, 45, 42, 68, 58],
+                                backgroundColor: 'rgba(51, 65, 85, 0.16)',
+                                borderColor: '#334155',
+                                borderWidth: 1
+                            },
+                            {
+                                label: l.future,
+                                data: [42, 30, 95, 94, 92, 90],
+                                backgroundColor: 'rgba(161, 98, 7, 0.18)',
+                                borderColor: '#a16207',
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: { display: false },
+                                pointLabels: { font: { size: 11 } }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                        }
+                    }
+                });
+            }
+
+            window.onNavigate = function (sectionId) {
+                if (sectionId === 'competencias') initSkillsChart();
+            };
+
+            window.addEventListener('i18n:applied', function () {
+                if (skillsChart) initSkillsChart();
+            });
+        })();
+    </script>
 </body>
 </html>

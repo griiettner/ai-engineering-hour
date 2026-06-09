@@ -56,6 +56,7 @@ metadata:
 | P9 | Amber | `#d97706` |
 | P10 | Lime | `#65a30d` |
 | P11 | Blue | `#2563eb` |
+| P12 | Architect Gold | `#a16207` |
 
 Novas partes escolhem cor distinta das anteriores e documentam aqui.
 

@@ -44,9 +44,9 @@ Status verificado em 2026-05-25 (17 parts total após inserir a nova P12 e renum
 | `part9.html` | ✅ | O Sistema Integrado |
 | `part10.html` | ✅ | TDD com IA · Testes Como Contrato |
 | `part11.html` | ✅ | Memória Viva · RAG Local + Reflect |
-| `part12.html` | ✅ | Arquitetura Operacional para Agentes |
+| `part12.html` | ✅ | O Dev do Futuro |
 | `part13.html` | 📝 draft | n8n & OpenClaw |
-| `part14.html` | 📝 draft | O Dev Sênior do Futuro |
+| `part14.html` | 📝 draft | tema migrado para P12, a redefinir |
 | `part15.html` | 📝 draft | Governança e Segurança |
 | `part16.html` | 📝 draft | Métricas e ROI |
 | `part17.html` | 📝 draft | A Próxima Fronteira |
@@ -75,7 +75,7 @@ Detalhes de cada sessão em `.claude/memory/project_sessions.md`.
 | P9 | Amber | `#d97706` |
 | P10 | Lime | `#65a30d` |
 | P11 | Blue | `#2563eb` |
-| P12 | Ink Blue | `#1f3a5f` |
+| P12 | Architect Gold | `#a16207` |
 
 Fundo body sempre `stone-50` (`#fafaf9`). Texto principal `stone-800` (`#292524`). Novas parts escolhem cor distinta e documentam aqui + em `.claude/memory/project_conventions.md`.
 

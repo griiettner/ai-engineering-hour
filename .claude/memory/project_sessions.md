@@ -84,9 +84,20 @@ metadata:
 - TBDs resolvidos com fallback: reflection file fictício (jwt-rotation-bug), apontar pro repo tobi/qmd, mostrar `qmd embed` + `qmd-reindex.sh`
 - Stack referenciada: phi4-mini via Ollama localhost:11434, launchd labels `dev.qmd.mcp` / `dev.qmd.reindex` / `dev.brain.auto-learn`
 
-## Drafts shiftados em 2026-05-12 (eram P10-P15, agora P11-P16)
-- P12 `n8n & OpenClaw`
-- P13 `O Dev Sênior do Futuro`
-- P14 `Governança e Segurança`
-- P15 `Métricas e ROI`
-- P16 `A Próxima Fronteira`
+## P12 · O Dev do Futuro | Architect Gold `#a16207`
+- Concluído em 2026-06-08 como virada editorial após P11
+- Mantra: "O futuro do dev não é escrever cada linha. É decidir o que deve existir, criar as condições para que agentes construam com segurança e assumir responsabilidade pelo resultado."
+- Tese: agentic development desloca a senioridade de implementação direta para arquitetura de intenção, contexto, sistemas, verificação e responsabilidade
+- 9 seções: Mudança (executor para arquiteto), Workflow agentic, Quatro arquétipos, Competências centrais, Novo loop de trabalho, O que muda de valor, Carreira e formação, Anti-patterns, Como evoluir agora
+- Arquétipos centrais: Systems Architect, AI Orchestrator / Context Engineer, Product Engineer, Quality & Reliability Lead
+- Aborda a quebra do pipeline tradicional junior -> senior e propõe formação deliberada: leitura guiada de PRs, postmortem de prompts, debugging com hipóteses, decomposição e review de trade-offs
+- Fechamento inclui bônus rápido sobre Loop Engineering de Addy Osmani: desenhar loops que descobrem trabalho, delegam a agentes, verificam, registram estado e decidem o próximo passo
+- Não repete P11 sobre RAG, QMD, reflect ou lifecycle de memória
+- P14 antigo "O Dev Sênior do Futuro" virou material migrado para P12 e deve ser redefinido antes de voltar ao índice
+
+## Drafts atuais após P12
+- P13 `n8n & OpenClaw`
+- P14 tema migrado para P12, a redefinir
+- P15 `Governança e Segurança`
+- P16 `Métricas e ROI`
+- P17 `A Próxima Fronteira`
